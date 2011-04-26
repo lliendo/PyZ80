@@ -1,0 +1,61 @@
+About  PyZ80 :
+--------------
+
+    PyZ80 is a Z80 emulator written in entirely in Python.
+    The emulator is not yet finished, an currently is being
+    tested.
+    As the proyect evolves, documentation will be added, thus
+    the main target of this proyect is to learn basic emulation
+    topics.
+
+Using PyZ80 :
+-------------
+
+    By running python cpu.py -h you should be able to see all
+    command line options available. If impatient here's basic
+    example :
+    
+        python cpu.py -p /path/to/1st/binary:0x100,/path/to/2nd/binary:0x200 \
+                      -t /tmp/exec_trace.log
+                      -s 0xFF
+
+    The example above will perform the following actions :
+
+        1 - Load binary "/path/to/1st/binary" at address 0x100
+        2 - Load binary "/path/to/2nd/binary" at address 0x200
+        3 - Set the logfile to "/tmp/exec_trace.log"
+        4 - The emulator will begin to execute instructions at
+            address 0xFF
+
+    The -p option allows you to load more than one binary file.
+    Always the -p option expects the following format : PATH:ADDRESS
+    where PATH is an absolute or relative path to a binary file
+    and ADDRESS is an hexadecimal value between 0x0000 and 0xFFFF.
+    When -t is not specified log activity is discarded by writing
+    to /dev/null.
+    When -s is no specified the emulator will start executing
+    instructions from 0x0000.
+
+    In the example above note that if the first binary is more
+    than 256 bytes length then the second binary will overwrite
+    bytes from the first binary so be careful when loading
+    multiple files.
+
+Tests :
+-------
+
+    The zexdoc.com and zexall.com under the tests directory 
+    were borrowed from the YAZE AG emulator.
+
+    If interesed, please point your browser to : 
+        http://www.mathematik.uni-ulm.de/users/ag/yaze/
+
+License :
+---------
+    
+    This software is released under the GNU/GPL.
+
+Author :
+--------
+
+    Lucas Liendo <mindmaster (at) gmail.com>

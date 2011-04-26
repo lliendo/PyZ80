@@ -1,0 +1,15 @@
+Tasks :
+-------
+
+    * When zexdoc.com is tested PyZ80 never ends. Moreover the first
+    test is never passed. This is a serious bug in one of the jump
+    instructions or maybe an instruction is not properly setting
+    a flag. A successful execution trace of zexdoc would be a good
+    starting point to track down the error.
+
+    * The interruption mechanism is not yet implemented.
+
+    * Some devices need to be developed (CTC, SIO, PIO) to make
+    the emulator more functional.
+
+    * Improve documentation.
