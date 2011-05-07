@@ -13,6 +13,8 @@
 
     You should have received a copy of the GNU General Public License
     along with PyZ80.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Copyright 2010-2011 Lucas Liendo.
 """
 
 from z80_helper import *
@@ -615,13 +617,13 @@ class Z80(object) :
 
         0x21 : (self._ld_rr_nn, ('ix',), 3),
         0x22 : (self._ld_addr_nn_rr, ('ix',), 3),
-        0x23 : (self._inc_rr, ('ix',), 1),
+        0x23 : (self._inc_rr, ("ix",), 1),
         0x24 : (self._inc_r, ('ixh',), 1),
         0x25 : (self._dec_r, ('ixh',), 1),
         0x26 : (self._ld_r_n, ('ixh',), 2),
         0x29 : (self._add_rr_rr, ('ix', 'ix',), 1),
         0x2A : (self._ld_rr_addr_nn, ('ix',), 3),
-        0x2B : (self._dec_rr, ('ix',), 1),
+        0x2B : (self._dec_rr, ("ix",), 1),
         0x2C : (self._inc_r, ('ixl',), 1),
         0x2D : (self._dec_r, ('ixl',), 1),
         0x2E : (self._ld_r_n, ('ixl',), 2),
@@ -1073,13 +1075,13 @@ class Z80(object) :
 
         0x21 : (self._ld_rr_nn, ('iy',), 3),
         0x22 : (self._ld_addr_nn_rr, ('iy',), 3),
-        0x23 : (self._inc_rr, ('iy',), 1),
+        0x23 : (self._inc_rr, ("iy",), 1),
         0x24 : (self._inc_r, ('iyh',), 1),
         0x25 : (self._dec_r, ('iyh',), 1),
         0x26 : (self._ld_r_n, ('iyh',), 2),
         0x29 : (self._add_rr_rr, ('iy', 'iy',), 1),
         0x2A : (self._ld_rr_addr_nn, ('iy',), 3),
-        0x2B : (self._dec_rr, ('iy',), 1),
+        0x2B : (self._dec_rr, ("iy",), 1),
         0x2C : (self._inc_r, ('iyl',), 1),
         0x2D : (self._dec_r, ('iyl',), 1),
         0x2E : (self._ld_r_n, ('iyl',), 2),
@@ -1168,7 +1170,7 @@ class Z80(object) :
         self.unprefixed_opcodes = {0x0 : (self._nop, (), 1),
         0x01 : (self._ld_rr_nn, ('bc',), 3),
         0x02 : (self._ld_addr_rr_r, ('bc', 'a',), 1),
-        0x03 : (self._inc_rr, ('bc',), 1),
+        0x03 : (self._inc_rr, ("bc",), 1),
         0x04 : (self._inc_r, ('b',), 1),
         0x05 : (self._dec_r, ('b',), 1),
         0x06 : (self._ld_r_n, ('b',), 2),
@@ -1176,7 +1178,7 @@ class Z80(object) :
         0x08 : (self._ex_rr_rr_, ('af', 'af',), 1),
         0x09 : (self._add_rr_rr, ('hl', 'bc',), 1),
         0x0A : (self._ld_r_addr_rr, ('a', 'bc',), 1),
-        0x0B : (self._dec_rr, ('bc',), 1),
+        0x0B : (self._dec_rr, ("bc",), 1),
         0x0C : (self._inc_r, ('c',), 1),
         0x0D : (self._dec_r, ('c',), 1),
         0x0E : (self._ld_r_n, ('c',), 2),
@@ -1185,7 +1187,7 @@ class Z80(object) :
         0x10 : (self._djnz, (), 2),
         0X11 : (self._ld_rr_nn, ('de',), 3),
         0x12 : (self._ld_addr_rr_r, ('de', 'a',), 1),
-        0x13 : (self._inc_rr, ('de',), 1),
+        0x13 : (self._inc_rr, ("de",), 1),
         0x14 : (self._inc_r, ('d',), 1),
         0x15 : (self._dec_r, ('d',), 1),
         0x16 : (self._ld_r_n, ('d',), 2),
@@ -1193,7 +1195,7 @@ class Z80(object) :
         0x18 : (self._jr_cc, (self._dummy_true,), 0),
         0x19 : (self._add_rr_rr, ('hl', 'de',), 1),
         0x1A : (self._ld_r_addr_rr, ('a', 'de',), 1),
-        0x1B : (self._dec_rr, ('de',), 1),
+        0x1B : (self._dec_rr, ("de",), 1),
         0x1C : (self._inc_r, ('e',), 1),
         0x1D : (self._dec_r, ('e',), 1),
         0x1E : (self._ld_r_n, ('e',), 2),
@@ -1202,7 +1204,7 @@ class Z80(object) :
         0x20 : (self._jr_not_cc, (self._test_zero_flag,), 0),
         0x21 : (self._ld_rr_nn, ('hl',), 3),
         0x22 : (self._ld_addr_nn_rr, ('hl',), 3),
-        0x23 : (self._inc_rr, ('hl',), 1),
+        0x23 : (self._inc_rr, ("hl",), 1),
         0x24 : (self._inc_r, ('h',), 1),
         0x25 : (self._dec_r, ('h',), 1),
         0x26 : (self._ld_r_n, ('h',), 2),
@@ -1210,7 +1212,7 @@ class Z80(object) :
         0x28 : (self._jr_cc, (self._test_zero_flag,), 0),
         0x29 : (self._add_rr_rr, ('hl', 'hl',), 1),
         0x2A : (self._ld_rr_addr_nn, ('hl',), 3),
-        0x2B : (self._dec_rr, ('hl',), 1),
+        0x2B : (self._dec_rr, ("hl",), 1),
         0x2C : (self._inc_r, ('l',), 1),
         0x2D : (self._dec_r, ('l',), 1),
         0x2E : (self._ld_r_n, ('l',), 2),
@@ -1219,7 +1221,7 @@ class Z80(object) :
         0x30 : (self._jr_not_cc, (self._test_carry_flag,), 0),
         0x31 : (self._ld_rr_nn, ("sp",), 3),
         0x32 : (self._ld_addr_nn_r, ("a",), 3),
-        0x33 : (self._inc_r, ("sp",), 1),
+        0x33 : (self._inc_rr, ("sp",), 1),
         0x34 : (self._inc_addr_rr, ("hl",), 1),
         0x35 : (self._dec_addr_rr, ("hl",), 1),
         0x36 : (self._ld_addr_rr_n, ("hl",), 2),
@@ -1227,7 +1229,7 @@ class Z80(object) :
         0x38 : (self._jr_cc, (self._test_carry_flag,), 0),
         0x39 : (self._add_rr_rr, ("hl", 'sp',), 1),
         0x3A : (self._ld_r_addr_nn, ("a",), 3),
-        0x3B : (self._dec_r, ("sp",), 1),
+        0x3B : (self._dec_rr, ("sp",), 1),
         0x3C : (self._inc_r, ("a",), 1),
         0x3D : (self._dec_r, ("a",), 1),
         0x3E : (self._ld_r_n, ("a",), 2),
@@ -1491,9 +1493,6 @@ class Z80(object) :
         #print self._trace
         self._logger.write(self._trace)
         self._trace = ""
-    
-    #def _reset_trace(self) :
-    #    self._trace = ""
 
     def _dummy_true(self) :
         return True
@@ -1895,21 +1894,16 @@ class Z80(object) :
         return "0x%0.2X  %s  0x%0.2X 0x%0.2X 0x%0.2X 0x%0.2X 0x%0.2X 0x%0.2X 0x%0.4X 0x%0.4X 0x%0.4X 0x%0.4X 0x%0.2X  %s   0x%0.2X 0x%0.2X 0x%0.2X 0x%0.2X 0x%0.2X 0x%0.2X" % (a, f, b, c, d, e, \
         h, l, ir, ix, iy, sp, a_, f_, b_, c_, d_, e_, h_, l_)
 
-    #def _pre_run_checks(self) :
-    #    if not self.ram :
-    #        raise RAMModuleNotPresent
-
     def run(self, start_address) :
         """
         Starts the execution of a program located at
         start_address.
         """
 
-        self._bdos_patch()
+        #self._bdos_patch()
 
         self._log_trace_header()
         self._print_trace()
-        #self._reset_trace()
 
         #self._pre_run_checks()
         self._write_rr("pc", start_address)
@@ -1965,7 +1959,6 @@ class Z80(object) :
         pass
 
     def _adc_flag_tests(self, n, m) :
-    #def _adc(self, n, m) :
         # Affects : S, Z, H, P, C
         # Resets : N.
         l = n + m
@@ -1984,8 +1977,6 @@ class Z80(object) :
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
-        #self._adc(self._read_r(r), self._read_n_ram(ho_addr, lo_addr) + \
-        #self._test_carry_flag())
         self._adc_flag_tests(self._read_r(r), self._read_n_ram(ho_addr, lo_addr) + \
         self._test_carry_flag())
         self._write_r(r, self._read_r(r) + \
@@ -1993,11 +1984,9 @@ class Z80(object) :
 
     def _adc_r_addr_rr(self, r, rr) :
         """
-        ADC r, (rr).2
+        ADC r, (rr).
         """
         self._log_instruction_trace("ADC %s, (%s)" % (r, rr))
-        #self._adc(self._read_r(r), self._read_n_ram(*(self._read_rr(rr))) + \
-        #self._test_carry_flag())
         self._adc_flag_tests(self._read_r(r), self._read_n_ram(*(self._read_rr(rr))) + \
         self._test_carry_flag())
         self._write_r(r, self._read_r(r) + \
@@ -2009,7 +1998,6 @@ class Z80(object) :
         """
         self._log_instruction_trace("ADC %s, 0x%0.2X" % (r, self._read_n()))
         byte = self._read_r(r) + self._read_n() + self._test_carry_flag()
-        #self._adc(self._read_r(r), self._read_n() + self._test_carry_flag())
         self._adc_flag_tests(self._read_r(r), self._read_n() + self._test_carry_flag())
         self._write_r(r, self._read_r(r) + self._read_n() + \
         self._test_carry_flag())
@@ -2019,8 +2007,6 @@ class Z80(object) :
         ADC r, r'. Add r1 and r2 with carry.
         """
         self._log_instruction_trace("ADC %s, %s" % (r1, r2))
-        #self._adc(self._read_r(r1), self._read_r(r2) + \
-        #self._test_carry_flag())
         self._adc_flag_tests(self._read_r(r1), self._read_r(r2) + \
         self._test_carry_flag())
         self._write_r(r1, self._read_r(r1) + self._read_r(r2) + \
@@ -2045,7 +2031,6 @@ class Z80(object) :
         self._write_rr(rr1, word_rr1 + word_rr2)
 
     def _add_flag_tests(self, n, m) :
-    #def _add(self, n, m) :
         # Affects : S, Z, H, P, C
         # Resets : N.
         add = n + m
@@ -2062,7 +2047,6 @@ class Z80(object) :
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
-        #self._add(self._read_r(r), self._read_n_ram(ho_addr, lo_addr))
         self._add_flag_tests(self._read_r(r), self._read_n_ram(ho_addr, lo_addr))
         self._write_r(r, self._read_r(r) + self._read_n_ram(ho_addr, lo_addr))
 
@@ -2072,19 +2056,16 @@ class Z80(object) :
         memory location (rr).
         """
         self._log_instruction_trace("ADD %s, (%s)" % (r, rr))
-        #self._add(self._read_r(r), self._read_n_ram(*self._read_rr(rr)))
         self._add_flag_tests(self._read_r(r), self._read_n_ram(*self._read_rr(rr)))
         self._write_r(r, self._read_r(r) + self._read_n_ram(*self._read_rr(rr)))
 
     def _add_r_n(self, r) :
         self._log_instruction_trace("ADD %s, 0x%0.2X" % (r, self._read_n()))
-        #self._add(self._read_r(r), self._read_n())
         self._add_flag_tests(self._read_r(r), self._read_n())
         self._write_r(r, self._read_r(r) + self._read_n())
 
     def _add_r_r(self, r1, r2) :
         self._log_instruction_trace("ADD %s, %s" % (r1, r2))
-        #self._add(self._read_r(r1), self._read_r(r2))
         self._add_flag_tests(self._read_r(r1), self._read_r(r2))
         self._write_r(r1, self._read_r(r1) + self._read_r(r2))
 
@@ -2129,22 +2110,16 @@ class Z80(object) :
 
     def _and_addr_indx_d(self, rr) :
         self._log_instruction_trace("AND (%s + 0x%0.2X)" % (rr, self._read_n()))
-        
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
-
         byte = self._read_r('a') & self._read_n_ram(ho_addr, lo_addr)
-        
         self._and_flag_tests(byte)
         self._write_r('a', byte)
 
     def _and_addr_rr(self, rr) :
         self._log_instruction_trace("AND (%s)" % rr)
-
         byte = self._read_r('a') & self._read_n_ram(*self._read_rr(rr))
-        
-        #self._and(byte)
         self._and_flag_tests(byte)
         self._write_r('a', byte)
 
@@ -2153,10 +2128,7 @@ class Z80(object) :
         AND n. Logical AND accumulator with n.
         """
         self._log_instruction_trace("AND 0x%0.2X" % self._read_n())
-
         byte = self._read_r('a') & self._read_n()
-        
-        #self._and(byte)
         self._and_flag_tests(byte)
         self._write_r('a', byte)
 
@@ -2165,15 +2137,11 @@ class Z80(object) :
         AND r. Logical AND accumulator with register r.
         """
         self._log_instruction_trace("AND %s" % r)
-
         byte = self._read_r('a') & self._read_r(r)
-        
-        #self._and(byte)
         self._and_flag_tests(byte)
         self._write_r('a', byte)
 
     def _bit_flag_tests(self, n) :
-    #def _bit(self, n) :
         # Affects : Z.
         # Sets : H.
         # Resets : N.
@@ -2300,7 +2268,6 @@ class Z80(object) :
 
         self._reset_add_substract_flag()
 
-    #def _cp(self, n, m) :
     def _cp_flag_tests(self, n, m) :
         l = n - m
         self._test_and_set_sign_flag(l)
@@ -2446,7 +2413,6 @@ class Z80(object) :
         self._test_and_set_zero_flag(self._read_r('a'))
         self._test_and_set_parity_flag(self._read_r('a'))
 
-    #def _dec(self, n, m) :
     def _dec_flag_tests(self, n, m) :
         # Affects : S, Z, H, V. 
         # Sets : N.
@@ -2604,7 +2570,6 @@ class Z80(object) :
         addr = self._read_r(rr2)
         self._write_r(r1, self._read_io_port(addr))
 
-    #def _inc(self, n, m) :
     def _inc_flag_tests(self, n, m) :
         # Affects : S, Z, H, V. 
         # Resets : N.
@@ -2624,7 +2589,6 @@ class Z80(object) :
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
-        #self._inc(self._read_n_ram(self, ho_addr, lo_addr), 1)
         self._inc_flag_tests(self._read_n_ram(self, ho_addr, lo_addr), 1)
         self._write_n_ram(self._read_n_ram(self, ho_addr, lo_addr) + 1, \
         ho_addr, lo_addr)
@@ -2635,7 +2599,6 @@ class Z80(object) :
         """
         self._log_instruction_trace("INC (%s)" % rr)
         ho_addr, lo_addr = self._read_rr(rr)
-        #self._inc(self._read_n_ram(ho_addr, lo_addr), 1)
         self._inc_flag_tests(self._read_n_ram(ho_addr, lo_addr), 1)
         self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) + 1, \
         ho_addr, lo_addr)
@@ -2701,7 +2664,6 @@ class Z80(object) :
         INC r. Increment register r.
         """
         self._log_instruction_trace("INC %s" % r)
-        #self._inc(self._read_r(r), 1)
         self._inc_flag_tests(self._read_r(r), 1)
         self._write_r(r, self._read_r(r) + 1)
 
@@ -2876,17 +2838,19 @@ class Z80(object) :
         LDDR. Repeating block load with decrement.
         """
         self._log_instruction_trace("LDDR")
-        while compose_word(*self._read_rr("bc")) :
-            byte = self._read_n_ram(*self._read_rr("hl"))
-            self._write_n_ram(byte, *self._read_rr("de"))
-            self._write_rr("de", compose_word(*self._read_rr("de")) - 1)
-            self._write_rr("hl", compose_word(*self._read_rr("hl")) - 1)
-            self._write_rr("bc", compose_word(*self._read_rr("bc")) - 1)
+        byte = self._read_n_ram(*self._read_rr("hl"))
+        self._write_n_ram(byte, *self._read_rr("de"))
+        self._write_rr("de", compose_word(*self._read_rr("de")) - 1)
+        self._write_rr("hl", compose_word(*self._read_rr("hl")) - 1)
+        self._write_rr("bc", compose_word(*self._read_rr("bc")) - 1)
 
-        # Flags sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_parity_overflow_flag()
-        self._reset_add_substract_flag()
+        if compose_word(*self._read_rr("bc")) :
+            self._dec_n_pc(2)
+        else :
+            # Flags sets & resets.
+            self._reset_half_carry_flag()
+            self._reset_parity_overflow_flag()
+            self._reset_add_substract_flag()
 
     def _ldi(self) :
         """
@@ -2913,17 +2877,19 @@ class Z80(object) :
         LDIR. Repeating block load with increment.
         """
         self._log_instruction_trace("LDIR")
-        while compose_word(*self._read_rr("bc")) :
-            byte = self._read_n_ram(*self._read_rr("hl"))
-            self._write_n_ram(byte, *self._read_rr("de"))
-            self._write_rr("de", compose_word(*self._read_rr("de")) + 1)
-            self._write_rr("hl", compose_word(*self._read_rr("hl")) + 1)
-            self._write_rr("bc", compose_word(*self._read_rr("bc")) - 1)
-        
-        # Flags sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_parity_overflow_flag()
-        self._reset_add_substract_flag()
+        byte = self._read_n_ram(*self._read_rr("hl"))
+        self._write_n_ram(byte, *self._read_rr("de"))
+        self._write_rr("de", compose_word(*self._read_rr("de")) + 1)
+        self._write_rr("hl", compose_word(*self._read_rr("hl")) + 1)
+        self._write_rr("bc", compose_word(*self._read_rr("bc")) - 1)
+
+        if compose_word(*self._read_rr("bc")) :
+            self._dec_n_pc(2)
+        else :
+            # Flags sets & resets.
+            self._reset_half_carry_flag()
+            self._reset_parity_overflow_flag()
+            self._reset_add_substract_flag()
 
     def _ld_r_addr_indx_d(self, r, rr) :
         ho_base_addr, lo_base_addr = self._read_rr(rr)
@@ -3015,7 +2981,6 @@ class Z80(object) :
         """ NOP. No operation. """
         self._log_instruction_trace("NOP")
 
-    #def _or(self, n) :
     def _or_flag_tests(self, n) :
         self._test_and_set_sign_flag(n)
         self._test_and_set_zero_flag(n)
@@ -3868,7 +3833,6 @@ class Z80(object) :
         word_rr1 = compose_word(*self._read_rr(rr1))
         word_rr2 = compose_word(*self._read_rr(rr2))
         carry = self._test_carry_flag()
-        #self._sbc_word(word_rr1, word_rr2 - self._test_carry_flag())
         self._sbc_word(word_rr1, word_rr2 - carry)
         self._write_rr(rr1, sub_words(word_rr1, word_rr2, carry))
 
