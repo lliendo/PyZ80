@@ -90,21 +90,3 @@ class CPU(object) :
 
         self.z80.plug_ram(self.ram)
         self.z80.run(cli_options["start_address"])
-
-if __name__ == "__main__" :
-    # Ram & devices.
-    ram64KiB = Ram64KiB()
-    dummy_device = DummyDevice()
-    dummy_device.name = "DUMMY_DEVICE"
-    dummy_device.address = 0x1
-    
-    # Computer.
-    computer = CPU()
-
-    try :
-        computer.plug_ram(ram64KiB)
-        computer.plug_device(dummy_device)
-        computer.run()
-
-    except Exception, e :
-        print e

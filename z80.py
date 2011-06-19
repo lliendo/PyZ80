@@ -728,8 +728,6 @@ class Z80(object) :
         0x4E : (self._im, (0x0,), 1),
         0x4F : (self._ld_r_r, ("r", "a",), 1),
 
-        #0x0E : (self._bdos, ("c", "de",), 1), # This is a phantom opcode.
-
         0x50 : (self._in_r_addr_r, ("d", "c",), 1),
         0x51 : (self._out_addr_r_r, ("c", "d",), 2),
         0x52 : (self._sbc_rr_rr, ("hl", "de",), 1),
@@ -1453,10 +1451,6 @@ class Z80(object) :
         #self._force_flag_register(0x15)
         self._trace = ""
 
-        # BDOS syscalls.
-        #self._bdos_system_calls = {9 : self._bdos_c_writestr,
-        #}
-
     def _force_flag_register(self, byte) :
         """
         Force the f register to byte.
@@ -1495,8 +1489,6 @@ class Z80(object) :
             print "Device : %s successfully plugged" % device.name
         else :
             raise DeviceAddressInUse(device.name)
-
-        #print self.devices
 
     def _log_instruction_trace(self, trace) :
         self._log_trace(trace, left_justify=20)

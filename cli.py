@@ -51,14 +51,14 @@ def parse_cli_options() :
     """ Returns a dictionary with options read from the CLI. """
 
     parser = OptionParser()
-    parser.add_option("-t", "--trace-log", default="/dev/null", \
-        help="Log execution trace to specified file. Default logfile is /dev/null.")
-    parser.add_option("-s", "--start-address", default="0x0000", \
-        help="Start execution at specified address. Default is 0x0000.")
-    parser.add_option("-p", "--programs", default=None, \
-        help="Load program/s. PROGRAM_1:ADDRESS_1[, PROGRAM_2:ADDRESS_2[, ...]]")
+    parser.add_option("-t", "--trace-log", default=os.devnull, \
+            help="Log execution trace to specified file. Default logfile is /dev/null.")
     parser.add_option("-b", "--bdos", action="store_true", default=False, \
-        help="BDOS syscalls support.")
+            help="BDOS syscalls support.")
+    parser.add_option("-s", "--start-address", default="0x0000", \
+            help="Start execution at specified address. Default is 0x0000.")
+    parser.add_option("-p", "--programs", default=None, \
+            help="Load program/s. PROGRAM_1:ADDRESS_1[, PROGRAM_2:ADDRESS_2[, ...]]")
     options, _ = parser.parse_args()
 
     programs = map(lambda x : (validate_file(x.split(":") [0]), \
