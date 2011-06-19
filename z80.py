@@ -64,6 +64,7 @@ class Z80(object) :
         self.ram = None
         self.devices = None
         self._logger = None
+        self._bdos_extension = False
 
         self.cb_opcodes = {0x0 : (self._rlc_r, ("b",), 1),
         0x01 : (self._rlc_r, ("c",), 1),
@@ -116,647 +117,648 @@ class Z80(object) :
         0x2E : (self._sra_addr_rr, ("hl",), 1),
         0x2F : (self._sra_r, ("a",), 1),
 
-        0x30 : (self._sll_r, ('b',), 1),
-        0x31 : (self._sll_r, ('c',), 1),
-        0x32 : (self._sll_r, ('d',), 1),
-        0x33 : (self._sll_r, ('e',), 1),
-        0x34 : (self._sll_r, ('h',), 1),
-        0x35 : (self._sll_r, ('l',), 1),
-        0x36 : (self._sll_addr_rr, ('hl',), 1),
-        0x37 : (self._sll_r, ('a',), 1),
-        0x38 : (self._srl_r, ('b',), 1),
-        0x39 : (self._srl_r, ('c',), 1),
-        0x3A : (self._srl_r, ('d',), 1),
-        0x3B : (self._srl_r, ('e',), 1),
-        0x3C : (self._srl_r, ('h',), 1),
-        0x3D : (self._srl_r, ('l',), 1),
-        0x3E : (self._srl_addr_rr, ('hl',), 1),
-        0x3F : (self._srl_r, ('a',), 1),
+        0x30 : (self._sll_r, ("b",), 1),
+        0x31 : (self._sll_r, ("c",), 1),
+        0x32 : (self._sll_r, ("d",), 1),
+        0x33 : (self._sll_r, ("e",), 1),
+        0x34 : (self._sll_r, ("h",), 1),
+        0x35 : (self._sll_r, ("l",), 1),
+        0x36 : (self._sll_addr_rr, ("hl",), 1),
+        0x37 : (self._sll_r, ("a",), 1),
+        0x38 : (self._srl_r, ("b",), 1),
+        0x39 : (self._srl_r, ("c",), 1),
+        0x3A : (self._srl_r, ("d",), 1),
+        0x3B : (self._srl_r, ("e",), 1),
+        0x3C : (self._srl_r, ("h",), 1),
+        0x3D : (self._srl_r, ("l",), 1),
+        0x3E : (self._srl_addr_rr, ("hl",), 1),
+        0x3F : (self._srl_r, ("a",), 1),
 
-        0x40 : (self._bit_n_r, (0x1, 'b',), 1),
-        0x41 : (self._bit_n_r, (0x1, 'c',), 1),
-        0x42 : (self._bit_n_r, (0x1, 'd',), 1),
-        0x43 : (self._bit_n_r, (0x1, 'e',), 1),
-        0x44 : (self._bit_n_r, (0x1, 'h',), 1),
-        0x45 : (self._bit_n_r, (0x1, 'l',), 1),
-        0x46 : (self._bit_n_addr_rr, (0x1, 'hl',), 1),
-        0x47 : (self._bit_n_r, (0x1, 'a',), 1),
-        0x48 : (self._bit_n_r, (0x2, 'b',), 1),
-        0x49 : (self._bit_n_r, (0x2, 'c',), 1),
-        0x4A : (self._bit_n_r, (0x2, 'd',), 1),
-        0x4B : (self._bit_n_r, (0x2, 'e',), 1),
-        0x4C : (self._bit_n_r, (0x2, 'h',), 1),
-        0x4D : (self._bit_n_r, (0x2, 'l',), 1),
-        0x4E : (self._bit_n_addr_rr, (0x2, 'hl',), 1),
-        0x4F : (self._bit_n_r, (0x2, 'a',), 1),
+        0x40 : (self._bit_n_r, (0x1, "b",), 1),
+        0x41 : (self._bit_n_r, (0x1, "c",), 1),
+        0x42 : (self._bit_n_r, (0x1, "d",), 1),
+        0x43 : (self._bit_n_r, (0x1, "e",), 1),
+        0x44 : (self._bit_n_r, (0x1, "h",), 1),
+        0x45 : (self._bit_n_r, (0x1, "l",), 1),
+        0x46 : (self._bit_n_addr_rr, (0x1, "hl",), 1),
+        0x47 : (self._bit_n_r, (0x1, "a",), 1),
+        0x48 : (self._bit_n_r, (0x2, "b",), 1),
+        0x49 : (self._bit_n_r, (0x2, "c",), 1),
+        0x4A : (self._bit_n_r, (0x2, "d",), 1),
+        0x4B : (self._bit_n_r, (0x2, "e",), 1),
+        0x4C : (self._bit_n_r, (0x2, "h",), 1),
+        0x4D : (self._bit_n_r, (0x2, "l",), 1),
+        0x4E : (self._bit_n_addr_rr, (0x2, "hl",), 1),
+        0x4F : (self._bit_n_r, (0x2, "a",), 1),
 
-        0x50 : (self._bit_n_r, (0x4, 'b',), 1),
-        0x51 : (self._bit_n_r, (0x4, 'c',), 1),
-        0x52 : (self._bit_n_r, (0x4, 'd',), 1),
-        0x53 : (self._bit_n_r, (0x4, 'e',), 1),
-        0x54 : (self._bit_n_r, (0x4, 'h',), 1),
-        0x55 : (self._bit_n_r, (0x4, 'l',), 1),
-        0x56 : (self._bit_n_addr_rr, (0x4, 'hl',), 1),
-        0x57 : (self._bit_n_r, (0x4, 'a',), 1),
-        0x58 : (self._bit_n_r, (0x8, 'b',), 1),
-        0x59 : (self._bit_n_r, (0x8, 'c',), 1),
-        0x5A : (self._bit_n_r, (0x8, 'd',), 1),
-        0x5B : (self._bit_n_r, (0x8, 'e',), 1),
-        0x5C : (self._bit_n_r, (0x8, 'h',), 1),
-        0x5D : (self._bit_n_r, (0x8, 'l',), 1),
-        0x5E : (self._bit_n_addr_rr, (0x8, 'hl',), 1),
-        0x5F : (self._bit_n_r, (0x8, 'a',), 1),
+        0x50 : (self._bit_n_r, (0x4, "b",), 1),
+        0x51 : (self._bit_n_r, (0x4, "c",), 1),
+        0x52 : (self._bit_n_r, (0x4, "d",), 1),
+        0x53 : (self._bit_n_r, (0x4, "e",), 1),
+        0x54 : (self._bit_n_r, (0x4, "h",), 1),
+        0x55 : (self._bit_n_r, (0x4, "l",), 1),
+        0x56 : (self._bit_n_addr_rr, (0x4, "hl",), 1),
+        0x57 : (self._bit_n_r, (0x4, "a",), 1),
+        0x58 : (self._bit_n_r, (0x8, "b",), 1),
+        0x59 : (self._bit_n_r, (0x8, "c",), 1),
+        0x5A : (self._bit_n_r, (0x8, "d",), 1),
+        0x5B : (self._bit_n_r, (0x8, "e",), 1),
+        0x5C : (self._bit_n_r, (0x8, "h",), 1),
+        0x5D : (self._bit_n_r, (0x8, "l",), 1),
+        0x5E : (self._bit_n_addr_rr, (0x8, "hl",), 1),
+        0x5F : (self._bit_n_r, (0x8, "a",), 1),
 
-        0x60 : (self._bit_n_r, (0x10, 'b',), 1),
-        0x61 : (self._bit_n_r, (0x10, 'c',), 1),
-        0x62 : (self._bit_n_r, (0x10, 'd',), 1),
-        0x63 : (self._bit_n_r, (0x10, 'e',), 1),
-        0x64 : (self._bit_n_r, (0x10, 'h',), 1),
-        0x65 : (self._bit_n_r, (0x10, 'l',), 1),
-        0x66 : (self._bit_n_addr_rr, (0x10, 'hl',), 1),
-        0x67 : (self._bit_n_r, (0x10, 'a',), 1),
-        0x68 : (self._bit_n_r, (0x20, 'b',), 1),
-        0x69 : (self._bit_n_r, (0x20, 'c',), 1),
-        0x6A : (self._bit_n_r, (0x20, 'd',), 1),
-        0x6B : (self._bit_n_r, (0x20, 'e',), 1),
-        0x6C : (self._bit_n_r, (0x20, 'h',), 1),
-        0x6D : (self._bit_n_r, (0x20, 'l',), 1),
-        0x6E : (self._bit_n_addr_rr, (0x20, 'hl',), 1),
-        0x6F : (self._bit_n_r, (0x20, 'a',), 1),
+        0x60 : (self._bit_n_r, (0x10, "b",), 1),
+        0x61 : (self._bit_n_r, (0x10, "c",), 1),
+        0x62 : (self._bit_n_r, (0x10, "d",), 1),
+        0x63 : (self._bit_n_r, (0x10, "e",), 1),
+        0x64 : (self._bit_n_r, (0x10, "h",), 1),
+        0x65 : (self._bit_n_r, (0x10, "l",), 1),
+        0x66 : (self._bit_n_addr_rr, (0x10, "hl",), 1),
+        0x67 : (self._bit_n_r, (0x10, "a",), 1),
+        0x68 : (self._bit_n_r, (0x20, "b",), 1),
+        0x69 : (self._bit_n_r, (0x20, "c",), 1),
+        0x6A : (self._bit_n_r, (0x20, "d",), 1),
+        0x6B : (self._bit_n_r, (0x20, "e",), 1),
+        0x6C : (self._bit_n_r, (0x20, "h",), 1),
+        0x6D : (self._bit_n_r, (0x20, "l",), 1),
+        0x6E : (self._bit_n_addr_rr, (0x20, "hl",), 1),
+        0x6F : (self._bit_n_r, (0x20, "a",), 1),
 
-        0x70 : (self._bit_n_r, (0x40, 'b',), 1),
-        0x71 : (self._bit_n_r, (0x40, 'c',), 1),
-        0x72 : (self._bit_n_r, (0x40, 'd',), 1),
-        0x73 : (self._bit_n_r, (0x40, 'e',), 1),
-        0x74 : (self._bit_n_r, (0x40, 'h',), 1),
-        0x75 : (self._bit_n_r, (0x40, 'l',), 1),
-        0x76 : (self._bit_n_addr_rr, (0x40, 'hl',), 1),
-        0x77 : (self._bit_n_r, (0x40, 'a',), 1),
-        0x78 : (self._bit_n_r, (0x80, 'b',), 1),
-        0x79 : (self._bit_n_r, (0x80, 'c',), 1),
-        0x7A : (self._bit_n_r, (0x80, 'd',), 1),
-        0x7B : (self._bit_n_r, (0x80, 'e',), 1),
-        0x7C : (self._bit_n_r, (0x80, 'h',), 1),
-        0x7D : (self._bit_n_r, (0x80, 'l',), 1),
-        0x7E : (self._bit_n_addr_rr, (0x80, 'hl',), 1),
-        0x7F : (self._bit_n_r, (0x80, 'a',), 1),
+        0x70 : (self._bit_n_r, (0x40, "b",), 1),
+        0x71 : (self._bit_n_r, (0x40, "c",), 1),
+        0x72 : (self._bit_n_r, (0x40, "d",), 1),
+        0x73 : (self._bit_n_r, (0x40, "e",), 1),
+        0x74 : (self._bit_n_r, (0x40, "h",), 1),
+        0x75 : (self._bit_n_r, (0x40, "l",), 1),
+        0x76 : (self._bit_n_addr_rr, (0x40, "hl",), 1),
+        0x77 : (self._bit_n_r, (0x40, "a",), 1),
+        0x78 : (self._bit_n_r, (0x80, "b",), 1),
+        0x79 : (self._bit_n_r, (0x80, "c",), 1),
+        0x7A : (self._bit_n_r, (0x80, "d",), 1),
+        0x7B : (self._bit_n_r, (0x80, "e",), 1),
+        0x7C : (self._bit_n_r, (0x80, "h",), 1),
+        0x7D : (self._bit_n_r, (0x80, "l",), 1),
+        0x7E : (self._bit_n_addr_rr, (0x80, "hl",), 1),
+        0x7F : (self._bit_n_r, (0x80, "a",), 1),
 
-        0x80 : (self._res_n_r, (0xFE, 'b',), 1),
-        0x81 : (self._res_n_r, (0xFE, 'c',), 1),
-        0x82 : (self._res_n_r, (0xFE, 'd',), 1),
-        0x83 : (self._res_n_r, (0xFE, 'e',), 1),
-        0x84 : (self._res_n_r, (0xFE, 'h',), 1),
-        0x85 : (self._res_n_r, (0xFE, 'l',), 1),
-        0x86 : (self._res_n_addr_rr, (0xFE, 'hl',), 1),
-        0x87 : (self._res_n_r, (0xFE, 'a',), 1),
-        0x88 : (self._res_n_r, (0xFD, 'b',), 1),
-        0x89 : (self._res_n_r, (0xFD, 'c',), 1),
-        0x8A : (self._res_n_r, (0xFD, 'd',), 1),
-        0x8B : (self._res_n_r, (0xFD, 'e',), 1),
-        0x8C : (self._res_n_r, (0xFD, 'h',), 1),
-        0x8D : (self._res_n_r, (0xFD, 'l',), 1),
-        0x8E : (self._res_n_addr_rr, (0xFD, 'hl',), 1),
-        0x8F : (self._res_n_r, (0xFD, 'a',), 1),
+        0x80 : (self._res_n_r, (0xFE, "b",), 1),
+        0x81 : (self._res_n_r, (0xFE, "c",), 1),
+        0x82 : (self._res_n_r, (0xFE, "d",), 1),
+        0x83 : (self._res_n_r, (0xFE, "e",), 1),
+        0x84 : (self._res_n_r, (0xFE, "h",), 1),
+        0x85 : (self._res_n_r, (0xFE, "l",), 1),
+        0x86 : (self._res_n_addr_rr, (0xFE, "hl",), 1),
+        0x87 : (self._res_n_r, (0xFE, "a",), 1),
+        0x88 : (self._res_n_r, (0xFD, "b",), 1),
+        0x89 : (self._res_n_r, (0xFD, "c",), 1),
+        0x8A : (self._res_n_r, (0xFD, "d",), 1),
+        0x8B : (self._res_n_r, (0xFD, "e",), 1),
+        0x8C : (self._res_n_r, (0xFD, "h",), 1),
+        0x8D : (self._res_n_r, (0xFD, "l",), 1),
+        0x8E : (self._res_n_addr_rr, (0xFD, "hl",), 1),
+        0x8F : (self._res_n_r, (0xFD, "a",), 1),
 
-        0x90 : (self._res_n_r, (0xFB, 'b',), 1),
-        0x91 : (self._res_n_r, (0xFB, 'c',), 1),
-        0x92 : (self._res_n_r, (0xFB, 'd',), 1),
-        0x93 : (self._res_n_r, (0xFB, 'e',), 1),
-        0x94 : (self._res_n_r, (0xFB, 'h',), 1),
-        0x95 : (self._res_n_r, (0xFB, 'l',), 1),
-        0x96 : (self._res_n_addr_rr, (0xFB, 'hl',), 1),
-        0x97 : (self._res_n_r, (0xFB, 'a',), 1),
-        0x98 : (self._res_n_r, (0xF7, 'b',), 1),
-        0x99 : (self._res_n_r, (0xF7, 'c',), 1),
-        0x9A : (self._res_n_r, (0xF7, 'd',), 1),
-        0x9B : (self._res_n_r, (0xF7, 'e',), 1),
-        0x9C : (self._res_n_r, (0xF7, 'h',), 1),
-        0x9D : (self._res_n_r, (0xF7, 'l',), 1),
-        0x9E : (self._res_n_addr_rr, (0xF7, 'hl',), 1),
-        0x9F : (self._res_n_r, (0xF7, 'a',), 1),
+        0x90 : (self._res_n_r, (0xFB, "b",), 1),
+        0x91 : (self._res_n_r, (0xFB, "c",), 1),
+        0x92 : (self._res_n_r, (0xFB, "d",), 1),
+        0x93 : (self._res_n_r, (0xFB, "e",), 1),
+        0x94 : (self._res_n_r, (0xFB, "h",), 1),
+        0x95 : (self._res_n_r, (0xFB, "l",), 1),
+        0x96 : (self._res_n_addr_rr, (0xFB, "hl",), 1),
+        0x97 : (self._res_n_r, (0xFB, "a",), 1),
+        0x98 : (self._res_n_r, (0xF7, "b",), 1),
+        0x99 : (self._res_n_r, (0xF7, "c",), 1),
+        0x9A : (self._res_n_r, (0xF7, "d",), 1),
+        0x9B : (self._res_n_r, (0xF7, "e",), 1),
+        0x9C : (self._res_n_r, (0xF7, "h",), 1),
+        0x9D : (self._res_n_r, (0xF7, "l",), 1),
+        0x9E : (self._res_n_addr_rr, (0xF7, "hl",), 1),
+        0x9F : (self._res_n_r, (0xF7, "a",), 1),
 
-        0xA0 : (self._res_n_r, (0xEF, 'b',), 1),
-        0xA1 : (self._res_n_r, (0xEF, 'c',), 1),
-        0xA2 : (self._res_n_r, (0xEF, 'd',), 1),
-        0xA3 : (self._res_n_r, (0xEF, 'e',), 1),
-        0xA4 : (self._res_n_r, (0xEF, 'h',), 1),
-        0xA5 : (self._res_n_r, (0xEF, 'l',), 1),
-        0xA6 : (self._res_n_addr_rr, (0xEF, 'hl',), 1),
-        0xA7 : (self._res_n_r, (0xEF, 'a',), 1),
-        0xA8 : (self._res_n_r, (0xDF, 'b',), 1),
-        0xA9 : (self._res_n_r, (0xDF, 'c',), 1),
-        0xAA : (self._res_n_r, (0xDF, 'd',), 1),
-        0xAB : (self._res_n_r, (0xDF, 'e',), 1),
-        0xAC : (self._res_n_r, (0xDF, 'h',), 1),
-        0xAD : (self._res_n_r, (0xDF, 'l',), 1),
-        0xAE : (self._res_n_addr_rr, (0xDF, 'hl',), 1),
-        0xAF : (self._res_n_r, (0xDF, 'a',), 1),
+        0xA0 : (self._res_n_r, (0xEF, "b",), 1),
+        0xA1 : (self._res_n_r, (0xEF, "c",), 1),
+        0xA2 : (self._res_n_r, (0xEF, "d",), 1),
+        0xA3 : (self._res_n_r, (0xEF, "e",), 1),
+        0xA4 : (self._res_n_r, (0xEF, "h",), 1),
+        0xA5 : (self._res_n_r, (0xEF, "l",), 1),
+        0xA6 : (self._res_n_addr_rr, (0xEF, "hl",), 1),
+        0xA7 : (self._res_n_r, (0xEF, "a",), 1),
+        0xA8 : (self._res_n_r, (0xDF, "b",), 1),
+        0xA9 : (self._res_n_r, (0xDF, "c",), 1),
+        0xAA : (self._res_n_r, (0xDF, "d",), 1),
+        0xAB : (self._res_n_r, (0xDF, "e",), 1),
+        0xAC : (self._res_n_r, (0xDF, "h",), 1),
+        0xAD : (self._res_n_r, (0xDF, "l",), 1),
+        0xAE : (self._res_n_addr_rr, (0xDF, "hl",), 1),
+        0xAF : (self._res_n_r, (0xDF, "a",), 1),
 
-        0xB0 : (self._res_n_r, (0xBF, 'b',), 1),
-        0xB1 : (self._res_n_r, (0xBF, 'c',), 1),
-        0xB2 : (self._res_n_r, (0xBF, 'd',), 1),
-        0xB3 : (self._res_n_r, (0xBF, 'e',), 1),
-        0xB4 : (self._res_n_r, (0xBF, 'h',), 1),
-        0xB5 : (self._res_n_r, (0xBF, 'l',), 1),
-        0xB6 : (self._res_n_addr_rr, (0xBF, 'hl',), 1),
-        0xB7 : (self._res_n_r, (0xBF, 'a',), 1),
-        0xB8 : (self._res_n_r, (0x7F, 'b',), 1),
-        0xB9 : (self._res_n_r, (0x7F, 'c',), 1),
-        0xBA : (self._res_n_r, (0x7F, 'd',), 1),
-        0xBB : (self._res_n_r, (0x7F, 'e',), 1),
-        0xBC : (self._res_n_r, (0x7F, 'h',), 1),
-        0xBD : (self._res_n_r, (0x7F, 'l',), 1),
-        0xBE : (self._res_n_addr_rr, (0x7F, 'hl',), 1),
-        0xBF : (self._res_n_r, (0x7F, 'a',), 1),
+        0xB0 : (self._res_n_r, (0xBF, "b",), 1),
+        0xB1 : (self._res_n_r, (0xBF, "c",), 1),
+        0xB2 : (self._res_n_r, (0xBF, "d",), 1),
+        0xB3 : (self._res_n_r, (0xBF, "e",), 1),
+        0xB4 : (self._res_n_r, (0xBF, "h",), 1),
+        0xB5 : (self._res_n_r, (0xBF, "l",), 1),
+        0xB6 : (self._res_n_addr_rr, (0xBF, "hl",), 1),
+        0xB7 : (self._res_n_r, (0xBF, "a",), 1),
+        0xB8 : (self._res_n_r, (0x7F, "b",), 1),
+        0xB9 : (self._res_n_r, (0x7F, "c",), 1),
+        0xBA : (self._res_n_r, (0x7F, "d",), 1),
+        0xBB : (self._res_n_r, (0x7F, "e",), 1),
+        0xBC : (self._res_n_r, (0x7F, "h",), 1),
+        0xBD : (self._res_n_r, (0x7F, "l",), 1),
+        0xBE : (self._res_n_addr_rr, (0x7F, "hl",), 1),
+        0xBF : (self._res_n_r, (0x7F, "a",), 1),
 
-        0xC0 : (self._set_n_r, (0x1, 'b',), 1),
-        0xC1 : (self._set_n_r, (0x1, 'c',), 1),
-        0xC2 : (self._set_n_r, (0x1, 'd',), 1),
-        0xC3 : (self._set_n_r, (0x1, 'e',), 1),
-        0xC4 : (self._set_n_r, (0x1, 'h',), 1),
-        0xC5 : (self._set_n_r, (0x1, 'l',), 1),
-        0xC6 : (self._set_n_addr_rr, (0x1, 'hl',), 1),
-        0xC7 : (self._set_n_r, (0x1, 'a',), 1),
-        0xC8 : (self._set_n_r, (0x2, 'b',), 1),
-        0xC9 : (self._set_n_r, (0x2, 'c',), 1),
-        0xCA : (self._set_n_r, (0x2, 'd',), 1),
-        0xCB : (self._set_n_r, (0x2, 'e',), 1),
-        0xCC : (self._set_n_r, (0x2, 'h',), 1),
-        0xCD : (self._set_n_r, (0x2, 'l',), 1),
-        0xCE : (self._set_n_addr_rr, (0x2, 'hl',), 1),
-        0xCF : (self._set_n_r, (0x2, 'a',), 1),
+        0xC0 : (self._set_n_r, (0x1, "b",), 1),
+        0xC1 : (self._set_n_r, (0x1, "c",), 1),
+        0xC2 : (self._set_n_r, (0x1, "d",), 1),
+        0xC3 : (self._set_n_r, (0x1, "e",), 1),
+        0xC4 : (self._set_n_r, (0x1, "h",), 1),
+        0xC5 : (self._set_n_r, (0x1, "l",), 1),
+        0xC6 : (self._set_n_addr_rr, (0x1, "hl",), 1),
+        0xC7 : (self._set_n_r, (0x1, "a",), 1),
+        0xC8 : (self._set_n_r, (0x2, "b",), 1),
+        0xC9 : (self._set_n_r, (0x2, "c",), 1),
+        0xCA : (self._set_n_r, (0x2, "d",), 1),
+        0xCB : (self._set_n_r, (0x2, "e",), 1),
+        0xCC : (self._set_n_r, (0x2, "h",), 1),
+        0xCD : (self._set_n_r, (0x2, "l",), 1),
+        0xCE : (self._set_n_addr_rr, (0x2, "hl",), 1),
+        0xCF : (self._set_n_r, (0x2, "a",), 1),
 
-        0xD0 : (self._set_n_r, (0x4, 'b',), 1),
-        0xD1 : (self._set_n_r, (0x4, 'c',), 1),
-        0xD2 : (self._set_n_r, (0x4, 'd',), 1),
-        0xD3 : (self._set_n_r, (0x4, 'e',), 1),
-        0xD4 : (self._set_n_r, (0x4, 'h',), 1),
-        0xD5 : (self._set_n_r, (0x4, 'l',), 1),
-        0xD6 : (self._set_n_addr_rr, (0x4, 'hl',), 1),
-        0xD7 : (self._set_n_r, (0x4, 'a',), 1),
-        0xD8 : (self._set_n_r, (0x8, 'b',), 1),
-        0xD9 : (self._set_n_r, (0x8, 'c',), 1),
-        0xDA : (self._set_n_r, (0x8, 'd',), 1),
-        0xDB : (self._set_n_r, (0x8, 'e',), 1),
-        0xDC : (self._set_n_r, (0x8, 'h',), 1),
-        0xDD : (self._set_n_r, (0x8, 'l',), 1),
-        0xDE : (self._set_n_addr_rr, (0x8, 'hl',), 1),
-        0xDF : (self._set_n_r, (0x8, 'a',), 1),
+        0xD0 : (self._set_n_r, (0x4, "b",), 1),
+        0xD1 : (self._set_n_r, (0x4, "c",), 1),
+        0xD2 : (self._set_n_r, (0x4, "d",), 1),
+        0xD3 : (self._set_n_r, (0x4, "e",), 1),
+        0xD4 : (self._set_n_r, (0x4, "h",), 1),
+        0xD5 : (self._set_n_r, (0x4, "l",), 1),
+        0xD6 : (self._set_n_addr_rr, (0x4, "hl",), 1),
+        0xD7 : (self._set_n_r, (0x4, "a",), 1),
+        0xD8 : (self._set_n_r, (0x8, "b",), 1),
+        0xD9 : (self._set_n_r, (0x8, "c",), 1),
+        0xDA : (self._set_n_r, (0x8, "d",), 1),
+        0xDB : (self._set_n_r, (0x8, "e",), 1),
+        0xDC : (self._set_n_r, (0x8, "h",), 1),
+        0xDD : (self._set_n_r, (0x8, "l",), 1),
+        0xDE : (self._set_n_addr_rr, (0x8, "hl",), 1),
+        0xDF : (self._set_n_r, (0x8, "a",), 1),
 
-        0xE0 : (self._set_n_r, (0x10, 'b',), 1),
-        0xE1 : (self._set_n_r, (0x10, 'c',), 1),
-        0xE2 : (self._set_n_r, (0x10, 'd',), 1),
-        0xE3 : (self._set_n_r, (0x10, 'e',), 1),
-        0xE4 : (self._set_n_r, (0x10, 'h',), 1),
-        0xE5 : (self._set_n_r, (0x10, 'l',), 1),
-        0xE6 : (self._set_n_addr_rr, (0x10, 'hl',), 1),
-        0xE7 : (self._set_n_r, (0x10, 'a',), 1),
-        0xE8 : (self._set_n_r, (0x20, 'b',), 1),
-        0xE9 : (self._set_n_r, (0x20, 'c',), 1),
-        0xEA : (self._set_n_r, (0x20, 'd',), 1),
-        0xEB : (self._set_n_r, (0x20, 'e',), 1),
-        0xEC : (self._set_n_r, (0x20, 'h',), 1),
-        0xED : (self._set_n_r, (0x20, 'l',), 1),
-        0xEE : (self._set_n_addr_rr, (0x20, 'hl',), 1),
-        0xEF : (self._set_n_r, (0x20, 'a',), 1),
+        0xE0 : (self._set_n_r, (0x10, "b",), 1),
+        0xE1 : (self._set_n_r, (0x10, "c",), 1),
+        0xE2 : (self._set_n_r, (0x10, "d",), 1),
+        0xE3 : (self._set_n_r, (0x10, "e",), 1),
+        0xE4 : (self._set_n_r, (0x10, "h",), 1),
+        0xE5 : (self._set_n_r, (0x10, "l",), 1),
+        0xE6 : (self._set_n_addr_rr, (0x10, "hl",), 1),
+        0xE7 : (self._set_n_r, (0x10, "a",), 1),
+        0xE8 : (self._set_n_r, (0x20, "b",), 1),
+        0xE9 : (self._set_n_r, (0x20, "c",), 1),
+        0xEA : (self._set_n_r, (0x20, "d",), 1),
+        0xEB : (self._set_n_r, (0x20, "e",), 1),
+        0xEC : (self._set_n_r, (0x20, "h",), 1),
+        0xED : (self._set_n_r, (0x20, "l",), 1),
+        0xEE : (self._set_n_addr_rr, (0x20, "hl",), 1),
+        0xEF : (self._set_n_r, (0x20, "a",), 1),
 
-        0xF0 : (self._set_n_r, (0x40, 'b',), 1),
-        0xF1 : (self._set_n_r, (0x40, 'c',), 1),
-        0xF2 : (self._set_n_r, (0x40, 'd',), 1),
-        0xF3 : (self._set_n_r, (0x40, 'e',), 1),
-        0xF4 : (self._set_n_r, (0x40, 'h',), 1),
-        0xF5 : (self._set_n_r, (0x40, 'l',), 1),
-        0xF6 : (self._set_n_addr_rr, (0x40, 'hl',), 1),
-        0xF7 : (self._set_n_r, (0x40, 'a',), 1),
-        0xF8 : (self._set_n_r, (0x80, 'b',), 1),
-        0xF9 : (self._set_n_r, (0x80, 'c',), 1),
-        0xFA : (self._set_n_r, (0x80, 'd',), 1),
-        0xFB : (self._set_n_r, (0x80, 'e',), 1),
-        0xFC : (self._set_n_r, (0x80, 'h',), 1),
-        0xFD : (self._set_n_r, (0x80, 'l',), 1),
-        0xFE : (self._set_n_addr_rr, (0x80, 'hl',), 1),
-        0xFF : (self._set_n_r, (0x80, 'a',), 1),
+        0xF0 : (self._set_n_r, (0x40, "b",), 1),
+        0xF1 : (self._set_n_r, (0x40, "c",), 1),
+        0xF2 : (self._set_n_r, (0x40, "d",), 1),
+        0xF3 : (self._set_n_r, (0x40, "e",), 1),
+        0xF4 : (self._set_n_r, (0x40, "h",), 1),
+        0xF5 : (self._set_n_r, (0x40, "l",), 1),
+        0xF6 : (self._set_n_addr_rr, (0x40, "hl",), 1),
+        0xF7 : (self._set_n_r, (0x40, "a",), 1),
+        0xF8 : (self._set_n_r, (0x80, "b",), 1),
+        0xF9 : (self._set_n_r, (0x80, "c",), 1),
+        0xFA : (self._set_n_r, (0x80, "d",), 1),
+        0xFB : (self._set_n_r, (0x80, "e",), 1),
+        0xFC : (self._set_n_r, (0x80, "h",), 1),
+        0xFD : (self._set_n_r, (0x80, "l",), 1),
+        0xFE : (self._set_n_addr_rr, (0x80, "hl",), 1),
+        0xFF : (self._set_n_r, (0x80, "a",), 1),
         }
 
-        self.ddcb_opcodes = {0x0 : (self._rlc_indx_d_r, ('ix', 'b',), 3),
-        0x01 : (self._rlc_indx_d_r, ('ix', 'c',), 3), 
-        0x02 : (self._rlc_indx_d_r, ('ix', 'd',), 3), 
-        0x03 : (self._rlc_indx_d_r, ('ix', 'e',), 3), 
-        0x04 : (self._rlc_indx_d_r, ('ix', 'h',), 3), 
-        0x05 : (self._rlc_indx_d_r, ('ix', 'l',), 3), 
-        0x06 : (self._rlc_indx_d, ('ix',), 3), 
-        0x07 : (self._rlc_indx_d_r, ('ix', 'a',), 3), 
-        0x08 : (self._rrc_indx_d_r, ('ix', 'b',), 3), 
-        0x09 : (self._rrc_indx_d_r, ('ix', 'c',), 3), 
-        0x0A : (self._rrc_indx_d_r, ('ix', 'd',), 3), 
-        0x0B : (self._rrc_indx_d_r, ('ix', 'e',), 3), 
-        0x0C : (self._rrc_indx_d_r, ('ix', 'h',), 3), 
-        0x0D : (self._rrc_indx_d_r, ('ix', 'l',), 3), 
-        0x0E : (self._rrc_indx_d, ('ix',), 3), 
-        0x0F : (self._rrc_indx_d_r, ('ix', 'a',), 3), 
+        self.ddcb_opcodes = {0x0 : (self._rlc_indx_d_r, ("ix", "b",), 3),
+        0x01 : (self._rlc_indx_d_r, ("ix", "c",), 3), 
+        0x02 : (self._rlc_indx_d_r, ("ix", "d",), 3), 
+        0x03 : (self._rlc_indx_d_r, ("ix", "e",), 3), 
+        0x04 : (self._rlc_indx_d_r, ("ix", "h",), 3), 
+        0x05 : (self._rlc_indx_d_r, ("ix", "l",), 3), 
+        0x06 : (self._rlc_indx_d, ("ix",), 3), 
+        0x07 : (self._rlc_indx_d_r, ("ix", "a",), 3), 
+        0x08 : (self._rrc_indx_d_r, ("ix", "b",), 3), 
+        0x09 : (self._rrc_indx_d_r, ("ix", "c",), 3), 
+        0x0A : (self._rrc_indx_d_r, ("ix", "d",), 3), 
+        0x0B : (self._rrc_indx_d_r, ("ix", "e",), 3), 
+        0x0C : (self._rrc_indx_d_r, ("ix", "h",), 3), 
+        0x0D : (self._rrc_indx_d_r, ("ix", "l",), 3), 
+        0x0E : (self._rrc_indx_d, ("ix",), 3), 
+        0x0F : (self._rrc_indx_d_r, ("ix", "a",), 3), 
         
-        0x10 : (self._rl_indx_d_r, ('ix', 'b',), 3), 
-        0X11 : (self._rl_indx_d_r, ('ix', 'c',), 3), 
-        0x12 : (self._rl_indx_d_r, ('ix', 'd',), 3), 
-        0x13 : (self._rl_indx_d_r, ('ix', 'e',), 3), 
-        0x14 : (self._rl_indx_d_r, ('ix', 'h',), 3), 
-        0x15 : (self._rl_indx_d_r, ('ix', 'l',), 3), 
-        0x16 : (self._rl_indx_d, ('ix',), 3), 
-        0x17 : (self._rl_indx_d_r, ('ix', 'a',), 3), 
-        0x18 : (self._rr_indx_d_r, ('ix', 'b',), 3), 
-        0x19 : (self._rr_indx_d_r, ('ix', 'c',), 3), 
-        0x1A : (self._rr_indx_d_r, ('ix', 'd',), 3), 
-        0x1B : (self._rr_indx_d_r, ('ix', 'e',), 3), 
-        0x1C : (self._rr_indx_d_r, ('ix', 'h',), 3), 
-        0x1D : (self._rr_indx_d_r, ('ix', 'l',), 3), 
-        0x1E : (self._rr_indx_d, ('ix',), 3), 
-        0x1F : (self._rr_indx_d_r, ('ix', 'a',), 3), 
+        0x10 : (self._rl_indx_d_r, ("ix", "b",), 3), 
+        0X11 : (self._rl_indx_d_r, ("ix", "c",), 3), 
+        0x12 : (self._rl_indx_d_r, ("ix", "d",), 3), 
+        0x13 : (self._rl_indx_d_r, ("ix", "e",), 3), 
+        0x14 : (self._rl_indx_d_r, ("ix", "h",), 3), 
+        0x15 : (self._rl_indx_d_r, ("ix", "l",), 3), 
+        0x16 : (self._rl_indx_d, ("ix",), 3), 
+        0x17 : (self._rl_indx_d_r, ("ix", "a",), 3), 
+        0x18 : (self._rr_indx_d_r, ("ix", "b",), 3), 
+        0x19 : (self._rr_indx_d_r, ("ix", "c",), 3), 
+        0x1A : (self._rr_indx_d_r, ("ix", "d",), 3), 
+        0x1B : (self._rr_indx_d_r, ("ix", "e",), 3), 
+        0x1C : (self._rr_indx_d_r, ("ix", "h",), 3), 
+        0x1D : (self._rr_indx_d_r, ("ix", "l",), 3), 
+        0x1E : (self._rr_indx_d, ("ix",), 3), 
+        0x1F : (self._rr_indx_d_r, ("ix", "a",), 3), 
 
-        0x20 : (self._sla_indx_d_r, ('ix', 'b',), 3), 
-        0x21 : (self._sla_indx_d_r, ('ix', 'c',), 3), 
-        0x22 : (self._sla_indx_d_r, ('ix', 'd',), 3), 
-        0x23 : (self._sla_indx_d_r, ('ix', 'e',), 3), 
-        0x24 : (self._sla_indx_d_r, ('ix', 'h',), 3), 
-        0x25 : (self._sla_indx_d_r, ('ix', 'l',), 3), 
-        0x26 : (self._sla_indx_d, ('ix',), 3), 
-        0x27 : (self._sla_indx_d_r, ('ix', 'a',), 3), 
-        0x28 : (self._sra_indx_d_r, ('ix', 'b',), 3), 
-        0x29 : (self._sra_indx_d_r, ('ix', 'c',), 3), 
-        0x2A : (self._sra_indx_d_r, ('ix', 'd',), 3), 
-        0x2B : (self._sra_indx_d_r, ('ix', 'e',), 3), 
-        0x2C : (self._sra_indx_d_r, ('ix', 'h',), 3), 
-        0x2D : (self._sra_indx_d_r, ('ix', 'l',), 3), 
-        0x2E : (self._sra_indx_d, ('ix',), 3), 
-        0x2F : (self._sra_indx_d_r, ('ix', 'a',), 3), 
+        0x20 : (self._sla_indx_d_r, ("ix", "b",), 3), 
+        0x21 : (self._sla_indx_d_r, ("ix", "c",), 3), 
+        0x22 : (self._sla_indx_d_r, ("ix", "d",), 3), 
+        0x23 : (self._sla_indx_d_r, ("ix", "e",), 3), 
+        0x24 : (self._sla_indx_d_r, ("ix", "h",), 3), 
+        0x25 : (self._sla_indx_d_r, ("ix", "l",), 3), 
+        0x26 : (self._sla_indx_d, ("ix",), 3), 
+        0x27 : (self._sla_indx_d_r, ("ix", "a",), 3), 
+        0x28 : (self._sra_indx_d_r, ("ix", "b",), 3), 
+        0x29 : (self._sra_indx_d_r, ("ix", "c",), 3), 
+        0x2A : (self._sra_indx_d_r, ("ix", "d",), 3), 
+        0x2B : (self._sra_indx_d_r, ("ix", "e",), 3), 
+        0x2C : (self._sra_indx_d_r, ("ix", "h",), 3), 
+        0x2D : (self._sra_indx_d_r, ("ix", "l",), 3), 
+        0x2E : (self._sra_indx_d, ("ix",), 3), 
+        0x2F : (self._sra_indx_d_r, ("ix", "a",), 3), 
 
-        0x30 : (self._sll_indx_d_r, ('ix', 'b',), 3), 
-        0x31 : (self._sll_indx_d_r, ('ix', 'c',), 3), 
-        0x32 : (self._sll_indx_d_r, ('ix', 'd',), 3), 
-        0x33 : (self._sll_indx_d_r, ('ix', 'e',), 3), 
-        0x34 : (self._sll_indx_d_r, ('ix', 'h',), 3), 
-        0x35 : (self._sll_indx_d_r, ('ix', 'l',), 3), 
-        0x36 : (self._sll_indx_d, ('ix',), 3), 
-        0x37 : (self._sll_indx_d_r, ('ix', 'a'), 3), 
-        0x38 : (self._srl_indx_d_r, ('ix', 'b',), 3), 
-        0x39 : (self._srl_indx_d_r, ('ix', 'c',), 3), 
-        0x3A : (self._srl_indx_d_r, ('ix', 'd',), 3), 
-        0x3B : (self._srl_indx_d_r, ('ix', 'e',), 3), 
-        0x3C : (self._srl_indx_d_r, ('ix', 'h',), 3), 
-        0x3D : (self._srl_indx_d_r, ('ix', 'l',), 3), 
-        0x3E : (self._srl_indx_d, ('ix',), 3), 
-        0x3F : (self._srl_indx_d_r, ('ix', 'a',), 3), 
+        0x30 : (self._sll_indx_d_r, ("ix", "b",), 3), 
+        0x31 : (self._sll_indx_d_r, ("ix", "c",), 3), 
+        0x32 : (self._sll_indx_d_r, ("ix", "d",), 3), 
+        0x33 : (self._sll_indx_d_r, ("ix", "e",), 3), 
+        0x34 : (self._sll_indx_d_r, ("ix", "h",), 3), 
+        0x35 : (self._sll_indx_d_r, ("ix", "l",), 3), 
+        0x36 : (self._sll_indx_d, ("ix",), 3), 
+        0x37 : (self._sll_indx_d_r, ("ix", "a"), 3), 
+        0x38 : (self._srl_indx_d_r, ("ix", "b",), 3), 
+        0x39 : (self._srl_indx_d_r, ("ix", "c",), 3), 
+        0x3A : (self._srl_indx_d_r, ("ix", "d",), 3), 
+        0x3B : (self._srl_indx_d_r, ("ix", "e",), 3), 
+        0x3C : (self._srl_indx_d_r, ("ix", "h",), 3), 
+        0x3D : (self._srl_indx_d_r, ("ix", "l",), 3), 
+        0x3E : (self._srl_indx_d, ("ix",), 3), 
+        0x3F : (self._srl_indx_d_r, ("ix", "a",), 3), 
 
-        0x40 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x41 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x42 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x43 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x44 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x45 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x46 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x47 : (self._bit_n_indx_d, (0x1, 'ix',), 3), 
-        0x48 : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
-        0x49 : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
-        0x4A : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
-        0x4B : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
-        0x4C : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
-        0x4D : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
-        0x4E : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
-        0x4F : (self._bit_n_indx_d, (0x2, 'ix',), 3), 
+        0x40 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x41 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x42 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x43 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x44 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x45 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x46 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x47 : (self._bit_n_indx_d, (0x1, "ix",), 3), 
+        0x48 : (self._bit_n_indx_d, (0x2, "ix",), 3), 
+        0x49 : (self._bit_n_indx_d, (0x2, "ix",), 3), 
+        0x4A : (self._bit_n_indx_d, (0x2, "ix",), 3), 
+        0x4B : (self._bit_n_indx_d, (0x2, "ix",), 3), 
+        0x4C : (self._bit_n_indx_d, (0x2, "ix",), 3), 
+        0x4D : (self._bit_n_indx_d, (0x2, "ix",), 3), 
+        0x4E : (self._bit_n_indx_d, (0x2, "ix",), 3), 
+        0x4F : (self._bit_n_indx_d, (0x2, "ix",), 3), 
 
-        0x50 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x51 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x52 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x53 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x54 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x55 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x56 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x57 : (self._bit_n_indx_d, (0x4, 'ix',), 3), 
-        0x58 : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
-        0x59 : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
-        0x5A : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
-        0x5B : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
-        0x5C : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
-        0x5D : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
-        0x5E : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
-        0x5F : (self._bit_n_indx_d, (0x8, 'ix',), 3), 
+        0x50 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x51 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x52 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x53 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x54 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x55 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x56 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x57 : (self._bit_n_indx_d, (0x4, "ix",), 3), 
+        0x58 : (self._bit_n_indx_d, (0x8, "ix",), 3), 
+        0x59 : (self._bit_n_indx_d, (0x8, "ix",), 3), 
+        0x5A : (self._bit_n_indx_d, (0x8, "ix",), 3), 
+        0x5B : (self._bit_n_indx_d, (0x8, "ix",), 3), 
+        0x5C : (self._bit_n_indx_d, (0x8, "ix",), 3), 
+        0x5D : (self._bit_n_indx_d, (0x8, "ix",), 3), 
+        0x5E : (self._bit_n_indx_d, (0x8, "ix",), 3), 
+        0x5F : (self._bit_n_indx_d, (0x8, "ix",), 3), 
 
-        0x60 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x61 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x62 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x63 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x64 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x65 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x66 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x67 : (self._bit_n_indx_d, (0x10, 'ix',), 3),
-        0x68 : (self._bit_n_indx_d, (0x20, 'ix',), 3),
-        0x69 : (self._bit_n_indx_d, (0x20, 'ix',), 3),
-        0x6A : (self._bit_n_indx_d, (0x20, 'ix',), 3),
-        0x6B : (self._bit_n_indx_d, (0x20, 'ix',), 3),
-        0x6C : (self._bit_n_indx_d, (0x20, 'ix',), 3),
-        0x6D : (self._bit_n_indx_d, (0x20, 'ix',), 3),
-        0x6E : (self._bit_n_indx_d, (0x20, 'ix',), 3),
-        0x6F : (self._bit_n_indx_d, (0x20, 'ix',), 3),
+        0x60 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x61 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x62 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x63 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x64 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x65 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x66 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x67 : (self._bit_n_indx_d, (0x10, "ix",), 3),
+        0x68 : (self._bit_n_indx_d, (0x20, "ix",), 3),
+        0x69 : (self._bit_n_indx_d, (0x20, "ix",), 3),
+        0x6A : (self._bit_n_indx_d, (0x20, "ix",), 3),
+        0x6B : (self._bit_n_indx_d, (0x20, "ix",), 3),
+        0x6C : (self._bit_n_indx_d, (0x20, "ix",), 3),
+        0x6D : (self._bit_n_indx_d, (0x20, "ix",), 3),
+        0x6E : (self._bit_n_indx_d, (0x20, "ix",), 3),
+        0x6F : (self._bit_n_indx_d, (0x20, "ix",), 3),
         
-        0x70 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x71 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x72 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x73 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x74 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x75 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x76 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x77 : (self._bit_n_indx_d, (0x40, 'ix',), 3),
-        0x78 : (self._bit_n_indx_d, (0x80, 'ix',), 3),
-        0x79 : (self._bit_n_indx_d, (0x80, 'ix',), 3),
-        0x7A : (self._bit_n_indx_d, (0x80, 'ix',), 3),
-        0x7B : (self._bit_n_indx_d, (0x80, 'ix',), 3),
-        0x7C : (self._bit_n_indx_d, (0x80, 'ix',), 3),
-        0x7D : (self._bit_n_indx_d, (0x80, 'ix',), 3),
-        0x7E : (self._bit_n_indx_d, (0x80, 'ix',), 3),
-        0x7F : (self._bit_n_indx_d, (0x80, 'ix',), 3),
+        0x70 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x71 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x72 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x73 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x74 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x75 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x76 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x77 : (self._bit_n_indx_d, (0x40, "ix",), 3),
+        0x78 : (self._bit_n_indx_d, (0x80, "ix",), 3),
+        0x79 : (self._bit_n_indx_d, (0x80, "ix",), 3),
+        0x7A : (self._bit_n_indx_d, (0x80, "ix",), 3),
+        0x7B : (self._bit_n_indx_d, (0x80, "ix",), 3),
+        0x7C : (self._bit_n_indx_d, (0x80, "ix",), 3),
+        0x7D : (self._bit_n_indx_d, (0x80, "ix",), 3),
+        0x7E : (self._bit_n_indx_d, (0x80, "ix",), 3),
+        0x7F : (self._bit_n_indx_d, (0x80, "ix",), 3),
 
-        0x80 : (self._res_n_indx_d_r, (0xFE, 'ix', 'b',), 3), 
-        0x81 : (self._res_n_indx_d_r, (0xFE, 'ix', 'c',), 3), 
-        0x82 : (self._res_n_indx_d_r, (0xFE, 'ix', 'd',), 3), 
-        0x83 : (self._res_n_indx_d_r, (0xFE, 'ix', 'e',), 3), 
-        0x84 : (self._res_n_indx_d_r, (0xFE, 'ix', 'h',), 3), 
-        0x85 : (self._res_n_indx_d_r, (0xFE, 'ix', 'l',), 3), 
-        0x86 : (self._res_n_indx_d, (0xFE, 'ix',), 3), 
-        0x87 : (self._res_n_indx_d_r, (0xFE, 'ix', 'a',), 3), 
-        0x88 : (self._res_n_indx_d_r, (0xFD, 'ix', 'b',), 3), 
-        0x89 : (self._res_n_indx_d_r, (0xFD, 'ix', 'c',), 3), 
-        0x8A : (self._res_n_indx_d_r, (0xFD, 'ix', 'd',), 3), 
-        0x8B : (self._res_n_indx_d_r, (0xFD, 'ix', 'e',), 3), 
-        0x8C : (self._res_n_indx_d_r, (0xFD, 'ix', 'h',), 3), 
-        0x8D : (self._res_n_indx_d_r, (0xFD, 'ix', 'l',), 3), 
-        0x8E : (self._res_n_indx_d, (0xFD, 'ix',), 3), 
-        0x8F : (self._res_n_indx_d_r, (0xFD, 'ix', 'a',), 3), 
+        0x80 : (self._res_n_indx_d_r, (0xFE, "ix", "b",), 3), 
+        0x81 : (self._res_n_indx_d_r, (0xFE, "ix", "c",), 3), 
+        0x82 : (self._res_n_indx_d_r, (0xFE, "ix", "d",), 3), 
+        0x83 : (self._res_n_indx_d_r, (0xFE, "ix", "e",), 3), 
+        0x84 : (self._res_n_indx_d_r, (0xFE, "ix", "h",), 3), 
+        0x85 : (self._res_n_indx_d_r, (0xFE, "ix", "l",), 3), 
+        0x86 : (self._res_n_indx_d, (0xFE, "ix",), 3), 
+        0x87 : (self._res_n_indx_d_r, (0xFE, "ix", "a",), 3), 
+        0x88 : (self._res_n_indx_d_r, (0xFD, "ix", "b",), 3), 
+        0x89 : (self._res_n_indx_d_r, (0xFD, "ix", "c",), 3), 
+        0x8A : (self._res_n_indx_d_r, (0xFD, "ix", "d",), 3), 
+        0x8B : (self._res_n_indx_d_r, (0xFD, "ix", "e",), 3), 
+        0x8C : (self._res_n_indx_d_r, (0xFD, "ix", "h",), 3), 
+        0x8D : (self._res_n_indx_d_r, (0xFD, "ix", "l",), 3), 
+        0x8E : (self._res_n_indx_d, (0xFD, "ix",), 3), 
+        0x8F : (self._res_n_indx_d_r, (0xFD, "ix", "a",), 3), 
 
-        0x90 : (self._res_n_indx_d_r, (0xFB, 'ix', 'b',), 3),
-        0x91 : (self._res_n_indx_d_r, (0xFB, 'ix', 'c',), 3),
-        0x92 : (self._res_n_indx_d_r, (0xFB, 'ix', 'd',), 3),
-        0x93 : (self._res_n_indx_d_r, (0xFB, 'ix', 'e',), 3),
-        0x94 : (self._res_n_indx_d_r, (0xFB, 'ix', 'h',), 3),
-        0x95 : (self._res_n_indx_d_r, (0xFB, 'ix', 'l',), 3),
-        0x96 : (self._res_n_indx_d, (0xFB, 'ix',), 3),
-        0x97 : (self._res_n_indx_d_r, (0xFB, 'ix', 'a',), 3),
-        0x98 : (self._res_n_indx_d_r, (0xF7, 'ix', 'b',), 3),
-        0x99 : (self._res_n_indx_d_r, (0xF7, 'ix', 'c',), 3),
-        0x9A : (self._res_n_indx_d_r, (0xF7, 'ix', 'd',), 3),
-        0x9B : (self._res_n_indx_d_r, (0xF7, 'ix', 'e',), 3),
-        0x9C : (self._res_n_indx_d_r, (0xF7, 'ix', 'h',), 3),
-        0x9D : (self._res_n_indx_d_r, (0xF7, 'ix', 'l',), 3),
-        0x9E : (self._res_n_indx_d, (0xF7, 'ix',), 3),
-        0x9F : (self._res_n_indx_d_r, (0xF7, 'ix', 'a',), 3),
+        0x90 : (self._res_n_indx_d_r, (0xFB, "ix", "b",), 3),
+        0x91 : (self._res_n_indx_d_r, (0xFB, "ix", "c",), 3),
+        0x92 : (self._res_n_indx_d_r, (0xFB, "ix", "d",), 3),
+        0x93 : (self._res_n_indx_d_r, (0xFB, "ix", "e",), 3),
+        0x94 : (self._res_n_indx_d_r, (0xFB, "ix", "h",), 3),
+        0x95 : (self._res_n_indx_d_r, (0xFB, "ix", "l",), 3),
+        0x96 : (self._res_n_indx_d, (0xFB, "ix",), 3),
+        0x97 : (self._res_n_indx_d_r, (0xFB, "ix", "a",), 3),
+        0x98 : (self._res_n_indx_d_r, (0xF7, "ix", "b",), 3),
+        0x99 : (self._res_n_indx_d_r, (0xF7, "ix", "c",), 3),
+        0x9A : (self._res_n_indx_d_r, (0xF7, "ix", "d",), 3),
+        0x9B : (self._res_n_indx_d_r, (0xF7, "ix", "e",), 3),
+        0x9C : (self._res_n_indx_d_r, (0xF7, "ix", "h",), 3),
+        0x9D : (self._res_n_indx_d_r, (0xF7, "ix", "l",), 3),
+        0x9E : (self._res_n_indx_d, (0xF7, "ix",), 3),
+        0x9F : (self._res_n_indx_d_r, (0xF7, "ix", "a",), 3),
         
-        0xA0 : (self._res_n_indx_d_r, (0xEF, 'ix', 'b',), 3),
-        0xA1 : (self._res_n_indx_d_r, (0xEF, 'ix', 'c',), 3),
-        0xA2 : (self._res_n_indx_d_r, (0xEF, 'ix', 'd',), 3),
-        0xA3 : (self._res_n_indx_d_r, (0xEF, 'ix', 'e',), 3),
-        0xA4 : (self._res_n_indx_d_r, (0xEF, 'ix', 'h',), 3),
-        0xA5 : (self._res_n_indx_d_r, (0xEF, 'ix', 'l',), 3),
-        0xA6 : (self._res_n_indx_d, (0xEF, 'ix',), 3),
-        0xA7 : (self._res_n_indx_d_r, (0xEF, 'ix', 'a',), 3),
-        0xA8 : (self._res_n_indx_d_r, (0xDF, 'ix', 'b',), 3),
-        0xA9 : (self._res_n_indx_d_r, (0xDF, 'ix', 'c',), 3),
-        0xAA : (self._res_n_indx_d_r, (0xDF, 'ix', 'd',), 3),
-        0xAB : (self._res_n_indx_d_r, (0xDF, 'ix', 'e',), 3),
-        0xAC : (self._res_n_indx_d_r, (0xDF, 'ix', 'h',), 3),
-        0xAD : (self._res_n_indx_d_r, (0xDF, 'ix', 'l',), 3),
-        0xAE : (self._res_n_indx_d, (0xDF, 'ix',), 3),
-        0xAF : (self._res_n_indx_d_r, (0xDF, 'ix', 'a',), 3),
+        0xA0 : (self._res_n_indx_d_r, (0xEF, "ix", "b",), 3),
+        0xA1 : (self._res_n_indx_d_r, (0xEF, "ix", "c",), 3),
+        0xA2 : (self._res_n_indx_d_r, (0xEF, "ix", "d",), 3),
+        0xA3 : (self._res_n_indx_d_r, (0xEF, "ix", "e",), 3),
+        0xA4 : (self._res_n_indx_d_r, (0xEF, "ix", "h",), 3),
+        0xA5 : (self._res_n_indx_d_r, (0xEF, "ix", "l",), 3),
+        0xA6 : (self._res_n_indx_d, (0xEF, "ix",), 3),
+        0xA7 : (self._res_n_indx_d_r, (0xEF, "ix", "a",), 3),
+        0xA8 : (self._res_n_indx_d_r, (0xDF, "ix", "b",), 3),
+        0xA9 : (self._res_n_indx_d_r, (0xDF, "ix", "c",), 3),
+        0xAA : (self._res_n_indx_d_r, (0xDF, "ix", "d",), 3),
+        0xAB : (self._res_n_indx_d_r, (0xDF, "ix", "e",), 3),
+        0xAC : (self._res_n_indx_d_r, (0xDF, "ix", "h",), 3),
+        0xAD : (self._res_n_indx_d_r, (0xDF, "ix", "l",), 3),
+        0xAE : (self._res_n_indx_d, (0xDF, "ix",), 3),
+        0xAF : (self._res_n_indx_d_r, (0xDF, "ix", "a",), 3),
 
-        0xB0 : (self._res_n_indx_d_r, (0xBF, 'ix', 'b',), 3),
-        0xB1 : (self._res_n_indx_d_r, (0xBF, 'ix', 'c',), 3),
-        0xB2 : (self._res_n_indx_d_r, (0xBF, 'ix', 'd',), 3),
-        0xB3 : (self._res_n_indx_d_r, (0xBF, 'ix', 'e',), 3),
-        0xB4 : (self._res_n_indx_d_r, (0xBF, 'ix', 'h',), 3),
-        0xB5 : (self._res_n_indx_d_r, (0xBF, 'ix', 'l',), 3),
-        0xB6 : (self._res_n_indx_d, (0xBF, 'ix',), 3),
-        0xB7 : (self._res_n_indx_d_r, (0xBF, 'ix', 'a',), 3),
-        0xB8 : (self._res_n_indx_d_r, (0x7F, 'ix', 'b',), 3),
-        0xB9 : (self._res_n_indx_d_r, (0x7F, 'ix', 'c',), 3),
-        0xBA : (self._res_n_indx_d_r, (0x7F, 'ix', 'd',), 3),
-        0xBB : (self._res_n_indx_d_r, (0x7F, 'ix', 'e',), 3),
-        0xBC : (self._res_n_indx_d_r, (0x7F, 'ix', 'h',), 3),
-        0xBD : (self._res_n_indx_d_r, (0x7F, 'ix', 'l',), 3),
-        0xBE : (self._res_n_indx_d, (0x7F, 'ix',), 3),
-        0xBF : (self._res_n_indx_d_r, (0x7F, 'ix', 'a',), 3),
+        0xB0 : (self._res_n_indx_d_r, (0xBF, "ix", "b",), 3),
+        0xB1 : (self._res_n_indx_d_r, (0xBF, "ix", "c",), 3),
+        0xB2 : (self._res_n_indx_d_r, (0xBF, "ix", "d",), 3),
+        0xB3 : (self._res_n_indx_d_r, (0xBF, "ix", "e",), 3),
+        0xB4 : (self._res_n_indx_d_r, (0xBF, "ix", "h",), 3),
+        0xB5 : (self._res_n_indx_d_r, (0xBF, "ix", "l",), 3),
+        0xB6 : (self._res_n_indx_d, (0xBF, "ix",), 3),
+        0xB7 : (self._res_n_indx_d_r, (0xBF, "ix", "a",), 3),
+        0xB8 : (self._res_n_indx_d_r, (0x7F, "ix", "b",), 3),
+        0xB9 : (self._res_n_indx_d_r, (0x7F, "ix", "c",), 3),
+        0xBA : (self._res_n_indx_d_r, (0x7F, "ix", "d",), 3),
+        0xBB : (self._res_n_indx_d_r, (0x7F, "ix", "e",), 3),
+        0xBC : (self._res_n_indx_d_r, (0x7F, "ix", "h",), 3),
+        0xBD : (self._res_n_indx_d_r, (0x7F, "ix", "l",), 3),
+        0xBE : (self._res_n_indx_d, (0x7F, "ix",), 3),
+        0xBF : (self._res_n_indx_d_r, (0x7F, "ix", "a",), 3),
 
-        0xC0 : (self._set_n_indx_d_r, (0x1, 'ix', 'b',), 3), 
-        0xC1 : (self._set_n_indx_d_r, (0x1, 'ix', 'c',), 3), 
-        0xC2 : (self._set_n_indx_d_r, (0x1, 'ix', 'd',), 3), 
-        0xC3 : (self._set_n_indx_d_r, (0x1, 'ix', 'e',), 3), 
-        0xC4 : (self._set_n_indx_d_r, (0x1, 'ix', 'h',), 3), 
-        0xC5 : (self._set_n_indx_d_r, (0x1, 'ix', 'l',), 3), 
-        0xC6 : (self._set_n_indx_d, (0x1, 'ix',), 3), 
-        0xC7 : (self._set_n_indx_d_r, (0x1, 'ix', 'a',), 3), 
-        0xC8 : (self._set_n_indx_d_r, (0x2, 'ix', 'b',), 3), 
-        0xC9 : (self._set_n_indx_d_r, (0x2, 'ix', 'c',), 3), 
-        0xCA : (self._set_n_indx_d_r, (0x2, 'ix', 'd',), 3), 
-        0xCB : (self._set_n_indx_d_r, (0x2, 'ix', 'e',), 3), 
-        0xCC : (self._set_n_indx_d_r, (0x2, 'ix', 'h',), 3), 
-        0xCD : (self._set_n_indx_d_r, (0x2, 'ix', 'l',), 3), 
-        0xCE : (self._set_n_indx_d, (0x2, 'ix',), 3), 
-        0xCF : (self._set_n_indx_d_r, (0x2, 'ix', 'a',), 3), 
+        0xC0 : (self._set_n_indx_d_r, (0x1, "ix", "b",), 3), 
+        0xC1 : (self._set_n_indx_d_r, (0x1, "ix", "c",), 3), 
+        0xC2 : (self._set_n_indx_d_r, (0x1, "ix", "d",), 3), 
+        0xC3 : (self._set_n_indx_d_r, (0x1, "ix", "e",), 3), 
+        0xC4 : (self._set_n_indx_d_r, (0x1, "ix", "h",), 3), 
+        0xC5 : (self._set_n_indx_d_r, (0x1, "ix", "l",), 3), 
+        0xC6 : (self._set_n_indx_d, (0x1, "ix",), 3), 
+        0xC7 : (self._set_n_indx_d_r, (0x1, "ix", "a",), 3), 
+        0xC8 : (self._set_n_indx_d_r, (0x2, "ix", "b",), 3), 
+        0xC9 : (self._set_n_indx_d_r, (0x2, "ix", "c",), 3), 
+        0xCA : (self._set_n_indx_d_r, (0x2, "ix", "d",), 3), 
+        0xCB : (self._set_n_indx_d_r, (0x2, "ix", "e",), 3), 
+        0xCC : (self._set_n_indx_d_r, (0x2, "ix", "h",), 3), 
+        0xCD : (self._set_n_indx_d_r, (0x2, "ix", "l",), 3), 
+        0xCE : (self._set_n_indx_d, (0x2, "ix",), 3), 
+        0xCF : (self._set_n_indx_d_r, (0x2, "ix", "a",), 3), 
 
-        0xD0 : (self._set_n_indx_d_r, (0x4, 'ix', 'b',), 3),
-        0xD1 : (self._set_n_indx_d_r, (0x4, 'ix', 'c',), 3),
-        0xD2 : (self._set_n_indx_d_r, (0x4, 'ix', 'd',), 3),
-        0xD3 : (self._set_n_indx_d_r, (0x4, 'ix', 'e',), 3),
-        0xD4 : (self._set_n_indx_d_r, (0x4, 'ix', 'h',), 3),
-        0xD5 : (self._set_n_indx_d_r, (0x4, 'ix', 'l',), 3),
-        0xD6 : (self._set_n_indx_d, (0x4, 'ix',), 3),
-        0xD7 : (self._set_n_indx_d_r, (0x4, 'ix', 'a',), 3),
-        0xD8 : (self._set_n_indx_d_r, (0x8, 'ix', 'b',), 3),
-        0xD9 : (self._set_n_indx_d_r, (0x8, 'ix', 'c',), 3),
-        0xDA : (self._set_n_indx_d_r, (0x8, 'ix', 'd',), 3),
-        0xDB : (self._set_n_indx_d_r, (0x8, 'ix', 'e',), 3),
-        0xDC : (self._set_n_indx_d_r, (0x8, 'ix', 'h',), 3),
-        0xDD : (self._set_n_indx_d_r, (0x8, 'ix', 'l',), 3),
-        0xDE : (self._set_n_indx_d, (0x8, 'ix',), 3),
-        0xDF : (self._set_n_indx_d_r, (0x8, 'ix', 'a',), 3),
+        0xD0 : (self._set_n_indx_d_r, (0x4, "ix", "b",), 3),
+        0xD1 : (self._set_n_indx_d_r, (0x4, "ix", "c",), 3),
+        0xD2 : (self._set_n_indx_d_r, (0x4, "ix", "d",), 3),
+        0xD3 : (self._set_n_indx_d_r, (0x4, "ix", "e",), 3),
+        0xD4 : (self._set_n_indx_d_r, (0x4, "ix", "h",), 3),
+        0xD5 : (self._set_n_indx_d_r, (0x4, "ix", "l",), 3),
+        0xD6 : (self._set_n_indx_d, (0x4, "ix",), 3),
+        0xD7 : (self._set_n_indx_d_r, (0x4, "ix", "a",), 3),
+        0xD8 : (self._set_n_indx_d_r, (0x8, "ix", "b",), 3),
+        0xD9 : (self._set_n_indx_d_r, (0x8, "ix", "c",), 3),
+        0xDA : (self._set_n_indx_d_r, (0x8, "ix", "d",), 3),
+        0xDB : (self._set_n_indx_d_r, (0x8, "ix", "e",), 3),
+        0xDC : (self._set_n_indx_d_r, (0x8, "ix", "h",), 3),
+        0xDD : (self._set_n_indx_d_r, (0x8, "ix", "l",), 3),
+        0xDE : (self._set_n_indx_d, (0x8, "ix",), 3),
+        0xDF : (self._set_n_indx_d_r, (0x8, "ix", "a",), 3),
 
-        0xE0 : (self._set_n_indx_d_r, (0x10, 'ix', 'b',), 3),
-        0xE1 : (self._set_n_indx_d_r, (0x10, 'ix', 'c',), 3),
-        0xE2 : (self._set_n_indx_d_r, (0x10, 'ix', 'd',), 3),
-        0xE3 : (self._set_n_indx_d_r, (0x10, 'ix', 'e',), 3),
-        0xE4 : (self._set_n_indx_d_r, (0x10, 'ix', 'h',), 3),
-        0xE5 : (self._set_n_indx_d_r, (0x10, 'ix', 'l',), 3),
-        0xE6 : (self._set_n_indx_d, (0x10, 'ix',), 3),
-        0xE7 : (self._set_n_indx_d_r, (0x10, 'ix', 'a',), 3),
-        0xE8 : (self._set_n_indx_d_r, (0x20, 'ix', 'b',), 3),
-        0xE9 : (self._set_n_indx_d_r, (0x20, 'ix', 'c',), 3),
-        0xEA : (self._set_n_indx_d_r, (0x20, 'ix', 'd',), 3),
-        0xEB : (self._set_n_indx_d_r, (0x20, 'ix', 'e',), 3),
-        0xEC : (self._set_n_indx_d_r, (0x20, 'ix', 'h',), 3),
-        0xED : (self._set_n_indx_d_r, (0x20, 'ix', 'l',), 3),
-        0xEE : (self._set_n_indx_d, (0x20, 'ix',), 3),
-        0xEF : (self._set_n_indx_d_r, (0x20, 'ix', 'a',), 3),
+        0xE0 : (self._set_n_indx_d_r, (0x10, "ix", "b",), 3),
+        0xE1 : (self._set_n_indx_d_r, (0x10, "ix", "c",), 3),
+        0xE2 : (self._set_n_indx_d_r, (0x10, "ix", "d",), 3),
+        0xE3 : (self._set_n_indx_d_r, (0x10, "ix", "e",), 3),
+        0xE4 : (self._set_n_indx_d_r, (0x10, "ix", "h",), 3),
+        0xE5 : (self._set_n_indx_d_r, (0x10, "ix", "l",), 3),
+        0xE6 : (self._set_n_indx_d, (0x10, "ix",), 3),
+        0xE7 : (self._set_n_indx_d_r, (0x10, "ix", "a",), 3),
+        0xE8 : (self._set_n_indx_d_r, (0x20, "ix", "b",), 3),
+        0xE9 : (self._set_n_indx_d_r, (0x20, "ix", "c",), 3),
+        0xEA : (self._set_n_indx_d_r, (0x20, "ix", "d",), 3),
+        0xEB : (self._set_n_indx_d_r, (0x20, "ix", "e",), 3),
+        0xEC : (self._set_n_indx_d_r, (0x20, "ix", "h",), 3),
+        0xED : (self._set_n_indx_d_r, (0x20, "ix", "l",), 3),
+        0xEE : (self._set_n_indx_d, (0x20, "ix",), 3),
+        0xEF : (self._set_n_indx_d_r, (0x20, "ix", "a",), 3),
 
-        0xF0 : (self._set_n_indx_d_r, (0x40, 'ix', 'b',), 3),
-        0xF1 : (self._set_n_indx_d_r, (0x40, 'ix', 'c',), 3),
-        0xF2 : (self._set_n_indx_d_r, (0x40, 'ix', 'd',), 3),
-        0xF3 : (self._set_n_indx_d_r, (0x40, 'ix', 'e',), 3),
-        0xF4 : (self._set_n_indx_d_r, (0x40, 'ix', 'h',), 3),
-        0xF5 : (self._set_n_indx_d_r, (0x40, 'ix', 'l',), 3),
-        0xF6 : (self._set_n_indx_d, (0x40, 'ix',), 3),
-        0xF7 : (self._set_n_indx_d_r, (0x40, 'ix', 'a',), 3),
-        0xF8 : (self._set_n_indx_d_r, (0x80, 'ix', 'b',), 3),
-        0xF9 : (self._set_n_indx_d_r, (0x80, 'ix', 'c',), 3),
-        0xFA : (self._set_n_indx_d_r, (0x80, 'ix', 'd',), 3),
-        0xFB : (self._set_n_indx_d_r, (0x80, 'ix', 'e',), 3),
-        0xFC : (self._set_n_indx_d_r, (0x80, 'ix', 'h',), 3),
-        0xFD : (self._set_n_indx_d_r, (0x80, 'ix', 'l',), 3),
-        0xFE : (self._set_n_indx_d, (0x80, 'ix',), 3),
-        0xFF : (self._set_n_indx_d_r, (0x80, 'ix', 'a',), 3),
+        0xF0 : (self._set_n_indx_d_r, (0x40, "ix", "b",), 3),
+        0xF1 : (self._set_n_indx_d_r, (0x40, "ix", "c",), 3),
+        0xF2 : (self._set_n_indx_d_r, (0x40, "ix", "d",), 3),
+        0xF3 : (self._set_n_indx_d_r, (0x40, "ix", "e",), 3),
+        0xF4 : (self._set_n_indx_d_r, (0x40, "ix", "h",), 3),
+        0xF5 : (self._set_n_indx_d_r, (0x40, "ix", "l",), 3),
+        0xF6 : (self._set_n_indx_d, (0x40, "ix",), 3),
+        0xF7 : (self._set_n_indx_d_r, (0x40, "ix", "a",), 3),
+        0xF8 : (self._set_n_indx_d_r, (0x80, "ix", "b",), 3),
+        0xF9 : (self._set_n_indx_d_r, (0x80, "ix", "c",), 3),
+        0xFA : (self._set_n_indx_d_r, (0x80, "ix", "d",), 3),
+        0xFB : (self._set_n_indx_d_r, (0x80, "ix", "e",), 3),
+        0xFC : (self._set_n_indx_d_r, (0x80, "ix", "h",), 3),
+        0xFD : (self._set_n_indx_d_r, (0x80, "ix", "l",), 3),
+        0xFE : (self._set_n_indx_d, (0x80, "ix",), 3),
+        0xFF : (self._set_n_indx_d_r, (0x80, "ix", "a",), 3),
         }
 
-        self.dd_opcodes = {0x09 : (self._add_rr_rr, ('ix', 'bc',), 1),
+        self.dd_opcodes = {0x09 : (self._add_rr_rr, ("ix", "bc",), 1),
 
-        0x19 : (self._add_rr_rr, ('ix', 'de',), 1),
+        0x19 : (self._add_rr_rr, ("ix", "de",), 1),
 
-        0x21 : (self._ld_rr_nn, ('ix',), 3),
-        0x22 : (self._ld_addr_nn_rr, ('ix',), 3),
+        0x21 : (self._ld_rr_nn, ("ix",), 3),
+        0x22 : (self._ld_addr_nn_rr, ("ix",), 3),
         0x23 : (self._inc_rr, ("ix",), 1),
-        0x24 : (self._inc_r, ('ixh',), 1),
-        0x25 : (self._dec_r, ('ixh',), 1),
-        0x26 : (self._ld_r_n, ('ixh',), 2),
-        0x29 : (self._add_rr_rr, ('ix', 'ix',), 1),
-        0x2A : (self._ld_rr_addr_nn, ('ix',), 3),
+        0x24 : (self._inc_r, ("ixh",), 1),
+        0x25 : (self._dec_r, ("ixh",), 1),
+        0x26 : (self._ld_r_n, ("ixh",), 2),
+        0x29 : (self._add_rr_rr, ("ix", "ix",), 1),
+        0x2A : (self._ld_rr_addr_nn, ("ix",), 3),
         0x2B : (self._dec_rr, ("ix",), 1),
-        0x2C : (self._inc_r, ('ixl',), 1),
-        0x2D : (self._dec_r, ('ixl',), 1),
-        0x2E : (self._ld_r_n, ('ixl',), 2),
+        0x2C : (self._inc_r, ("ixl",), 1),
+        0x2D : (self._dec_r, ("ixl",), 1),
+        0x2E : (self._ld_r_n, ("ixl",), 2),
 
-        0x34 : (self._inc_addr_indx_d, ('ix',), 2),
-        0x35 : (self._dec_addr_indx_d, ('ix',), 2),
-        0x36 : (self._ld_addr_indx_d_n, ('ix',), 3),
-        0x39 : (self._add_rr_rr, ('ix', 'sp',), 1),
+        0x34 : (self._inc_addr_indx_d, ("ix",), 2),
+        0x35 : (self._dec_addr_indx_d, ("ix",), 2),
+        0x36 : (self._ld_addr_indx_d_n, ("ix",), 3),
+        0x39 : (self._add_rr_rr, ("ix", "sp",), 1),
 
-        0x44 : (self._ld_r_r, ('b', 'ixh',), 1),
-        0x45 : (self._ld_r_r, ('b', 'ixl',), 1),
-        0x46 : (self._ld_r_addr_indx_d, ('b', 'ix',), 2),
-        0x4C : (self._ld_r_r, ('c', 'ixh',), 1),
-        0x4D : (self._ld_r_r, ('c', 'ixl',), 1),
-        0x4E : (self._ld_r_addr_indx_d, ('c', 'ix',), 2),
+        0x44 : (self._ld_r_r, ("b", "ixh",), 1),
+        0x45 : (self._ld_r_r, ("b", "ixl",), 1),
+        0x46 : (self._ld_r_addr_indx_d, ("b", "ix",), 2),
+        0x4C : (self._ld_r_r, ("c", "ixh",), 1),
+        0x4D : (self._ld_r_r, ("c", "ixl",), 1),
+        0x4E : (self._ld_r_addr_indx_d, ("c", "ix",), 2),
 
-        0x54 : (self._ld_r_r, ('d', 'ixh',), 1),
-        0x55 : (self._ld_r_r, ('d', 'ixl',), 1),
-        0x56 : (self._ld_r_addr_indx_d, ('d', 'ix',), 2),
-        0x5C : (self._ld_r_r, ('e', 'ixh',), 1),
-        0x5D : (self._ld_r_r, ('e', 'ixl',), 1),
-        0x5E : (self._ld_r_addr_indx_d, ('e', 'ix',), 2),
+        0x54 : (self._ld_r_r, ("d", "ixh",), 1),
+        0x55 : (self._ld_r_r, ("d", "ixl",), 1),
+        0x56 : (self._ld_r_addr_indx_d, ("d", "ix",), 2),
+        0x5C : (self._ld_r_r, ("e", "ixh",), 1),
+        0x5D : (self._ld_r_r, ("e", "ixl",), 1),
+        0x5E : (self._ld_r_addr_indx_d, ("e", "ix",), 2),
 
-        0x60 : (self._ld_r_r, ('ixh', 'b',), 1),
-        0x61 : (self._ld_r_r, ('ixh', 'c',), 1),
-        0x62 : (self._ld_r_r, ('ixh', 'd',), 1),
-        0x63 : (self._ld_r_r, ('ixh', 'e',), 1),
-        0x64 : (self._ld_r_r, ('ixh', 'ixh',), 1),
-        0x65 : (self._ld_r_r, ('ixh', 'ixl',), 1),
-        0x66 : (self._ld_r_addr_indx_d, ('h', 'ix',), 2),
-        0x67 : (self._ld_r_r, ('ixh', 'a',), 1),
-        0x68 : (self._ld_r_r, ('ixl', 'b',), 1),
-        0x69 : (self._ld_r_r, ('ixl', 'c',), 1),
-        0x6A : (self._ld_r_r, ('ixl', 'd',), 1),
-        0x6B : (self._ld_r_r, ('ixl', 'e',), 1),
-        0x6C : (self._ld_r_r, ('ixl', 'ixh',), 1),
-        0x6D : (self._ld_r_r, ('ixl', 'ixl',), 1),
-        0x6E : (self._ld_r_addr_indx_d, ('l', 'ix',), 2),
-        0x6F : (self._ld_r_r, ('ixl', 'a',), 1),
+        0x60 : (self._ld_r_r, ("ixh", "b",), 1),
+        0x61 : (self._ld_r_r, ("ixh", "c",), 1),
+        0x62 : (self._ld_r_r, ("ixh", "d",), 1),
+        0x63 : (self._ld_r_r, ("ixh", "e",), 1),
+        0x64 : (self._ld_r_r, ("ixh", "ixh",), 1),
+        0x65 : (self._ld_r_r, ("ixh", "ixl",), 1),
+        0x66 : (self._ld_r_addr_indx_d, ("h", "ix",), 2),
+        0x67 : (self._ld_r_r, ("ixh", "a",), 1),
+        0x68 : (self._ld_r_r, ("ixl", "b",), 1),
+        0x69 : (self._ld_r_r, ("ixl", "c",), 1),
+        0x6A : (self._ld_r_r, ("ixl", "d",), 1),
+        0x6B : (self._ld_r_r, ("ixl", "e",), 1),
+        0x6C : (self._ld_r_r, ("ixl", "ixh",), 1),
+        0x6D : (self._ld_r_r, ("ixl", "ixl",), 1),
+        0x6E : (self._ld_r_addr_indx_d, ("l", "ix",), 2),
+        0x6F : (self._ld_r_r, ("ixl", "a",), 1),
 
-        0x70 : (self._ld_addr_indx_d_r, ('ix', 'b',), 2), 
-        0x71 : (self._ld_addr_indx_d_r, ('ix', 'c',), 2), 
-        0x72 : (self._ld_addr_indx_d_r, ('ix', 'd',), 2), 
-        0x73 : (self._ld_addr_indx_d_r, ('ix', 'e',), 2), 
-        0x74 : (self._ld_addr_indx_d_r, ('ix', 'h',), 2), 
-        0x75 : (self._ld_addr_indx_d_r, ('ix', 'l',), 2), 
-        0x77 : (self._ld_addr_indx_d_r, ('ix', 'a',), 2), 
-        0x7C : (self._ld_r_r, ('a', 'ixh',), 1),
-        0x7D : (self._ld_r_r, ('a', 'ixl',), 1),
-        0x7E : (self._ld_r_addr_indx_d, ('a', 'ix',), 2),
+        0x70 : (self._ld_addr_indx_d_r, ("ix", "b",), 2), 
+        0x71 : (self._ld_addr_indx_d_r, ("ix", "c",), 2), 
+        0x72 : (self._ld_addr_indx_d_r, ("ix", "d",), 2), 
+        0x73 : (self._ld_addr_indx_d_r, ("ix", "e",), 2), 
+        0x74 : (self._ld_addr_indx_d_r, ("ix", "h",), 2), 
+        0x75 : (self._ld_addr_indx_d_r, ("ix", "l",), 2), 
+        0x77 : (self._ld_addr_indx_d_r, ("ix", "a",), 2), 
+        0x7C : (self._ld_r_r, ("a", "ixh",), 1),
+        0x7D : (self._ld_r_r, ("a", "ixl",), 1),
+        0x7E : (self._ld_r_addr_indx_d, ("a", "ix",), 2),
 
-        0x84 : (self._add_r_r, ('a', 'ixh',), 1),
-        0x85 : (self._add_r_r, ('a', 'ixl',), 1),
-        0x86 : (self._add_r_addr_indx_d, ('a', 'ix',), 2),
-        0x8C : (self._adc_r_r, ('a', 'ixh'), 1),
-        0x8D : (self._adc_r_r, ('a', 'ixl'), 1),
-        0x8E : (self._adc_r_addr_indx_d, ('a', 'ix',), 2),
+        0x84 : (self._add_r_r, ("a", "ixh",), 1),
+        0x85 : (self._add_r_r, ("a", "ixl",), 1),
+        0x86 : (self._add_r_addr_indx_d, ("a", "ix",), 2),
+        0x8C : (self._adc_r_r, ("a", "ixh"), 1),
+        0x8D : (self._adc_r_r, ("a", "ixl"), 1),
+        0x8E : (self._adc_r_addr_indx_d, ("a", "ix",), 2),
 
-        0x94 : (self._sub_r, ('ixh',), 1),
-        0x95 : (self._sub_r, ('ixl',), 1),
-        0x96 : (self._sub_addr_indx_d, ('ix',), 2),
-        0x9C : (self._sbc_r_r, ('a', 'ixh',), 1),
-        0x9D : (self._sbc_r_r, ('a', 'ixl',), 1),
-        0x9E : (self._sbc_r_addr_indx_d, ('a', 'ix',), 2),
+        0x94 : (self._sub_r, ("ixh",), 1),
+        0x95 : (self._sub_r, ("ixl",), 1),
+        0x96 : (self._sub_addr_indx_d, ("ix",), 2),
+        0x9C : (self._sbc_r_r, ("a", "ixh",), 1),
+        0x9D : (self._sbc_r_r, ("a", "ixl",), 1),
+        0x9E : (self._sbc_r_addr_indx_d, ("a", "ix",), 2),
 
-        0xA4 : (self._and_r, ('ixh',), 1),
-        0xA5 : (self._and_r, ('ixl',), 1),
-        0xA6 : (self._and_addr_indx_d, ('ix',), 2),
-        0xAC : (self._xor_r, ('ixh',), 1),
-        0xAD : (self._xor_r, ('ixl',), 1),
-        0xAE : (self._xor_addr_indx_d, ('ix',), 2),
+        0xA4 : (self._and_r, ("ixh",), 1),
+        0xA5 : (self._and_r, ("ixl",), 1),
+        0xA6 : (self._and_addr_indx_d, ("ix",), 2),
+        0xAC : (self._xor_r, ("ixh",), 1),
+        0xAD : (self._xor_r, ("ixl",), 1),
+        0xAE : (self._xor_addr_indx_d, ("ix",), 2),
 
-        0xB4 : (self._or_r, ('ixh',), 1),
-        0xB5 : (self._or_r, ('ixl',), 1),
-        0xB6 : (self._or_addr_indx_d, ('ix',), 2),
-        0xBC : (self._cp_r, ('ixh',), 1),
-        0xBD : (self._cp_r, ('ixl',), 1),
-        0xBE : (self._cp_addr_indx_d, ('ix',), 2),
+        0xB4 : (self._or_r, ("ixh",), 1),
+        0xB5 : (self._or_r, ("ixl",), 1),
+        0xB6 : (self._or_addr_indx_d, ("ix",), 2),
+        0xBC : (self._cp_r, ("ixh",), 1),
+        0xBD : (self._cp_r, ("ixl",), 1),
+        0xBE : (self._cp_addr_indx_d, ("ix",), 2),
 
         0xCB : self.ddcb_opcodes,
 
         0xE1 : (self._pop_rr, ("ix",), 1),
+        0xE3 : (self._ex_addr_sp_rr, ("ix",), 1),
         0xE5 : (self._push_rr, ("ix",), 1),
         }
 
-        self.ed_opcodes = {0x40 : (self._in_r_addr_r, ('b', 'c',), 1),
-        0x41 : (self._out_addr_r_r, ('c', 'b',), 2),
-        0x42 : (self._sbc_rr_rr, ('hl', 'bc',), 1),
-        0x43 : (self._ld_addr_nn_rr, ('bc',), 3),
+        self.ed_opcodes = {0x40 : (self._in_r_addr_r, ("b", "c",), 1),
+        0x41 : (self._out_addr_r_r, ("c", "b",), 2),
+        0x42 : (self._sbc_rr_rr, ("hl", "bc",), 1),
+        0x43 : (self._ld_addr_nn_rr, ("bc",), 3),
         0x44 : (self._neg, (), 1),
         0x45 : (self._retn, (), 1),
         0x46 : (self._im, (0x0,), 1),
-        0x47 : (self._ld_r_r, ('i', 'a',), 1),
-        0x48 : (self._in_r_addr_r, ('c', 'c',), 1),
-        0x49 : (self._out_addr_r_r, ('c', 'c',), 2),
-        0x4A : (self._adc_rr_rr, ('hl', 'bc',), 1),
-        0x4B : (self._ld_rr_addr_nn, ('bc',), 3),
+        0x47 : (self._ld_r_r, ("i", "a",), 1),
+        0x48 : (self._in_r_addr_r, ("c", "c",), 1),
+        0x49 : (self._out_addr_r_r, ("c", "c",), 2),
+        0x4A : (self._adc_rr_rr, ("hl", "bc",), 1),
+        0x4B : (self._ld_rr_addr_nn, ("bc",), 3),
         0x4C : (self._neg, (), 1),
         0x4D : (self._reti, (), 1),
         0x4E : (self._im, (0x0,), 1),
-        0x4F : (self._ld_r_r, ('r', 'a',), 1),
+        0x4F : (self._ld_r_r, ("r", "a",), 1),
 
-        0x0E : (self._bdos, ("c", "de",), 1), # This is a phantom opcode.
+        #0x0E : (self._bdos, ("c", "de",), 1), # This is a phantom opcode.
 
-        0x50 : (self._in_r_addr_r, ('d', 'c',), 1),
-        0x51 : (self._out_addr_r_r, ('c', 'd',), 2),
-        0x52 : (self._sbc_rr_rr, ('hl', 'de',), 1),
-        0x53 : (self._ld_addr_nn_rr, ('de',), 3),
+        0x50 : (self._in_r_addr_r, ("d", "c",), 1),
+        0x51 : (self._out_addr_r_r, ("c", "d",), 2),
+        0x52 : (self._sbc_rr_rr, ("hl", "de",), 1),
+        0x53 : (self._ld_addr_nn_rr, ("de",), 3),
         0x54 : (self._neg, (), 1),
         0x55 : (self._retn, (), 1),
         0x56 : (self._im, (0x1,), 1),
-        0x57 : (self._ld_r_r, ('a', 'i',), 1),
-        0x58 : (self._in_r_addr_r, ('e', 'c',), 1),
-        0x59 : (self._out_addr_r_r, ('c', 'e',), 2),
-        0x5A : (self._adc_rr_rr, ('hl', 'de',), 1),
-        0x5B : (self._ld_rr_addr_nn, ('de',), 3),
+        0x57 : (self._ld_r_r, ("a", "i",), 1),
+        0x58 : (self._in_r_addr_r, ("e", "c",), 1),
+        0x59 : (self._out_addr_r_r, ("c", "e",), 2),
+        0x5A : (self._adc_rr_rr, ("hl", "de",), 1),
+        0x5B : (self._ld_rr_addr_nn, ("de",), 3),
         0x5C : (self._neg, (), 1),
         0x5D : (self._retn, (), 1),
         0x5E : (self._im, (0x2,), 1),
-        0x5F : (self._ld_r_r, ('a', 'r',), 1),
+        0x5F : (self._ld_r_r, ("a", "r",), 1),
 
-        0x60 : (self._in_r_addr_r, ('h', 'c',), 1),
-        0x61 : (self._out_addr_r_r, ('c', 'h',), 2),
-        0x62 : (self._sbc_rr_rr, ('hl', 'hl',), 1),
-        0x63 : (self._ld_addr_nn_rr, ('hl',), 3),
+        0x60 : (self._in_r_addr_r, ("h", "c",), 1),
+        0x61 : (self._out_addr_r_r, ("c", "h",), 2),
+        0x62 : (self._sbc_rr_rr, ("hl", "hl",), 1),
+        0x63 : (self._ld_addr_nn_rr, ("hl",), 3),
         0x64 : (self._neg, (), 1),
         0x65 : (self._retn, (), 1),
         0x66 : (self._im, (0x0,), 1),
         0x67 : (self._rrd, (), 1),
-        0x68 : (self._in_r_addr_r, ('l', 'c',), 1),
-        0x69 : (self._out_addr_r_r, ('c', 'l',), 2),
-        0x6A : (self._adc_rr_rr, ('hl', 'hl',), 1),
-        0x6B : (self._ld_rr_addr_nn, ('hl',), 3),
+        0x68 : (self._in_r_addr_r, ("l", "c",), 1),
+        0x69 : (self._out_addr_r_r, ("c", "l",), 2),
+        0x6A : (self._adc_rr_rr, ("hl", "hl",), 1),
+        0x6B : (self._ld_rr_addr_nn, ("hl",), 3),
         0x6C : (self._neg, (), 1),
         0x6D : (self._retn, (), 1),
         0x6E : (self._im, (0x0,), 1),
@@ -847,22 +849,22 @@ class Z80(object) :
         0x2E : (self._sra_indx_d, ("iy",), 3), 
         0x2F : (self._sra_indx_d_r, ("iy", "a",), 3), 
 
-        0x30 : (self._sll_indx_d_r, ('iy', 'b',), 3), 
-        0x31 : (self._sll_indx_d_r, ('iy', 'c',), 3), 
-        0x32 : (self._sll_indx_d_r, ('iy', 'd',), 3), 
-        0x33 : (self._sll_indx_d_r, ('iy', 'e',), 3), 
-        0x34 : (self._sll_indx_d_r, ('iy', 'h',), 3), 
-        0x35 : (self._sll_indx_d_r, ('iy', 'l',), 3), 
-        0x36 : (self._sll_indx_d, ('iy',), 3), 
-        0x37 : (self._sll_indx_d_r, ('iy', 'a',), 3), 
-        0x38 : (self._srl_indx_d_r, ('iy', 'b',), 3), 
-        0x39 : (self._srl_indx_d_r, ('iy', 'c',), 3), 
-        0x3A : (self._srl_indx_d_r, ('iy', 'd',), 3), 
-        0x3B : (self._srl_indx_d_r, ('iy', 'e',), 3), 
-        0x3C : (self._srl_indx_d_r, ('iy', 'h',), 3), 
-        0x3D : (self._srl_indx_d_r, ('iy', 'l',), 3), 
-        0x3E : (self._srl_indx_d, ('iy',), 3), 
-        0x3F : (self._srl_indx_d_r, ('iy', 'a',), 3), 
+        0x30 : (self._sll_indx_d_r, ("iy", "b",), 3), 
+        0x31 : (self._sll_indx_d_r, ("iy", "c",), 3), 
+        0x32 : (self._sll_indx_d_r, ("iy", "d",), 3), 
+        0x33 : (self._sll_indx_d_r, ("iy", "e",), 3), 
+        0x34 : (self._sll_indx_d_r, ("iy", "h",), 3), 
+        0x35 : (self._sll_indx_d_r, ("iy", "l",), 3), 
+        0x36 : (self._sll_indx_d, ("iy",), 3), 
+        0x37 : (self._sll_indx_d_r, ("iy", "a",), 3), 
+        0x38 : (self._srl_indx_d_r, ("iy", "b",), 3), 
+        0x39 : (self._srl_indx_d_r, ("iy", "c",), 3), 
+        0x3A : (self._srl_indx_d_r, ("iy", "d",), 3), 
+        0x3B : (self._srl_indx_d_r, ("iy", "e",), 3), 
+        0x3C : (self._srl_indx_d_r, ("iy", "h",), 3), 
+        0x3D : (self._srl_indx_d_r, ("iy", "l",), 3), 
+        0x3E : (self._srl_indx_d, ("iy",), 3), 
+        0x3F : (self._srl_indx_d_r, ("iy", "a",), 3), 
 
         0x40 : (self._bit_n_indx_d, (0x1, "iy",), 3), 
         0x41 : (self._bit_n_indx_d, (0x1, "iy",), 3), 
@@ -932,290 +934,294 @@ class Z80(object) :
         0x7E : (self._bit_n_indx_d, (0x80, "iy",), 3),
         0x7F : (self._bit_n_indx_d, (0x80, "iy",), 3),
 
-        0x80 : (self._res_n_indx_d_r, (0xFE, "iy", 'b',), 3), 
-        0x81 : (self._res_n_indx_d_r, (0xFE, "iy", 'c',), 3), 
-        0x82 : (self._res_n_indx_d_r, (0xFE, "iy", 'd',), 3), 
-        0x83 : (self._res_n_indx_d_r, (0xFE, "iy", 'e',), 3), 
-        0x84 : (self._res_n_indx_d_r, (0xFE, "iy", 'h',), 3), 
-        0x85 : (self._res_n_indx_d_r, (0xFE, "iy", 'l',), 3), 
+        0x80 : (self._res_n_indx_d_r, (0xFE, "iy", "b",), 3), 
+        0x81 : (self._res_n_indx_d_r, (0xFE, "iy", "c",), 3), 
+        0x82 : (self._res_n_indx_d_r, (0xFE, "iy", "d",), 3), 
+        0x83 : (self._res_n_indx_d_r, (0xFE, "iy", "e",), 3), 
+        0x84 : (self._res_n_indx_d_r, (0xFE, "iy", "h",), 3), 
+        0x85 : (self._res_n_indx_d_r, (0xFE, "iy", "l",), 3), 
         0x86 : (self._res_n_indx_d, (0xFE, "iy",), 3), 
-        0x87 : (self._res_n_indx_d_r, (0xFE, "iy", 'a',), 3), 
-        0x88 : (self._res_n_indx_d_r, (0xFD, "iy", 'b',), 3), 
-        0x89 : (self._res_n_indx_d_r, (0xFD, "iy", 'c',), 3), 
-        0x8A : (self._res_n_indx_d_r, (0xFD, "iy", 'd',), 3), 
-        0x8B : (self._res_n_indx_d_r, (0xFD, "iy", 'e',), 3), 
-        0x8C : (self._res_n_indx_d_r, (0xFD, "iy", 'h',), 3), 
-        0x8D : (self._res_n_indx_d_r, (0xFD, "iy", 'l',), 3), 
+        0x87 : (self._res_n_indx_d_r, (0xFE, "iy", "a",), 3), 
+        0x88 : (self._res_n_indx_d_r, (0xFD, "iy", "b",), 3), 
+        0x89 : (self._res_n_indx_d_r, (0xFD, "iy", "c",), 3), 
+        0x8A : (self._res_n_indx_d_r, (0xFD, "iy", "d",), 3), 
+        0x8B : (self._res_n_indx_d_r, (0xFD, "iy", "e",), 3), 
+        0x8C : (self._res_n_indx_d_r, (0xFD, "iy", "h",), 3), 
+        0x8D : (self._res_n_indx_d_r, (0xFD, "iy", "l",), 3), 
         0x8E : (self._res_n_indx_d, (0xFD, "iy",), 3), 
-        0x8F : (self._res_n_indx_d_r, (0xFD, "iy", 'a',), 3), 
+        0x8F : (self._res_n_indx_d_r, (0xFD, "iy", "a",), 3), 
 
-        0x90 : (self._res_n_indx_d_r, (0xFB, 'iy', 'b',), 3),
-        0x91 : (self._res_n_indx_d_r, (0xFB, 'iy', 'c',), 3),
-        0x92 : (self._res_n_indx_d_r, (0xFB, 'iy', 'd',), 3),
-        0x93 : (self._res_n_indx_d_r, (0xFB, 'iy', 'e',), 3),
-        0x94 : (self._res_n_indx_d_r, (0xFB, 'iy', 'h',), 3),
-        0x95 : (self._res_n_indx_d_r, (0xFB, 'iy', 'l',), 3),
-        0x96 : (self._res_n_indx_d, (0xFB, 'iy',), 3),
-        0x97 : (self._res_n_indx_d_r, (0xFB, 'iy', 'a',), 3),
-        0x98 : (self._res_n_indx_d_r, (0xF7, 'iy', 'b',), 3),
-        0x99 : (self._res_n_indx_d_r, (0xF7, 'iy', 'c',), 3),
-        0x9A : (self._res_n_indx_d_r, (0xF7, 'iy', 'd',), 3),
-        0x9B : (self._res_n_indx_d_r, (0xF7, 'iy', 'e',), 3),
-        0x9C : (self._res_n_indx_d_r, (0xF7, 'iy', 'h',), 3),
-        0x9D : (self._res_n_indx_d_r, (0xF7, 'iy', 'l',), 3),
-        0x9E : (self._res_n_indx_d, (0xF7, 'iy',), 3),
-        0x9F : (self._res_n_indx_d_r, (0xF7, 'iy', 'a',), 3),
+        0x90 : (self._res_n_indx_d_r, (0xFB, "iy", "b",), 3),
+        0x91 : (self._res_n_indx_d_r, (0xFB, "iy", "c",), 3),
+        0x92 : (self._res_n_indx_d_r, (0xFB, "iy", "d",), 3),
+        0x93 : (self._res_n_indx_d_r, (0xFB, "iy", "e",), 3),
+        0x94 : (self._res_n_indx_d_r, (0xFB, "iy", "h",), 3),
+        0x95 : (self._res_n_indx_d_r, (0xFB, "iy", "l",), 3),
+        0x96 : (self._res_n_indx_d, (0xFB, "iy",), 3),
+        0x97 : (self._res_n_indx_d_r, (0xFB, "iy", "a",), 3),
+        0x98 : (self._res_n_indx_d_r, (0xF7, "iy", "b",), 3),
+        0x99 : (self._res_n_indx_d_r, (0xF7, "iy", "c",), 3),
+        0x9A : (self._res_n_indx_d_r, (0xF7, "iy", "d",), 3),
+        0x9B : (self._res_n_indx_d_r, (0xF7, "iy", "e",), 3),
+        0x9C : (self._res_n_indx_d_r, (0xF7, "iy", "h",), 3),
+        0x9D : (self._res_n_indx_d_r, (0xF7, "iy", "l",), 3),
+        0x9E : (self._res_n_indx_d, (0xF7, "iy",), 3),
+        0x9F : (self._res_n_indx_d_r, (0xF7, "iy", "a",), 3),
         
-        0xA0 : (self._res_n_indx_d_r, (0xEF, 'iy', 'b',), 3),
-        0xA1 : (self._res_n_indx_d_r, (0xEF, 'iy', 'c',), 3),
-        0xA2 : (self._res_n_indx_d_r, (0xEF, 'iy', 'd',), 3),
-        0xA3 : (self._res_n_indx_d_r, (0xEF, 'iy', 'e',), 3),
-        0xA4 : (self._res_n_indx_d_r, (0xEF, 'iy', 'h',), 3),
-        0xA5 : (self._res_n_indx_d_r, (0xEF, 'iy', 'l',), 3),
-        0xA6 : (self._res_n_indx_d, (0xEF, 'iy',), 3),
-        0xA7 : (self._res_n_indx_d_r, (0xEF, 'iy', 'a',), 3),
-        0xA8 : (self._res_n_indx_d_r, (0xDF, 'iy', 'b',), 3),
-        0xA9 : (self._res_n_indx_d_r, (0xDF, 'iy', 'c',), 3),
-        0xAA : (self._res_n_indx_d_r, (0xDF, 'iy', 'd',), 3),
-        0xAB : (self._res_n_indx_d_r, (0xDF, 'iy', 'e',), 3),
-        0xAC : (self._res_n_indx_d_r, (0xDF, 'iy', 'h',), 3),
-        0xAD : (self._res_n_indx_d_r, (0xDF, 'iy', 'l',), 3),
-        0xAE : (self._res_n_indx_d, (0xDF, 'iy',), 3),
-        0xAF : (self._res_n_indx_d_r, (0xDF, 'iy', 'a',), 3),
+        0xA0 : (self._res_n_indx_d_r, (0xEF, "iy", "b",), 3),
+        0xA1 : (self._res_n_indx_d_r, (0xEF, "iy", "c",), 3),
+        0xA2 : (self._res_n_indx_d_r, (0xEF, "iy", "d",), 3),
+        0xA3 : (self._res_n_indx_d_r, (0xEF, "iy", "e",), 3),
+        0xA4 : (self._res_n_indx_d_r, (0xEF, "iy", "h",), 3),
+        0xA5 : (self._res_n_indx_d_r, (0xEF, "iy", "l",), 3),
+        0xA6 : (self._res_n_indx_d, (0xEF, "iy",), 3),
+        0xA7 : (self._res_n_indx_d_r, (0xEF, "iy", "a",), 3),
+        0xA8 : (self._res_n_indx_d_r, (0xDF, "iy", "b",), 3),
+        0xA9 : (self._res_n_indx_d_r, (0xDF, "iy", "c",), 3),
+        0xAA : (self._res_n_indx_d_r, (0xDF, "iy", "d",), 3),
+        0xAB : (self._res_n_indx_d_r, (0xDF, "iy", "e",), 3),
+        0xAC : (self._res_n_indx_d_r, (0xDF, "iy", "h",), 3),
+        0xAD : (self._res_n_indx_d_r, (0xDF, "iy", "l",), 3),
+        0xAE : (self._res_n_indx_d, (0xDF, "iy",), 3),
+        0xAF : (self._res_n_indx_d_r, (0xDF, "iy", "a",), 3),
 
-        0xB0 : (self._res_n_indx_d_r, (0xBF, 'iy', 'b',), 3),
-        0xB1 : (self._res_n_indx_d_r, (0xBF, 'iy', 'c',), 3),
-        0xB2 : (self._res_n_indx_d_r, (0xBF, 'iy', 'd',), 3),
-        0xB3 : (self._res_n_indx_d_r, (0xBF, 'iy', 'e',), 3),
-        0xB4 : (self._res_n_indx_d_r, (0xBF, 'iy', 'h',), 3),
-        0xB5 : (self._res_n_indx_d_r, (0xBF, 'iy', 'l',), 3),
-        0xB6 : (self._res_n_indx_d, (0xBF, 'iy',), 3),
-        0xB7 : (self._res_n_indx_d_r, (0xBF, 'iy', 'a',), 3),
-        0xB8 : (self._res_n_indx_d_r, (0x7F, 'iy', 'b',), 3),
-        0xB9 : (self._res_n_indx_d_r, (0x7F, 'iy', 'c',), 3),
-        0xBA : (self._res_n_indx_d_r, (0x7F, 'iy', 'd',), 3),
-        0xBB : (self._res_n_indx_d_r, (0x7F, 'iy', 'e',), 3),
-        0xBC : (self._res_n_indx_d_r, (0x7F, 'iy', 'h',), 3),
-        0xBD : (self._res_n_indx_d_r, (0x7F, 'iy', 'l',), 3),
-        0xBE : (self._res_n_indx_d, (0x7F, 'iy',), 3),
-        0xBF : (self._res_n_indx_d_r, (0x7F, 'iy', 'a',), 3),
+        0xB0 : (self._res_n_indx_d_r, (0xBF, "iy", "b",), 3),
+        0xB1 : (self._res_n_indx_d_r, (0xBF, "iy", "c",), 3),
+        0xB2 : (self._res_n_indx_d_r, (0xBF, "iy", "d",), 3),
+        0xB3 : (self._res_n_indx_d_r, (0xBF, "iy", "e",), 3),
+        0xB4 : (self._res_n_indx_d_r, (0xBF, "iy", "h",), 3),
+        0xB5 : (self._res_n_indx_d_r, (0xBF, "iy", "l",), 3),
+        0xB6 : (self._res_n_indx_d, (0xBF, "iy",), 3),
+        0xB7 : (self._res_n_indx_d_r, (0xBF, "iy", "a",), 3),
+        0xB8 : (self._res_n_indx_d_r, (0x7F, "iy", "b",), 3),
+        0xB9 : (self._res_n_indx_d_r, (0x7F, "iy", "c",), 3),
+        0xBA : (self._res_n_indx_d_r, (0x7F, "iy", "d",), 3),
+        0xBB : (self._res_n_indx_d_r, (0x7F, "iy", "e",), 3),
+        0xBC : (self._res_n_indx_d_r, (0x7F, "iy", "h",), 3),
+        0xBD : (self._res_n_indx_d_r, (0x7F, "iy", "l",), 3),
+        0xBE : (self._res_n_indx_d, (0x7F, "iy",), 3),
+        0xBF : (self._res_n_indx_d_r, (0x7F, "iy", "a",), 3),
 
-        0xC0 : (self._set_n_indx_d_r, (0x1, 'iy', 'b',), 3), 
-        0xC1 : (self._set_n_indx_d_r, (0x1, 'iy', 'c',), 3), 
-        0xC2 : (self._set_n_indx_d_r, (0x1, 'iy', 'd',), 3), 
-        0xC3 : (self._set_n_indx_d_r, (0x1, 'iy', 'e',), 3), 
-        0xC4 : (self._set_n_indx_d_r, (0x1, 'iy', 'h',), 3), 
-        0xC5 : (self._set_n_indx_d_r, (0x1, 'iy', 'l',), 3), 
-        0xC6 : (self._set_n_indx_d, (0x1, 'iy',), 3), 
-        0xC7 : (self._set_n_indx_d_r, (0x1, 'iy', 'a',), 3), 
-        0xC8 : (self._set_n_indx_d_r, (0x2, 'iy', 'b',), 3), 
-        0xC9 : (self._set_n_indx_d_r, (0x2, 'iy', 'c',), 3), 
-        0xCA : (self._set_n_indx_d_r, (0x2, 'iy', 'd',), 3), 
-        0xCB : (self._set_n_indx_d_r, (0x2, 'iy', 'e',), 3), 
-        0xCC : (self._set_n_indx_d_r, (0x2, 'iy', 'h',), 3), 
-        0xCD : (self._set_n_indx_d_r, (0x2, 'iy', 'l',), 3), 
-        0xCE : (self._set_n_indx_d, (0x2, 'iy',), 3), 
-        0xCF : (self._set_n_indx_d_r, (0x2, 'iy', 'a',), 3), 
+        0xC0 : (self._set_n_indx_d_r, (0x1, "iy", "b",), 3), 
+        0xC1 : (self._set_n_indx_d_r, (0x1, "iy", "c",), 3), 
+        0xC2 : (self._set_n_indx_d_r, (0x1, "iy", "d",), 3), 
+        0xC3 : (self._set_n_indx_d_r, (0x1, "iy", "e",), 3), 
+        0xC4 : (self._set_n_indx_d_r, (0x1, "iy", "h",), 3), 
+        0xC5 : (self._set_n_indx_d_r, (0x1, "iy", "l",), 3), 
+        0xC6 : (self._set_n_indx_d, (0x1, "iy",), 3), 
+        0xC7 : (self._set_n_indx_d_r, (0x1, "iy", "a",), 3), 
+        0xC8 : (self._set_n_indx_d_r, (0x2, "iy", "b",), 3), 
+        0xC9 : (self._set_n_indx_d_r, (0x2, "iy", "c",), 3), 
+        0xCA : (self._set_n_indx_d_r, (0x2, "iy", "d",), 3), 
+        0xCB : (self._set_n_indx_d_r, (0x2, "iy", "e",), 3), 
+        0xCC : (self._set_n_indx_d_r, (0x2, "iy", "h",), 3), 
+        0xCD : (self._set_n_indx_d_r, (0x2, "iy", "l",), 3), 
+        0xCE : (self._set_n_indx_d, (0x2, "iy",), 3), 
+        0xCF : (self._set_n_indx_d_r, (0x2, "iy", "a",), 3), 
 
-        0xD0 : (self._set_n_indx_d_r, (0x4, 'iy', 'b',), 3),
-        0xD1 : (self._set_n_indx_d_r, (0x4, 'iy', 'c',), 3),
-        0xD2 : (self._set_n_indx_d_r, (0x4, 'iy', 'd',), 3),
-        0xD3 : (self._set_n_indx_d_r, (0x4, 'iy', 'e',), 3),
-        0xD4 : (self._set_n_indx_d_r, (0x4, 'iy', 'h',), 3),
-        0xD5 : (self._set_n_indx_d_r, (0x4, 'iy', 'l',), 3),
-        0xD6 : (self._set_n_indx_d, (0x4, 'iy',), 3),
-        0xD7 : (self._set_n_indx_d_r, (0x4, 'iy', 'a',), 3),
-        0xD8 : (self._set_n_indx_d_r, (0x8, 'iy', 'b',), 3),
-        0xD9 : (self._set_n_indx_d_r, (0x8, 'iy', 'c',), 3),
-        0xDA : (self._set_n_indx_d_r, (0x8, 'iy', 'd',), 3),
-        0xDB : (self._set_n_indx_d_r, (0x8, 'iy', 'e',), 3),
-        0xDC : (self._set_n_indx_d_r, (0x8, 'iy', 'h',), 3),
-        0xDD : (self._set_n_indx_d_r, (0x8, 'iy', 'l',), 3),
-        0xDE : (self._set_n_indx_d, (0x8, 'iy',), 3),
-        0xDF : (self._set_n_indx_d_r, (0x8, 'iy', 'a',), 3),
+        0xD0 : (self._set_n_indx_d_r, (0x4, "iy", "b",), 3),
+        0xD1 : (self._set_n_indx_d_r, (0x4, "iy", "c",), 3),
+        0xD2 : (self._set_n_indx_d_r, (0x4, "iy", "d",), 3),
+        0xD3 : (self._set_n_indx_d_r, (0x4, "iy", "e",), 3),
+        0xD4 : (self._set_n_indx_d_r, (0x4, "iy", "h",), 3),
+        0xD5 : (self._set_n_indx_d_r, (0x4, "iy", "l",), 3),
+        0xD6 : (self._set_n_indx_d, (0x4, "iy",), 3),
+        0xD7 : (self._set_n_indx_d_r, (0x4, "iy", "a",), 3),
+        0xD8 : (self._set_n_indx_d_r, (0x8, "iy", "b",), 3),
+        0xD9 : (self._set_n_indx_d_r, (0x8, "iy", "c",), 3),
+        0xDA : (self._set_n_indx_d_r, (0x8, "iy", "d",), 3),
+        0xDB : (self._set_n_indx_d_r, (0x8, "iy", "e",), 3),
+        0xDC : (self._set_n_indx_d_r, (0x8, "iy", "h",), 3),
+        0xDD : (self._set_n_indx_d_r, (0x8, "iy", "l",), 3),
+        0xDE : (self._set_n_indx_d, (0x8, "iy",), 3),
+        0xDF : (self._set_n_indx_d_r, (0x8, "iy", "a",), 3),
 
-        0xE0 : (self._set_n_indx_d_r, (0x10, 'iy', 'b',), 3),
-        0xE1 : (self._set_n_indx_d_r, (0x10, 'iy', 'c',), 3),
-        0xE2 : (self._set_n_indx_d_r, (0x10, 'iy', 'd',), 3),
-        0xE3 : (self._set_n_indx_d_r, (0x10, 'iy', 'e',), 3),
-        0xE4 : (self._set_n_indx_d_r, (0x10, 'iy', 'h',), 3),
-        0xE5 : (self._set_n_indx_d_r, (0x10, 'iy', 'l',), 3),
-        0xE6 : (self._set_n_indx_d, (0x10, 'iy',), 3),
-        0xE7 : (self._set_n_indx_d_r, (0x10, 'iy', 'a',), 3),
-        0xE8 : (self._set_n_indx_d_r, (0x20, 'iy', 'b',), 3),
-        0xE9 : (self._set_n_indx_d_r, (0x20, 'iy', 'c',), 3),
-        0xEA : (self._set_n_indx_d_r, (0x20, 'iy', 'd',), 3),
-        0xEB : (self._set_n_indx_d_r, (0x20, 'iy', 'e',), 3),
-        0xEC : (self._set_n_indx_d_r, (0x20, 'iy', 'h',), 3),
-        0xED : (self._set_n_indx_d_r, (0x20, 'iy', 'l',), 3),
-        0xEE : (self._set_n_indx_d, (0x20, 'iy',), 3),
-        0xEF : (self._set_n_indx_d_r, (0x20, 'iy', 'a',), 3),
+        0xE0 : (self._set_n_indx_d_r, (0x10, "iy", "b",), 3),
+        0xE1 : (self._set_n_indx_d_r, (0x10, "iy", "c",), 3),
+        0xE2 : (self._set_n_indx_d_r, (0x10, "iy", "d",), 3),
+        0xE3 : (self._set_n_indx_d_r, (0x10, "iy", "e",), 3),
+        0xE4 : (self._set_n_indx_d_r, (0x10, "iy", "h",), 3),
+        0xE5 : (self._set_n_indx_d_r, (0x10, "iy", "l",), 3),
+        0xE6 : (self._set_n_indx_d, (0x10, "iy",), 3),
+        0xE7 : (self._set_n_indx_d_r, (0x10, "iy", "a",), 3),
+        0xE8 : (self._set_n_indx_d_r, (0x20, "iy", "b",), 3),
+        0xE9 : (self._set_n_indx_d_r, (0x20, "iy", "c",), 3),
+        0xEA : (self._set_n_indx_d_r, (0x20, "iy", "d",), 3),
+        0xEB : (self._set_n_indx_d_r, (0x20, "iy", "e",), 3),
+        0xEC : (self._set_n_indx_d_r, (0x20, "iy", "h",), 3),
+        0xED : (self._set_n_indx_d_r, (0x20, "iy", "l",), 3),
+        0xEE : (self._set_n_indx_d, (0x20, "iy",), 3),
+        0xEF : (self._set_n_indx_d_r, (0x20, "iy", "a",), 3),
 
-        0xF0 : (self._set_n_indx_d_r, (0x40, 'iy', 'b',), 3),
-        0xF1 : (self._set_n_indx_d_r, (0x40, 'iy', 'c',), 3),
-        0xF2 : (self._set_n_indx_d_r, (0x40, 'iy', 'd',), 3),
-        0xF3 : (self._set_n_indx_d_r, (0x40, 'iy', 'e',), 3),
-        0xF4 : (self._set_n_indx_d_r, (0x40, 'iy', 'h',), 3),
-        0xF5 : (self._set_n_indx_d_r, (0x40, 'iy', 'l',), 3),
-        0xF6 : (self._set_n_indx_d, (0x40, 'iy',), 3),
-        0xF7 : (self._set_n_indx_d_r, (0x40, 'iy', 'a',), 3),
-        0xF8 : (self._set_n_indx_d_r, (0x80, 'iy', 'b',), 3),
-        0xF9 : (self._set_n_indx_d_r, (0x80, 'iy', 'c',), 3),
-        0xFA : (self._set_n_indx_d_r, (0x80, 'iy', 'd',), 3),
-        0xFB : (self._set_n_indx_d_r, (0x80, 'iy', 'e',), 3),
-        0xFC : (self._set_n_indx_d_r, (0x80, 'iy', 'h',), 3),
-        0xFD : (self._set_n_indx_d_r, (0x80, 'iy', 'l',), 3),
-        0xFE : (self._set_n_indx_d, (0x80, 'iy',), 3),
-        0xFF : (self._set_n_indx_d_r, (0x80, 'iy', 'a',), 3),
+        0xF0 : (self._set_n_indx_d_r, (0x40, "iy", "b",), 3),
+        0xF1 : (self._set_n_indx_d_r, (0x40, "iy", "c",), 3),
+        0xF2 : (self._set_n_indx_d_r, (0x40, "iy", "d",), 3),
+        0xF3 : (self._set_n_indx_d_r, (0x40, "iy", "e",), 3),
+        0xF4 : (self._set_n_indx_d_r, (0x40, "iy", "h",), 3),
+        0xF5 : (self._set_n_indx_d_r, (0x40, "iy", "l",), 3),
+        0xF6 : (self._set_n_indx_d, (0x40, "iy",), 3),
+        0xF7 : (self._set_n_indx_d_r, (0x40, "iy", "a",), 3),
+        0xF8 : (self._set_n_indx_d_r, (0x80, "iy", "b",), 3),
+        0xF9 : (self._set_n_indx_d_r, (0x80, "iy", "c",), 3),
+        0xFA : (self._set_n_indx_d_r, (0x80, "iy", "d",), 3),
+        0xFB : (self._set_n_indx_d_r, (0x80, "iy", "e",), 3),
+        0xFC : (self._set_n_indx_d_r, (0x80, "iy", "h",), 3),
+        0xFD : (self._set_n_indx_d_r, (0x80, "iy", "l",), 3),
+        0xFE : (self._set_n_indx_d, (0x80, "iy",), 3),
+        0xFF : (self._set_n_indx_d_r, (0x80, "iy", "a",), 3),
         }
 
-        self.fd_opcodes = {0x09 : (self._add_rr_rr, ('iy', 'bc',), 1),
+        self.fd_opcodes = {0x09 : (self._add_rr_rr, ("iy", "bc",), 1),
 
-        0x19 : (self._add_rr_rr, ('iy', 'de',), 1),
+        0x19 : (self._add_rr_rr, ("iy", "de",), 1),
 
-        0x21 : (self._ld_rr_nn, ('iy',), 3),
-        0x22 : (self._ld_addr_nn_rr, ('iy',), 3),
+        0x21 : (self._ld_rr_nn, ("iy",), 3),
+        0x22 : (self._ld_addr_nn_rr, ("iy",), 3),
         0x23 : (self._inc_rr, ("iy",), 1),
-        0x24 : (self._inc_r, ('iyh',), 1),
-        0x25 : (self._dec_r, ('iyh',), 1),
-        0x26 : (self._ld_r_n, ('iyh',), 2),
-        0x29 : (self._add_rr_rr, ('iy', 'iy',), 1),
-        0x2A : (self._ld_rr_addr_nn, ('iy',), 3),
+        0x24 : (self._inc_r, ("iyh",), 1),
+        0x25 : (self._dec_r, ("iyh",), 1),
+        0x26 : (self._ld_r_n, ("iyh",), 2),
+        0x29 : (self._add_rr_rr, ("iy", "iy",), 1),
+        0x2A : (self._ld_rr_addr_nn, ("iy",), 3),
         0x2B : (self._dec_rr, ("iy",), 1),
-        0x2C : (self._inc_r, ('iyl',), 1),
-        0x2D : (self._dec_r, ('iyl',), 1),
-        0x2E : (self._ld_r_n, ('iyl',), 2),
+        0x2C : (self._inc_r, ("iyl",), 1),
+        0x2D : (self._dec_r, ("iyl",), 1),
+        0x2E : (self._ld_r_n, ("iyl",), 2),
 
-        0x34 : (self._inc_addr_indx_d, ('iy',), 2),
-        0x35 : (self._dec_addr_indx_d, ('iy',), 2),
-        0x36 : (self._ld_addr_indx_d_n, ('iy',), 3),
-        0x39 : (self._add_rr_rr, ('iy', 'sp',), 1),
+        0x34 : (self._inc_addr_indx_d, ("iy",), 2),
+        0x35 : (self._dec_addr_indx_d, ("iy",), 2),
+        0x36 : (self._ld_addr_indx_d_n, ("iy",), 3),
+        0x39 : (self._add_rr_rr, ("iy", "sp",), 1),
 
-        0x44 : (self._ld_r_r, ('b', 'iyh',), 1),
-        0x45 : (self._ld_r_r, ('b', 'iyl',), 1),
-        0x46 : (self._ld_r_addr_indx_d, ('b', 'iy',), 2),
-        0x4C : (self._ld_r_r, ('c', 'iyh',), 1),
-        0x4D : (self._ld_r_r, ('c', 'iyl',), 1),
-        0x4E : (self._ld_r_addr_indx_d, ('c', 'iy',), 2),
+        0x44 : (self._ld_r_r, ("b", "iyh",), 1),
+        0x45 : (self._ld_r_r, ("b", "iyl",), 1),
+        0x46 : (self._ld_r_addr_indx_d, ("b", "iy",), 2),
+        0x4C : (self._ld_r_r, ("c", "iyh",), 1),
+        0x4D : (self._ld_r_r, ("c", "iyl",), 1),
+        0x4E : (self._ld_r_addr_indx_d, ("c", "iy",), 2),
 
-        0x54 : (self._ld_r_r, ('d', 'iyh',), 1),
-        0x55 : (self._ld_r_r, ('d', 'iyl',), 1),
-        0x56 : (self._ld_r_addr_indx_d, ('d', 'iy',), 2),
-        0x5C : (self._ld_r_r, ('e', 'iyh',), 1),
-        0x5D : (self._ld_r_r, ('e', 'iyl',), 1),
-        0x5E : (self._ld_r_addr_indx_d, ('e', 'iy',), 2),
+        0x54 : (self._ld_r_r, ("d", "iyh",), 1),
+        0x55 : (self._ld_r_r, ("d", "iyl",), 1),
+        0x56 : (self._ld_r_addr_indx_d, ("d", "iy",), 2),
+        0x5C : (self._ld_r_r, ("e", "iyh",), 1),
+        0x5D : (self._ld_r_r, ("e", "iyl",), 1),
+        0x5E : (self._ld_r_addr_indx_d, ("e", "iy",), 2),
 
-        0x60 : (self._ld_r_r, ('iyh', 'b',), 1),
-        0x61 : (self._ld_r_r, ('iyh', 'c',), 1),
-        0x62 : (self._ld_r_r, ('iyh', 'd',), 1),
-        0x63 : (self._ld_r_r, ('iyh', 'e',), 1),
-        0x64 : (self._ld_r_r, ('iyh', 'iyh',), 1),
-        0x65 : (self._ld_r_r, ('iyh', 'iyl',), 1),
-        0x66 : (self._ld_r_addr_indx_d, ('h', 'iy',), 2),
-        0x67 : (self._ld_r_r, ('iyh', 'a',), 1),
-        0x68 : (self._ld_r_r, ('iyl', 'b',), 1),
-        0x69 : (self._ld_r_r, ('iyl', 'c',), 1),
-        0x6A : (self._ld_r_r, ('iyl', 'd',), 1),
-        0x6B : (self._ld_r_r, ('iyl', 'e',), 1),
-        0x6C : (self._ld_r_r, ('iyl', 'iyh',), 1),
-        0x6D : (self._ld_r_r, ('iyl', 'iyl',), 1),
-        0x6E : (self._ld_r_addr_indx_d, ('l', 'iy',), 2),
-        0x6F : (self._ld_r_r, ('iyl', 'a',), 1),
+        0x60 : (self._ld_r_r, ("iyh", "b",), 1),
+        0x61 : (self._ld_r_r, ("iyh", "c",), 1),
+        0x62 : (self._ld_r_r, ("iyh", "d",), 1),
+        0x63 : (self._ld_r_r, ("iyh", "e",), 1),
+        0x64 : (self._ld_r_r, ("iyh", "iyh",), 1),
+        0x65 : (self._ld_r_r, ("iyh", "iyl",), 1),
+        0x66 : (self._ld_r_addr_indx_d, ("h", "iy",), 2),
+        0x67 : (self._ld_r_r, ("iyh", "a",), 1),
+        0x68 : (self._ld_r_r, ("iyl", "b",), 1),
+        0x69 : (self._ld_r_r, ("iyl", "c",), 1),
+        0x6A : (self._ld_r_r, ("iyl", "d",), 1),
+        0x6B : (self._ld_r_r, ("iyl", "e",), 1),
+        0x6C : (self._ld_r_r, ("iyl", "iyh",), 1),
+        0x6D : (self._ld_r_r, ("iyl", "iyl",), 1),
+        0x6E : (self._ld_r_addr_indx_d, ("l", "iy",), 2),
+        0x6F : (self._ld_r_r, ("iyl", "a",), 1),
 
-        0x70 : (self._ld_addr_indx_d_r, ('iy', 'b',), 2), 
-        0x71 : (self._ld_addr_indx_d_r, ('iy', 'c',), 2), 
-        0x72 : (self._ld_addr_indx_d_r, ('iy', 'd',), 2), 
-        0x73 : (self._ld_addr_indx_d_r, ('iy', 'e',), 2), 
-        0x74 : (self._ld_addr_indx_d_r, ('iy', 'h',), 2), 
-        0x75 : (self._ld_addr_indx_d_r, ('iy', 'l',), 2), 
-        0x77 : (self._ld_addr_indx_d_r, ('iy', 'a',), 2), 
-        0x7C : (self._ld_r_r, ('a', 'iyh',), 1),
-        0x7D : (self._ld_r_r, ('a', 'iyl',), 1),
-        0x7E : (self._ld_r_addr_indx_d, ('a', 'iy',), 2),
+        0x70 : (self._ld_addr_indx_d_r, ("iy", "b",), 2), 
+        0x71 : (self._ld_addr_indx_d_r, ("iy", "c",), 2), 
+        0x72 : (self._ld_addr_indx_d_r, ("iy", "d",), 2), 
+        0x73 : (self._ld_addr_indx_d_r, ("iy", "e",), 2), 
+        0x74 : (self._ld_addr_indx_d_r, ("iy", "h",), 2), 
+        0x75 : (self._ld_addr_indx_d_r, ("iy", "l",), 2), 
+        0x77 : (self._ld_addr_indx_d_r, ("iy", "a",), 2), 
+        0x7C : (self._ld_r_r, ("a", "iyh",), 1),
+        0x7D : (self._ld_r_r, ("a", "iyl",), 1),
+        0x7E : (self._ld_r_addr_indx_d, ("a", "iy",), 2),
 
-        0x84 : (self._add_r_r, ('a', 'iyh',), 1),
-        0x85 : (self._add_r_r, ('a', 'iyl',), 1),
-        0x86 : (self._add_r_addr_indx_d, ('a', 'iy',), 2),
-        0x8C : (self._adc_r_r, ('a', 'iyh'), 1),
-        0x8D : (self._adc_r_r, ('a', 'iyl'), 1),
-        0x8E : (self._adc_r_addr_indx_d, ('a', 'iy',), 2),
+        0x84 : (self._add_r_r, ("a", "iyh",), 1),
+        0x85 : (self._add_r_r, ("a", "iyl",), 1),
+        0x86 : (self._add_r_addr_indx_d, ("a", "iy",), 2),
+        0x8C : (self._adc_r_r, ("a", "iyh"), 1),
+        0x8D : (self._adc_r_r, ("a", "iyl"), 1),
+        0x8E : (self._adc_r_addr_indx_d, ("a", "iy",), 2),
 
-        0x94 : (self._sub_r, ('iyh',), 1),
-        0x95 : (self._sub_r, ('iyl',), 1),
-        0x96 : (self._sub_addr_indx_d, ('iy',), 2),
-        0x9C : (self._sbc_r_r, ('a', 'iyh',), 1),
-        0x9D : (self._sbc_r_r, ('a', 'iyl',), 1),
-        0x9E : (self._sbc_r_addr_indx_d, ('a', 'iy',), 2),
+        0x94 : (self._sub_r, ("iyh",), 1),
+        0x95 : (self._sub_r, ("iyl",), 1),
+        0x96 : (self._sub_addr_indx_d, ("iy",), 2),
+        0x9C : (self._sbc_r_r, ("a", "iyh",), 1),
+        0x9D : (self._sbc_r_r, ("a", "iyl",), 1),
+        0x9E : (self._sbc_r_addr_indx_d, ("a", "iy",), 2),
 
-        0xA4 : (self._and_r, ('iyh',), 1),
-        0xA5 : (self._and_r, ('iyl',), 1),
-        0xA6 : (self._and_addr_indx_d, ('iy',), 2),
-        0xAC : (self._xor_r, ('iyh',), 1),
-        0xAD : (self._xor_r, ('iyl',), 1),
-        0xAE : (self._xor_addr_indx_d, ('iy',), 2),
+        0xA4 : (self._and_r, ("iyh",), 1),
+        0xA5 : (self._and_r, ("iyl",), 1),
+        0xA6 : (self._and_addr_indx_d, ("iy",), 2),
+        0xAC : (self._xor_r, ("iyh",), 1),
+        0xAD : (self._xor_r, ("iyl",), 1),
+        0xAE : (self._xor_addr_indx_d, ("iy",), 2),
 
-        0xB4 : (self._or_r, ('iyh',), 1),
-        0xB5 : (self._or_r, ('iyl',), 1),
-        0xB6 : (self._or_addr_indx_d, ('iy',), 2),
-        0xBC : (self._cp_r, ('iyh',), 1),
-        0xBD : (self._cp_r, ('iyl',), 1),
-        0xBE : (self._cp_addr_indx_d, ('iy',), 2),
+        0xB4 : (self._or_r, ("iyh",), 1),
+        0xB5 : (self._or_r, ("iyl",), 1),
+        0xB6 : (self._or_addr_indx_d, ("iy",), 2),
+        0xBC : (self._cp_r, ("iyh",), 1),
+        0xBD : (self._cp_r, ("iyl",), 1),
+        0xBE : (self._cp_addr_indx_d, ("iy",), 2),
 
         0xCB : self.fdcb_opcodes,
 
         0xE1 : (self._pop_rr, ("iy",), 1),
+        0xE3 : (self._ex_addr_sp_rr, ("iy",), 1),
         0xE5 : (self._push_rr, ("iy",), 1),
+        0xE9 : None,
+        
+        0xF9 : (self._ld_rr_rr, ("sp", "hl",), 1)
         }
 
         self.unprefixed_opcodes = {0x0 : (self._nop, (), 1),
-        0x01 : (self._ld_rr_nn, ('bc',), 3),
-        0x02 : (self._ld_addr_rr_r, ('bc', 'a',), 1),
+        0x01 : (self._ld_rr_nn, ("bc",), 3),
+        0x02 : (self._ld_addr_rr_r, ("bc", "a",), 1),
         0x03 : (self._inc_rr, ("bc",), 1),
-        0x04 : (self._inc_r, ('b',), 1),
-        0x05 : (self._dec_r, ('b',), 1),
-        0x06 : (self._ld_r_n, ('b',), 2),
+        0x04 : (self._inc_r, ("b",), 1),
+        0x05 : (self._dec_r, ("b",), 1),
+        0x06 : (self._ld_r_n, ("b",), 2),
         0x07 : (self._rlca, (), 1),
-        0x08 : (self._ex_rr_rr_, ('af', 'af',), 1),
-        0x09 : (self._add_rr_rr, ('hl', 'bc',), 1),
-        0x0A : (self._ld_r_addr_rr, ('a', 'bc',), 1),
+        0x08 : (self._ex_rr_rr_, ("af", "af",), 1),
+        0x09 : (self._add_rr_rr, ("hl", "bc",), 1),
+        0x0A : (self._ld_r_addr_rr, ("a", "bc",), 1),
         0x0B : (self._dec_rr, ("bc",), 1),
-        0x0C : (self._inc_r, ('c',), 1),
-        0x0D : (self._dec_r, ('c',), 1),
-        0x0E : (self._ld_r_n, ('c',), 2),
+        0x0C : (self._inc_r, ("c",), 1),
+        0x0D : (self._dec_r, ("c",), 1),
+        0x0E : (self._ld_r_n, ("c",), 2),
         0x0F : (self._rrca, (), 1),
         
         0x10 : (self._djnz, (), 2),
-        0X11 : (self._ld_rr_nn, ('de',), 3),
-        0x12 : (self._ld_addr_rr_r, ('de', 'a',), 1),
+        0X11 : (self._ld_rr_nn, ("de",), 3),
+        0x12 : (self._ld_addr_rr_r, ("de", "a",), 1),
         0x13 : (self._inc_rr, ("de",), 1),
-        0x14 : (self._inc_r, ('d',), 1),
-        0x15 : (self._dec_r, ('d',), 1),
-        0x16 : (self._ld_r_n, ('d',), 2),
+        0x14 : (self._inc_r, ("d",), 1),
+        0x15 : (self._dec_r, ("d",), 1),
+        0x16 : (self._ld_r_n, ("d",), 2),
         0x17 : (self._rla, (), 1),
         0x18 : (self._jr_cc, (self._dummy_true,), 0),
-        0x19 : (self._add_rr_rr, ('hl', 'de',), 1),
-        0x1A : (self._ld_r_addr_rr, ('a', 'de',), 1),
+        0x19 : (self._add_rr_rr, ("hl", "de",), 1),
+        0x1A : (self._ld_r_addr_rr, ("a", "de",), 1),
         0x1B : (self._dec_rr, ("de",), 1),
-        0x1C : (self._inc_r, ('e',), 1),
-        0x1D : (self._dec_r, ('e',), 1),
-        0x1E : (self._ld_r_n, ('e',), 2),
+        0x1C : (self._inc_r, ("e",), 1),
+        0x1D : (self._dec_r, ("e",), 1),
+        0x1E : (self._ld_r_n, ("e",), 2),
         0x1F : (self._rra, (), 1),
 
         0x20 : (self._jr_not_cc, (self._test_zero_flag,), 0),
-        0x21 : (self._ld_rr_nn, ('hl',), 3),
-        0x22 : (self._ld_addr_nn_rr, ('hl',), 3),
+        0x21 : (self._ld_rr_nn, ("hl",), 3),
+        0x22 : (self._ld_addr_nn_rr, ("hl",), 3),
         0x23 : (self._inc_rr, ("hl",), 1),
-        0x24 : (self._inc_r, ('h',), 1),
-        0x25 : (self._dec_r, ('h',), 1),
-        0x26 : (self._ld_r_n, ('h',), 2),
+        0x24 : (self._inc_r, ("h",), 1),
+        0x25 : (self._dec_r, ("h",), 1),
+        0x26 : (self._ld_r_n, ("h",), 2),
         0x27 : (self._daa, (), 1),
         0x28 : (self._jr_cc, (self._test_zero_flag,), 0),
-        0x29 : (self._add_rr_rr, ('hl', 'hl',), 1),
-        0x2A : (self._ld_rr_addr_nn, ('hl',), 3),
+        0x29 : (self._add_rr_rr, ("hl", "hl",), 1),
+        0x2A : (self._ld_rr_addr_nn, ("hl",), 3),
         0x2B : (self._dec_rr, ("hl",), 1),
-        0x2C : (self._inc_r, ('l',), 1),
-        0x2D : (self._dec_r, ('l',), 1),
-        0x2E : (self._ld_r_n, ('l',), 2),
+        0x2C : (self._inc_r, ("l",), 1),
+        0x2D : (self._dec_r, ("l",), 1),
+        0x2E : (self._ld_r_n, ("l",), 2),
         0x2F : (self._cpl, (), 1),
 
         0x30 : (self._jr_not_cc, (self._test_carry_flag,), 0),
@@ -1227,7 +1233,7 @@ class Z80(object) :
         0x36 : (self._ld_addr_rr_n, ("hl",), 2),
         0x37 : (self._scf, (), 1),
         0x38 : (self._jr_cc, (self._test_carry_flag,), 0),
-        0x39 : (self._add_rr_rr, ("hl", 'sp',), 1),
+        0x39 : (self._add_rr_rr, ("hl", "sp",), 1),
         0x3A : (self._ld_r_addr_nn, ("a",), 3),
         0x3B : (self._dec_rr, ("sp",), 1),
         0x3C : (self._inc_r, ("a",), 1),
@@ -1444,26 +1450,35 @@ class Z80(object) :
         self.opcodes = None
 
         # Debug.
-        #self._force_flag_register(0x7F)
+        #self._force_flag_register(0x15)
         self._trace = ""
 
-        self._bdos_system_calls = {9 : self._bdos_c_writestr,
-        }
+        # BDOS syscalls.
+        #self._bdos_system_calls = {9 : self._bdos_c_writestr,
+        #}
 
-    #def _force_flag_register(self, byte) :
-    #    """
-    #    Force the f register to byte.
-    #    This method is used ONLY for testing purposes.
-    #    """
-    #    self._write_r("f", byte)
+    def _force_flag_register(self, byte) :
+        """
+        Force the f register to byte.
+        This method is used ONLY for testing purposes.
+        """
+        self._write_r("f", byte)
 
     @property
     def logger(self) :
-        return None
+        return self._logger
 
     @logger.setter
     def logger(self, logger) :
         self._logger = logger
+
+    @property
+    def bdos_extension(self) :
+        return self._bdos_extension
+
+    @bdos_extension.setter
+    def bdos_extension(self, value) :
+        self._bdos_extension = value
 
     def plug_ram(self, ram) :
         if not self.ram :
@@ -1490,7 +1505,6 @@ class Z80(object) :
         self._trace = "%s %s" % (self._trace, trace.ljust(left_justify))
 
     def _print_trace(self) :
-        #print self._trace
         self._logger.write(self._trace)
         self._trace = ""
 
@@ -1500,12 +1514,11 @@ class Z80(object) :
     def _log_trace_header(self) :
         self._log_trace("\n PC     Instruction          A     SZYHXPNC  B    C    D    E    H    L    IR     IX     IY     SP     A'    SZYHXPNC'  B'   C'   D'   E'   H'   L'  \n")
 
-    
     def _fetch_instruction(self) :
         """ Fetches & stores the current instruction into the IR register. """
 
-        addr = compose_word(*self._read_rr('pc'))
-        self._write_rr('ir', self.ram.read(addr))
+        addr = compose_word(*self._read_rr("pc"))
+        self._write_rr("ir", self.ram.read(addr))
 
     def _fetch_instruction_ahead(self) :
         """
@@ -1513,15 +1526,15 @@ class Z80(object) :
         into the IR register. This method is only used when
         processing the DDCB or FDCB instructions.
         """
-        addr = compose_word(*self._read_rr('pc')) + 2
-        self._write_rr('ir', self.ram.read(addr))
+        addr = compose_word(*self._read_rr("pc")) + 2
+        self._write_rr("ir", self.ram.read(addr))
 
     def _test_sign_flag(self) :
         """ Tests the sign flag (S) of the f register.     
             returns: 1 if set, otherwise 0. 
         """
 
-        if self.registers['f'] & 0x80 :
+        if self.registers["f"] & 0x80 :
             return 1
 
         return 0
@@ -1535,14 +1548,14 @@ class Z80(object) :
         """ Resets the sign flag (S) of the f register. """
 
         if self._test_sign_flag() :        
-            self.registers['f'] ^= 0x80
+            self.registers["f"] ^= 0x80
 
     def _test_zero_flag(self) :
         """ Tests the zero flag (Z) of the f register. 
             returns: 1 if set, otherwise 0. 
         """
 
-        if self.registers['f'] & 0x40 :
+        if self.registers["f"] & 0x40 :
             return 1
 
         return 0
@@ -1550,20 +1563,20 @@ class Z80(object) :
     def _set_zero_flag(self) :
         """ Sets the zero flag (Z) of the f register. """
 
-        self.registers['f'] |= 0x40
+        self.registers["f"] |= 0x40
 
     def _reset_zero_flag(self) :
         """ Resets the zero flag (Z) of the f register. """
 
         if self._test_zero_flag() :        
-            self.registers['f'] ^= 0x40
+            self.registers["f"] ^= 0x40
 
     def _test_half_carry_flag(self) :
         """ Tests the half carry flag (H) of the f register. 
             returns: 1 if set, otherwise 0. 
         """
 
-        if self.registers['f'] & 0x10 :
+        if self.registers["f"] & 0x10 :
             return 1
 
         return 0
@@ -1571,20 +1584,20 @@ class Z80(object) :
     def _set_half_carry_flag(self) :
         """ Sets the half carry flag (H) of the f register. """
 
-        self.registers['f'] |= 0x10
+        self.registers["f"] |= 0x10
 
     def _reset_half_carry_flag(self) :
         """ Resets the half carry flag (H) of the f register. """
 
         if self._test_half_carry_flag() :        
-            self.registers['f'] ^= 0x10
+            self.registers["f"] ^= 0x10
 
     def _test_parity_overflow_flag(self) :
         """ Tests the parity/overflow (P) flag of the f register. 
             returns: 1 if set, otherwise 0. 
         """
 
-        if self.registers['f'] & 0x4 :
+        if self.registers["f"] & 0x4 :
             return 1
 
         return 0
@@ -1592,20 +1605,20 @@ class Z80(object) :
     def _set_parity_overflow_flag(self) :
         """ Sets the parity/overflow (P) of the f register. """
 
-        self.registers['f'] |= 0x4
+        self.registers["f"] |= 0x4
 
     def _reset_parity_overflow_flag(self) :
         """ Resets the parity/overflow (P) of the f register. """
 
         if self._test_parity_overflow_flag() :        
-            self.registers['f'] ^= 0x4
+            self.registers["f"] ^= 0x4
 
     def _test_add_substract_flag(self) :
         """ Tests the add/substract (N) flag of the f register. 
             returns: 1 if set, otherwise 0. 
         """
 
-        if self.registers['f'] & 0x2 :
+        if self.registers["f"] & 0x2 :
             return 1
 
         return 0
@@ -1613,20 +1626,20 @@ class Z80(object) :
     def _set_add_substract_flag(self) :
         """ Sets the add/substract (N) of the f register. """
 
-        self.registers['f'] |= 0x2
+        self.registers["f"] |= 0x2
 
     def _reset_add_substract_flag(self) :
         """ Resets the add/substract (N) of the f register. """
 
         if self._test_add_substract_flag() :        
-            self.registers['f'] ^= 0x2
+            self.registers["f"] ^= 0x2
 
     def _test_carry_flag(self) :
         """ Tests the carry flag (C) of the f register. 
             returns: 1 if set, otherwise 0. 
         """
 
-        if self.registers['f'] & 0x1 :
+        if self.registers["f"] & 0x1 :
             return 1
 
         return 0
@@ -1634,13 +1647,13 @@ class Z80(object) :
     def _set_carry_flag(self) :
         """ Sets the carry flag (C) of the f register. """
 
-        self.registers['f'] |= 0x1
+        self.registers["f"] |= 0x1
 
     def _reset_carry_flag(self) :
         """ Resets the carry flag (C) of the f register. """
 
         if self._test_carry_flag() :        
-            self.registers['f'] ^= 0x1
+            self.registers["f"] ^= 0x1
 
     def _read_ix_iy_byte(self, r) :
         """
@@ -1827,8 +1840,8 @@ class Z80(object) :
                 n: The increment.
         """
 
-        ho_addr, lo_addr = self._read_rr('pc')
-        self._write_rr('pc', compose_word(ho_addr, lo_addr) + n)
+        ho_addr, lo_addr = self._read_rr("pc")
+        self._write_rr("pc", compose_word(ho_addr, lo_addr) + n)
 
     def _dec_n_pc(self, n) :
         """ Decrements the program counter by n.
@@ -1836,8 +1849,8 @@ class Z80(object) :
                 n: The decrement.
         """
 
-        ho_addr, lo_addr = self._read_rr('pc')
-        self._write_rr('pc', compose_word(ho_addr, lo_addr) - n)
+        ho_addr, lo_addr = self._read_rr("pc")
+        self._write_rr("pc", compose_word(ho_addr, lo_addr) - n)
 
     def _inc_n_sp(self, n) :
         """ Increments the stack pointer by n.
@@ -1845,8 +1858,8 @@ class Z80(object) :
                 n: The increment.
         """
 
-        ho_addr, lo_addr = self._read_rr('sp')
-        self._write_rr('sp', compose_word(ho_addr, lo_addr) + n)
+        ho_addr, lo_addr = self._read_rr("sp")
+        self._write_rr("sp", compose_word(ho_addr, lo_addr) + n)
 
     def _dec_n_sp(self, n) :
         """ Decrements the stack pointer by n.
@@ -1854,8 +1867,8 @@ class Z80(object) :
                 n: The decrement.
         """
 
-        ho_addr, lo_addr = self._read_rr('sp')
-        self._write_rr('sp', compose_word(ho_addr, lo_addr) - n)
+        ho_addr, lo_addr = self._read_rr("sp")
+        self._write_rr("sp", compose_word(ho_addr, lo_addr) - n)
 
     def _binary_r(self, r) :
         """ Returns the binary representation of register r.
@@ -1865,26 +1878,23 @@ class Z80(object) :
         binary = bin(self._read_r(r))[2:]
         return binary.zfill(8)
 
-    #def _show_status(self) :
-    #    print self._current_pc + self._current_instruction + self._registers
-
     def _registers_status(self) :
-        a = self._read_r('a')
-        a_ = self._read_r('a_')
-        b = self._read_r('b')
-        b_ = self._read_r('b_')
-        c = self._read_r('c')
-        c_ = self._read_r('c_')
-        d = self._read_r('d')
-        d_ = self._read_r('d_')
-        e = self._read_r('e')
-        e_ = self._read_r('e_')
-        f = self._binary_r('f')
-        f_ = self._binary_r('f_')
-        h = self._read_r('h')
-        h_ = self._read_r('h_')
-        l = self._read_r('l')
-        l_ = self._read_r('l_')
+        a  = self._read_r("a")
+        a_ = self._read_r("a_")
+        b  = self._read_r("b")
+        b_ = self._read_r("b_")
+        c  = self._read_r("c")
+        c_ = self._read_r("c_")
+        d  = self._read_r("d")
+        d_ = self._read_r("d_")
+        e  = self._read_r("e")
+        e_ = self._read_r("e_")
+        f  = self._binary_r("f")
+        f_ = self._binary_r("f_")
+        h  = self._read_r("h")
+        h_ = self._read_r("h_")
+        l  = self._read_r("l")
+        l_ = self._read_r("l_")
         ir = compose_word(*self._read_rr("ir"))
         ix = compose_word(*self._read_rr("ix"))
         iy = compose_word(*self._read_rr("iy"))
@@ -1900,12 +1910,11 @@ class Z80(object) :
         start_address.
         """
 
-        #self._bdos_patch()
+        if self._bdos_extension :
+            self._bdos_patch()
 
         self._log_trace_header()
         self._print_trace()
-
-        #self._pre_run_checks()
         self._write_rr("pc", start_address)
 
         # Note : When the program counter reaches 0xFFFF we
@@ -1919,7 +1928,6 @@ class Z80(object) :
             self._execute_opcode()
             self._inc_n_pc(self.opcodes[self._read_r("ir")] [2])
             self._print_trace()
-            #self._reset_trace()
             self._interrupt_handler()
 
     def _fetch_opcode(self) :
@@ -1938,7 +1946,6 @@ class Z80(object) :
                 self.opcodes = self.opcodes [self._read_r("ir")]
                 self._fetch_instruction_ahead()
 
-           
     def _execute_opcode(self) :
         """
         Execute opcode. If opcode is invalid or 
@@ -1973,24 +1980,27 @@ class Z80(object) :
         """
         ADC r, (rr + d).
         """
-        self._log_instruction_trace("ADC %s, (%s + 0x%0.2X)" % (r, rr, self._read_n()))
+        self._log_instruction_trace("ADC %s, (%s + 0x%0.2X)" % \
+            (r, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
-        self._adc_flag_tests(self._read_r(r), self._read_n_ram(ho_addr, lo_addr) + \
-        self._test_carry_flag())
-        self._write_r(r, self._read_r(r) + \
-        self._read_n_ram(ho_addr, lo_addr) + self._test_carry_flag())
+            lo_base_addr, self._read_n())
+        byte = self._read_r(r) + self._read_n_ram(ho_addr, lo_addr) + \
+            self._test_carry_flag()
+        self._adc_flag_tests(self._read_r(r), \
+            self._read_n_ram(ho_addr, lo_addr) + self._test_carry_flag())
+        self._write_r(r, byte)
 
     def _adc_r_addr_rr(self, r, rr) :
         """
         ADC r, (rr).
         """
         self._log_instruction_trace("ADC %s, (%s)" % (r, rr))
-        self._adc_flag_tests(self._read_r(r), self._read_n_ram(*(self._read_rr(rr))) + \
-        self._test_carry_flag())
-        self._write_r(r, self._read_r(r) + \
-        self._read_n_ram(*(self._read_rr(rr))) + self._test_carry_flag())
+        byte = self._read_r(r) + self._read_n_ram(*(self._read_rr(rr))) + \
+            self._test_carry_flag()
+        self._adc_flag_tests(self._read_r(r), \
+            self._read_n_ram(*(self._read_rr(rr))) + self._test_carry_flag())
+        self._write_r(r, byte)
 
     def _adc_r_n(self, r) :
         """
@@ -1998,19 +2008,20 @@ class Z80(object) :
         """
         self._log_instruction_trace("ADC %s, 0x%0.2X" % (r, self._read_n()))
         byte = self._read_r(r) + self._read_n() + self._test_carry_flag()
-        self._adc_flag_tests(self._read_r(r), self._read_n() + self._test_carry_flag())
-        self._write_r(r, self._read_r(r) + self._read_n() + \
-        self._test_carry_flag())
+        self._adc_flag_tests(self._read_r(r), \
+            self._read_n() + self._test_carry_flag())
+        self._write_r(r, byte)
 
     def _adc_r_r(self, r1, r2) :
         """
         ADC r, r'. Add r1 and r2 with carry.
         """
         self._log_instruction_trace("ADC %s, %s" % (r1, r2))
+        byte = self._read_r(r1) + self._read_r(r2) + \
+            self._test_carry_flag()
         self._adc_flag_tests(self._read_r(r1), self._read_r(r2) + \
-        self._test_carry_flag())
-        self._write_r(r1, self._read_r(r1) + self._read_r(r2) + \
-        self._test_carry_flag())
+            self._test_carry_flag())
+        self._write_r(r1, byte)
 
     def _adc_word(self, n, m) :
         # Affects : S, Z, H, P, C
@@ -2099,7 +2110,6 @@ class Z80(object) :
         self._add_word(word_rr1, word_rr2)
         self._write_rr(rr1, word_rr1 + word_rr2)
 
-    #def _and(self, n) :
     def _and_flag_tests(self, n) :
         self._test_and_set_sign_flag(n)
         self._test_and_set_zero_flag(n)
@@ -2112,34 +2122,34 @@ class Z80(object) :
         self._log_instruction_trace("AND (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
-        byte = self._read_r('a') & self._read_n_ram(ho_addr, lo_addr)
+            lo_base_addr, self._read_n())
+        byte = self._read_r("a") & self._read_n_ram(ho_addr, lo_addr)
         self._and_flag_tests(byte)
-        self._write_r('a', byte)
+        self._write_r("a", byte)
 
     def _and_addr_rr(self, rr) :
         self._log_instruction_trace("AND (%s)" % rr)
-        byte = self._read_r('a') & self._read_n_ram(*self._read_rr(rr))
+        byte = self._read_r("a") & self._read_n_ram(*self._read_rr(rr))
         self._and_flag_tests(byte)
-        self._write_r('a', byte)
+        self._write_r("a", byte)
 
     def _and_n(self) :
         """
         AND n. Logical AND accumulator with n.
         """
         self._log_instruction_trace("AND 0x%0.2X" % self._read_n())
-        byte = self._read_r('a') & self._read_n()
+        byte = self._read_r("a") & self._read_n()
         self._and_flag_tests(byte)
-        self._write_r('a', byte)
+        self._write_r("a", byte)
 
     def _and_r(self, r) :
         """
         AND r. Logical AND accumulator with register r.
         """
         self._log_instruction_trace("AND %s" % r)
-        byte = self._read_r('a') & self._read_r(r)
+        byte = self._read_r("a") & self._read_r(r)
         self._and_flag_tests(byte)
-        self._write_r('a', byte)
+        self._write_r("a", byte)
 
     def _bit_flag_tests(self, n) :
         # Affects : Z.
@@ -2177,6 +2187,11 @@ class Z80(object) :
         self._write_n_ram(0x0E, 0x00, 0x06)
         self._write_n_ram(0xC9, 0x00, 0x07)
 
+        self.ed_opcodes[0x0E] = (self._bdos, ("c", "de",), 1)
+
+        self._bdos_system_calls = {9 : self._bdos_c_writestr,
+        }
+
     def _bit_n_indx_d(self, n, rr) :
         """
         BIT n, (rr + d). Test bit n of byte pointed by (rr + d).
@@ -2184,7 +2199,7 @@ class Z80(object) :
         self._log_instruction_trace("BIT 0x%0.2X, (%s + 0x%0.2X)" % (n, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._bit_flag_tests(self._read_n_ram(ho_addr, lo_addr) & n)
 
     def _bit_n_addr_rr(self, n, rr) :
@@ -2204,8 +2219,8 @@ class Z80(object) :
     def _call(self) :
         ho_byte, lo_byte = self._read_nn()
         self._inc_n_pc(3)
-        self._write_nn_stack(*self._read_rr('pc'))
-        self._write_rr('pc', compose_word(ho_byte, lo_byte))
+        self._write_nn_stack(*self._read_rr("pc"))
+        self._write_rr("pc", compose_word(ho_byte, lo_byte))
 
     def _call_cc(self, cc) :
         """
@@ -2224,6 +2239,7 @@ class Z80(object) :
             trace = "CALL 0x%0.2X" % compose_word(*self._read_nn())
 
         self._log_instruction_trace(trace)
+
         if cc() :
             self._call()
             return
@@ -2247,6 +2263,7 @@ class Z80(object) :
             trace = "CALL 0x%0.2X" % compose_word(*self._read_nn())
 
         self._log_instruction_trace(trace)
+
         if not cc() :
             self._call()
             return 
@@ -2257,14 +2274,19 @@ class Z80(object) :
         """
         CCF. Complement carry flag.
         """
-        # Sets : C.
+        # Sets : C, H.
         # Resets : N.
         self._log_instruction_trace("CCF")
 
         if self._test_carry_flag() :
-            self._reset_carry_flag
+            self._reset_carry_flag()
         else :
             self._set_carry_flag()
+
+        if self._test_half_carry_flag() :
+            self._reset_half_carry_flag()
+        else :
+            self._set_half_carry_flag()
 
         self._reset_add_substract_flag()
 
@@ -2279,9 +2301,10 @@ class Z80(object) :
 
     def _cp_addr_indx_d(self, rr) :
         self._log_instruction_trace("CP (%s + 0x%0.2X)" % (rr, self._read_n()))
-        ho_addr, lo_addr = self._compute_indexed_address(ho_addr, lo_addr, \
-        self._read_n())
-        self._cp_flag_tests(self._read_r('a'), self._read_n_ram(ho_addr, lo_addr))
+        ho_base_addr, lo_base_addr = self._read_rr(rr)
+        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+            lo_base_addr, self._read_n())
+        self._cp_flag_tests(self._read_r("a"), self._read_n_ram(ho_addr, lo_addr))
 
     def _cp_addr_rr(self, rr) :
         self._log_instruction_trace("CP (%s)" % rr)
@@ -2330,8 +2353,10 @@ class Z80(object) :
 
     def _cpir(self) :
         """ CPIR. Compare block with increment. """
-        self._test_and_set_sign_flag(self._read_r("a") - self._read_n_ram(*self._read_rr("hl")))
-        self._test_and_set_half_carry_on_substract(self._read_r("a"), self._read_n_ram(*self._read_rr("hl")))
+        self._test_and_set_sign_flag(self._read_r("a") - \
+            self._read_n_ram(*self._read_rr("hl")))
+        self._test_and_set_half_carry_on_substract(self._read_r("a"), \
+            self._read_n_ram(*self._read_rr("hl")))
         self._write_rr("hl", compose_word(*self._read_rr("hl")) + 1)
         self._write_rr("bc", compose_word(*self._read_rr("bc")) - 1)
 
@@ -2348,7 +2373,7 @@ class Z80(object) :
         """
         # Sets : H, N.
         self._log_instruction_trace("CPL")
-        self._write_r('a', ones_complement_byte(self._read_r('a')))
+        self._write_r("a", ones_complement_byte(self._read_r("a")))
 
         # Flags sets & resets.
         self._set_half_carry_flag()
@@ -2356,11 +2381,11 @@ class Z80(object) :
 
     def _cp_n (self) :
         self._log_instruction_trace("CP 0x%0.2X" % self._read_n())
-        self._cp_flag_tests(self._read_r('a'), self._read_n())
+        self._cp_flag_tests(self._read_r("a"), self._read_n())
 
     def _cp_r (self, r) :
         self._log_instruction_trace("CP %s" % r)
-        self._cp_flag_tests(self._read_r('a'), self._read_r(r))
+        self._cp_flag_tests(self._read_r("a"), self._read_r(r))
 
     def _daa(self) :
         """
@@ -2382,21 +2407,21 @@ class Z80(object) :
         "110" : [(0x7, 0xF, 0x0, 0x9, 0xA0, 1)],
         "111" : [(0x6, 0xF, 0x6, 0xF, 0x9A, 1)]}
 
-        ho_nibble, lo_nibble = decompose_byte(self._read_r('a'))
+        ho_nibble, lo_nibble = decompose_byte(self._read_r("a"))
         # nch holds the concatenation of the N, C and H flags.
         # Then we use nch to access the daa_table.
         nch = "%d%d%d" % (self._test_add_substract_flag(), \
-        self._test_carry_flag(), self._test_half_carry_flag())
+            self._test_carry_flag(), self._test_half_carry_flag())
         daa = daa_table [nch]
         stop = False
         i = 0
 
         while not stop :
-            if (ho_nibble >= daa [i] [0] and ho_nibble <= daa [i] [1])\
+            if (ho_nibble >= daa [i] [0] and ho_nibble <= daa [i] [1]) \
             and (lo_nibble >= daa [i] [2] and lo_nibble <= daa [i] [3]) :
                 # Set/reset half carry flag.
-                self._test_and_set_half_carry_on_add(self._read_r('a'),\
-                daa [i] [4])
+                self._test_and_set_half_carry_on_add(self._read_r("a"),\
+                    daa [i] [4])
                 
                 # Set/reset carry flag.
                 if daa [i] [5] :
@@ -2404,14 +2429,14 @@ class Z80(object) :
                 else :
                     self._reset_carry_flag()
 
-                self._write_r('a', self._read_r('a') + daa [i] [4])
+                self._write_r("a", self._read_r("a") + daa [i] [4])
                 stop = True
             else :
                 i += 1
 
-        self._test_and_set_sign_flag(self._read_r('a'))
-        self._test_and_set_zero_flag(self._read_r('a'))
-        self._test_and_set_parity_flag(self._read_r('a'))
+        self._test_and_set_sign_flag(self._read_r("a"))
+        self._test_and_set_zero_flag(self._read_r("a"))
+        self._test_and_set_parity_flag(self._read_r("a"))
 
     def _dec_flag_tests(self, n, m) :
         # Affects : S, Z, H, V. 
@@ -2427,10 +2452,10 @@ class Z80(object) :
         self._log_instruction_trace("DEC (%r + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._dec_flag_tests(self._read_n_ram(self, ho_addr, lo_addr), 1)
         self._write_n_ram(self._read_n_ram(self, ho_addr, lo_addr) - 1, \
-        ho_addr, lo_addr)
+            ho_addr, lo_addr)
 
     def _dec_addr_rr(self, rr) :
         """
@@ -2467,16 +2492,13 @@ class Z80(object) :
         DJNZ. Decrement b and jump n relative on non zero.
         """
         self._log_instruction_trace("DJNZ")
-        offset = self._read_n()
+        self._write_r("b", self._read_r("b") - 1)
 
-        if self._read_r('b') - 1 :
-            self._write_r('b', self._read_r('b') - 1)
-
-            if test_byte_sign(offset) :
-                offset = twos_complement_byte(offset)
-                self._dec_n_pc(offset)
-            else :
-                self._inc_n_pc(offset)
+        if self._read_r("b") :
+            ho_base_addr, lo_base_addr = self._read_rr("pc")
+            ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+                lo_base_addr, self._read_n())
+            self._write_rr("pc", compose_word(ho_addr, lo_addr))
 
     def _ei(self) :
         """
@@ -2512,11 +2534,11 @@ class Z80(object) :
         """
         self._log_instruction_trace("EX %s %s'" % (rr, rr_))
         r = self._read_r(rr[0])
-        self._write_r(rr[0], self._read_r(rr_[0] + '_'))
-        self._write_r(rr_[0] + '_', r)
+        self._write_r(rr[0], self._read_r(rr_[0] + "_"))
+        self._write_r(rr_[0] + "_", r)
         r = self._read_r(rr[1])
-        self._write_r(rr[1], self._read_r(rr_[1] + '_'))
-        self._write_r(rr_[1] + '_', r)
+        self._write_r(rr[1], self._read_r(rr_[1] + "_"))
+        self._write_r(rr_[1] + "_", r)
 
     def _exx(self) :
         """
@@ -2527,16 +2549,14 @@ class Z80(object) :
 
         for register in registers :
             r = self._read_r(register)
-            self._write_r(register, self._read_r(register + '_'))
-            self._write_r(register + '_', r)
+            self._write_r(register, self._read_r(register + "_"))
+            self._write_r(register + "_", r)
 
     def _halt(self) :
         """
-        HALT. Halt CPU.
+        HALT. Halt the CPU.
         """
         self._log_instruction_trace("HALT")
-        self.ram.dump_ram_range(0xFF, 0x101)
-        #self.ram.dump_ram_range(0x1F6, 0x200)
         exit()
 
     def _im(self, n) :
@@ -2544,7 +2564,7 @@ class Z80(object) :
         IM. Set interrupt mode n.
         """
         self._log_instruction_trace("IM 0x%0.2%" % n)
-        self._write_r('im', n)
+        self._write_r("im", n)
 
     def _read_io_port(self, addr) :
         try :
@@ -2565,8 +2585,6 @@ class Z80(object) :
 
     def _in_r_addr_r(self, r1, r2) :
         self._log_instruction_trace("IN %s, (%s)" % (r1, r2))
-        # Affects : S, Z, H, P. 
-        # Resets : N.
         addr = self._read_r(rr2)
         self._write_r(r1, self._read_io_port(addr))
 
@@ -2588,10 +2606,10 @@ class Z80(object) :
         self._log_instruction_trace("INC (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
-        self._inc_flag_tests(self._read_n_ram(self, ho_addr, lo_addr), 1)
-        self._write_n_ram(self._read_n_ram(self, ho_addr, lo_addr) + 1, \
-        ho_addr, lo_addr)
+            lo_base_addr, self._read_n())
+        self._inc_flag_tests(self._read_n_ram(ho_addr, lo_addr), 1)
+        self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) + 1, \
+            ho_addr, lo_addr)
         
     def _inc_addr_rr(self, rr) :
         """
@@ -2601,7 +2619,7 @@ class Z80(object) :
         ho_addr, lo_addr = self._read_rr(rr)
         self._inc_flag_tests(self._read_n_ram(ho_addr, lo_addr), 1)
         self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) + 1, \
-        ho_addr, lo_addr)
+            ho_addr, lo_addr)
 
     def _inc_rr(self, rr) :
         """
@@ -2616,7 +2634,7 @@ class Z80(object) :
 
         ho_addr, lo_addr = self._read_rr("hl")
         self._write_n_ram(self._read_io_port(self._read_r("c")), \
-        ho_addr, lo_addr)
+            ho_addr, lo_addr)
         self._write_r("b", self._read_r("b") - 1)
         self._write_rr("hl", compose_word(*self._read_rr("hl")) - 1)
 
@@ -2636,7 +2654,7 @@ class Z80(object) :
         self._log_instruction_trace("INI")
         ho_addr, lo_addr = self._read_rr("hl")
         self._write_n_ram(self._read_io_port(self._read_r("c")), \
-        ho_addr, lo_addr)
+            ho_addr, lo_addr)
         self._write_r("b", self._read_r("b") - 1)
         self._write_rr("hl", compose_word(*self._read_rr("hl")) + 1)
 
@@ -2680,8 +2698,9 @@ class Z80(object) :
             trace = "JP 0x%0.2X" % compose_word(*self._read_nn())
 
         self._log_instruction_trace(trace)
+
         if cc() :
-            self._write_rr('pc', compose_word(*self._read_nn()))
+            self._write_rr("pc", compose_word(*self._read_nn()))
             return
 
         self._inc_n_pc(3)
@@ -2699,21 +2718,22 @@ class Z80(object) :
             trace = "JP 0x%0.2X" % compose_word(*self._read_nn())
 
         self._log_instruction_trace(trace)
+
         if not cc() :
-            self._write_rr('pc', compose_word(*self._read_nn()))
+            self._write_rr("pc", compose_word(*self._read_nn()))
             return
 
         self._inc_n_pc(3)
 
     def _jp_rr(self, rr) :
         self._log_instruction_trace("JP %s" % rr)
-        self._write_rr('pc', *self._read_rr(rr))
+        self._write_rr("pc", *self._read_rr(rr))
 
     def _jr(self) :
-        ho_base_addr, lo_base_addr = self._read_rr('pc')
+        ho_base_addr, lo_base_addr = self._read_rr("pc")
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
-        self._write_rr('pc', compose_word(ho_addr, lo_addr))
+        self._write_rr("pc", compose_word(ho_addr, lo_addr))
 
     def _jr_cc(self, cc) :
         """
@@ -2731,6 +2751,7 @@ class Z80(object) :
             trace = "JR 0x%0.2X" % compose_word(*self._read_nn())
 
         self._log_instruction_trace(trace)
+
         if cc() :
             self._jr()
 
@@ -2752,6 +2773,7 @@ class Z80(object) :
             trace = "JR 0x%0.2X" % compose_word(*self._read_nn())
 
         self._log_instruction_trace(trace)
+
         if not cc() :
             self._jr()
 
@@ -2766,7 +2788,7 @@ class Z80(object) :
         self._log_instruction_trace("LD (%s + 0x%0.2X), 0x%0.2X" % (rr, d, n))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, d)
+            lo_base_addr, d)
         self._write_n_ram(n, ho_addr, lo_addr)
 
     def _ld_addr_indx_d_r(self, rr, r) :
@@ -2777,11 +2799,12 @@ class Z80(object) :
         self._log_instruction_trace("LD (%s + 0x%0.2X), %s" % (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
 
     def _ld_addr_nn_r(self, r) :
-        self._log_instruction_trace("LD (0x%0.2X), %s" % (compose_word(*self._read_nn()), r))
+        self._log_instruction_trace("LD (0x%0.2X), %s" % \
+            (compose_word(*self._read_nn()), r))
         ho_addr, lo_addr = self._read_nn()
         self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
 
@@ -2790,7 +2813,8 @@ class Z80(object) :
         LD (nn), rr. Load memory locations addressed by nn from
         register pair rr.
         """
-        self._log_instruction_trace("LD (0x%0.2X), %s" % (compose_word(*self._read_nn()), rr))
+        self._log_instruction_trace("LD (0x%0.2X), %s" % \
+            (compose_word(*self._read_nn()), rr))
         ho_addr, lo_addr = self._read_nn()
         ho_byte, lo_byte = self._read_rr(rr)
         self._write_nn_ram(ho_byte, lo_byte, ho_addr, lo_addr)
@@ -2892,6 +2916,8 @@ class Z80(object) :
             self._reset_add_substract_flag()
 
     def _ld_r_addr_indx_d(self, r, rr) :
+        self._log_instruction_trace("LD %s, (%s + 0x%0.2X)" % \
+            (r, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
@@ -2901,7 +2927,8 @@ class Z80(object) :
         """
         LD r, (nn). Load register r from memory location (nn).
         """
-        self._log_instruction_trace("LD %s, (0x%X)" % (r, compose_word(*(self._read_nn()))))
+        self._log_instruction_trace("LD %s, (0x%0.2X)" % \
+            (r, compose_word(*(self._read_nn()))))
         ho_byte, lo_byte = self._read_nn()
         self._write_r(r, self._read_n_ram(ho_byte, lo_byte))
 
@@ -2918,7 +2945,7 @@ class Z80(object) :
         """
         LD r, n. Load register r with inmediate data n.
         """
-        self._log_instruction_trace("LD %s, 0x%X" % (r, self._read_n()))
+        self._log_instruction_trace("LD %s, 0x%0.2X" % (r, self._read_n()))
         self._write_r(r, self._read_n())
 
     def _ld_rr_addr_nn(self, rr) :
@@ -2927,7 +2954,7 @@ class Z80(object) :
         addressed by nn.
         """
         self._log_instruction_trace("LD %s, (0x%0.2X)" % (rr, \
-        compose_word(*self._read_nn())))
+            compose_word(*self._read_nn())))
         ho_addr, lo_addr = self._read_nn()
         ho_byte, lo_byte = self._read_nn_ram(ho_addr, lo_addr)
         self._write_rr(rr, compose_word(ho_byte, lo_byte))
@@ -2937,7 +2964,7 @@ class Z80(object) :
         LD rr, nn. Load register pair rr with inmediate data nn.
         """
         self._log_instruction_trace("LD %s, 0x%0.2X" % (rr, \
-        compose_word(*self._read_nn())))
+            compose_word(*self._read_nn())))
         self._write_rr(rr, compose_word(*self._read_nn()))
 
     def _ld_rr_rr(self, rr1, rr2) :
@@ -2962,19 +2989,19 @@ class Z80(object) :
         # Sets : N.
         self._log_instruction_trace("NEG")
 
-        if self._read_r('a') == 0x0 :
+        if self._read_r("a") == 0x0 :
             self._set_carry_flag()
         else :
             self._reset_carry_flag()
 
-        if self._read_r('a') == 0x80 :
+        if self._read_r("a") == 0x80 :
             self._set_parity_overflow_flag()
         else :
             self._reset_parity_overflow_flag()
 
-        self._write_r('a', twos_complement_byte(self._read_r('a')))
-        self._test_and_set_sign_flag(self._read_r('a'))
-        self._test_and_set_zero_flag(self._read_r('a'))
+        self._write_r("a", twos_complement_byte(self._read_r("a")))
+        self._test_and_set_sign_flag(self._read_r("a"))
+        self._test_and_set_zero_flag(self._read_r("a"))
         self._set_add_substract_flag()
 
     def _nop(self) :
@@ -2993,12 +3020,14 @@ class Z80(object) :
         """
         OR (rr + d).
         """
-        self._log_instruction_trace("OR (%s + 0x%0.2X)" % (rr, self._read_n()))
+        self._log_instruction_trace("OR (%s + 0x%0.2X)" % \
+            (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr()
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
-        self._or_flag_tests(self._read_r('a') | self._read_n_ram(ho_addr, lo_addr))
-        self._write_r('a', self._read_r('a') | \
+            lo_base_addr, self._read_n())
+        self._or_flag_tests(self._read_r("a") | \
+            self._read_n_ram(ho_addr, lo_addr))
+        self._write_r("a", self._read_r("a") | \
         self._read_n_ram(ho_addr, lo_addr))
 
     def _or_addr_rr(self, rr) :
@@ -3006,19 +3035,20 @@ class Z80(object) :
         OR (rr).
         """
         self._log_instruction_trace("OR (%s)" % rr)
-        self._or_flag_tests(self._read_r('a') | self._read_n_ram(*self._read_rr(rr)))
-        self._write_r('a', self._read_r('a') | \
-        self._read_n_ram(*self._read_rr(rr)))
+        self._or_flag_tests(self._read_r("a") | \
+            self._read_n_ram(*self._read_rr(rr)))
+        self._write_r("a", self._read_r("a") | \
+            self._read_n_ram(*self._read_rr(rr)))
 
     def _or_n(self) :
         self._log_instruction_trace("OR 0x%0.2X" % self._read_n())
-        self._or_flag_tests(self._read_r('a') | self._read_n())
-        self._write_r('a', self._read_r('a') | self._read_n())
+        self._or_flag_tests(self._read_r("a") | self._read_n())
+        self._write_r("a", self._read_r("a") | self._read_n())
 
     def _or_r(self, r) :
         self._log_instruction_trace("OR %s" % r)
-        self._or_flag_tests(self._read_r('a') | self._read_r(r))
-        self._write_r('a', self._read_r('a') | self._read_r(r))
+        self._or_flag_tests(self._read_r("a") | self._read_r(r))
+        self._write_r("a", self._read_r("a") | self._read_r(r))
 
     def _otdr(self) :
         pass
@@ -3035,16 +3065,15 @@ class Z80(object) :
             self._inc_n_pc(2)
 
     def _out_addr_n_r(self, r) :
-        self._log_instruction_trace("OUT (0x%0.2X), %s" % (self._read_n(), \
-        self._read_r(r)))
+        self._log_instruction_trace("OUT (0x%0.2X), %s" % (self._read_n(), r))
         self._write_io_port(self._read_n(), self._read_r(r))
 
     def _out_addr_r_n(self, r, n) :
-        self._log_instruction_trace("OUT (%s) %s" % (r, n))
+        self._log_instruction_trace("OUT (%s), 0x%0.2X" % (r, n))
         self._write_io_port(self._read_r(r), n)
 
     def _out_addr_r_r(self, r1, r2) :
-        self._log_instruction_trace("OUT (%s) %s" % (r1, r2))
+        self._log_instruction_trace("OUT (%s), %s" % (r1, r2))
         self._write_io_port(self._read_r(r1), self._read_r(r2))
 
     def _outd(self) :
@@ -3103,22 +3132,22 @@ class Z80(object) :
 
     def _res_n_indx_d(self, n, rr) :
         self._log_instruction_trace("RES 0x%0.2X, (%s + 0x%0.2X)" % \
-        (n, rr, self._read_n()))
+            (n, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) & n, \
-        ho_addr, lo_addr)
+            ho_addr, lo_addr)
    
     def _res_n_indx_d_r(self, n, rr, r) :
         """
         RES n, (rr + d), r. 
         """
         self._log_instruction_trace("RES 0x%0.2X, (%s + 0x%0.2X), %s" % \
-        (n, rr, self._read_n(), r))
+            (n, rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._write_r(r, self._read_r(r) & n)
         self._write_n_ram(self._read_r(r) & n, ho_addr, lo_addr)
 
@@ -3133,33 +3162,40 @@ class Z80(object) :
 
         if cc() :
             ho_addr, lo_addr = self._read_nn_stack()
-            self._write_rr('pc', compose_word(ho_addr, lo_addr))
+            self._write_rr("pc", compose_word(ho_addr, lo_addr))
             return
 
         self._inc_pc()
 
     def _reti(self) :
-        """ RETI. Returns from interrupt. """
+        """ RETI. Return from interrupt. """
 
         self._log_instruction_trace("RETI")
-        self._write_rr('pc', compose_word(*self._read_nn_stack()))
+        self._write_rr("pc", compose_word(*self._read_nn_stack()))
 
     def _retn(self) :
-        """ RETN. Returns from non-maskable interrupt. """
+        """ RETN. Return from non-maskable interrupt. """
 
         self._log_instruction_trace("RETN")
-        self._write_rr('pc', compose_word(*self._read_nn_stack()))
-        self._write_r('iff1', self._read_r('iff2'))
+        self._write_rr("pc", compose_word(*self._read_nn_stack()))
+        self._write_r("iff1", self._read_r("iff2"))
 
     def _ret_not_cc(self, cc) :
         self._log_instruction_trace("RET")
 
         if not cc() :
             ho_addr, lo_addr = self._read_nn_stack()
-            self._write_rr('pc', compose_word(ho_addr, lo_addr))
+            self._write_rr("pc", compose_word(ho_addr, lo_addr))
             return
 
         self._inc_pc()
+
+    def _rl_flag_tests(self, n) :
+        self._test_and_set_sign_flag(n)
+        self._test_and_set_zero_flag(n)
+        self._test_and_set_parity_flag(n)
+        self._reset_half_carry_flag()
+        self._reset_add_substract_flag()
 
     def _rl_addr_rr(self, rr) :
         """
@@ -3173,15 +3209,17 @@ class Z80(object) :
 
         if self._test_carry_flag() :
             self._write_n_ram(rotate_left_byte(byte, 1) | 0x1, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
         else :
             self._write_n_ram(rotate_left_byte(byte, 1) & 0xFE, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
 
         if byte & 0x80 :
             self._set_carry_flag()
         else :
             self._reset_carry_flag()
+
+        #self._rl_flag_tests(self._read_n_ram(ho_addr, lo_addr))
 
         # Flag tests.
         self._test_and_set_sign_flag(self._read_n_ram(ho_addr, lo_addr))
@@ -3202,20 +3240,22 @@ class Z80(object) :
         self._log_instruction_trace("RL (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
         if self._test_carry_flag() :
             self._write_n_ram(rotate_left_byte(byte, 1) | 0x1, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
         else :
             self._write_n_ram(rotate_left_byte(byte, 1) & 0xFE, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
 
         if byte & 0x80 :
             self._set_carry_flag()
         else :
             self._reset_carry_flag()
+
+        #self._rl_flag_tests(self._read_n_ram(ho_addr, lo_addr))
 
         # Flag tests.
         self._test_and_set_sign_flag(self._read_n_ram(ho_addr, lo_addr))
@@ -3225,6 +3265,7 @@ class Z80(object) :
         # Flag sets & resets.
         self._reset_half_carry_flag()
         self._reset_add_substract_flag()
+        
 
     def _rl_indx_d_r(self, rr, r) :
         """
@@ -3236,7 +3277,7 @@ class Z80(object) :
         self._log_instruction_trace("RL (%s + 0x%0.2X), %s" % (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_r(r)
         self._write_r(r, rotate_left_byte(self._read_r(r), 1))
 
@@ -3254,6 +3295,8 @@ class Z80(object) :
 
         # WARNING !!! Probar este cambio. 
         #self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
+
+        #self._rl_flag_tests(self._read_r(r))
 
         # Flag tests.
         self._test_and_set_sign_flag(self._read_r(r))
@@ -3284,6 +3327,8 @@ class Z80(object) :
         else :
             self._reset_carry_flag()
 
+        #self._rl_flag_tests(self._read_r(r))
+
         # Flag tests.
         self._test_and_set_sign_flag(self._read_r(r))
         self._test_and_set_zero_flag(self._read_r(r))
@@ -3300,8 +3345,8 @@ class Z80(object) :
         # Affects : C.
         # Resets : H, N.
         self._log_instruction_trace("RLA")
-        self._write_r('a', rotate_left_byte(self._read_r('a'), 1))
-        lsb = self._read_r('a') & 0x1
+        self._write_r("a", rotate_left_byte(self._read_r("a"), 1))
+        lsb = self._read_r("a") & 0x1
         carry_flag = self._test_carry_flag()
 
         if lsb :
@@ -3310,7 +3355,7 @@ class Z80(object) :
             self._reset_carry_flag()
 
         if carry_flag :
-            self._write_r('a', self._read_r('a') | 0x1)
+            self._write_r("a", self._read_r("a") | 0x1)
 
         self._reset_half_carry_flag()
         self._reset_add_substract_flag()
@@ -3327,7 +3372,7 @@ class Z80(object) :
         if self._read_n_ram(*self._read_rr(rr)) & 0x8 :
             self._set_carry_flag()
         else :
-            self._reset_carry_flag
+            self._reset_carry_flag()
 
         byte = self._read_n_ram(*self._read_rr(rr))
         byte = rotate_left_byte(byte, 1)
@@ -3352,12 +3397,12 @@ class Z80(object) :
         self._log_instruction_trace("RLC (%s + %d)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
 
         if self._read_n_ram(ho_addr, lo_addr) & 0x8 :
             self._set_carry_flag()
         else :
-            self._reset_carry_flag
+            self._reset_carry_flag()
 
         byte = self._read_n_ram(ho_addr, lo_addr)
         byte = rotate_left_byte(byte, 1)
@@ -3388,7 +3433,7 @@ class Z80(object) :
 
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._write_r(r, rotate_left_byte(self._read_r(r), 1))
         self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
 
@@ -3412,7 +3457,7 @@ class Z80(object) :
         if self._read_r(r) & 0x8 :
             self._set_carry_flag()
         else :
-            self._reset_carry_flag
+            self._reset_carry_flag()
 
         self._write_r(r, rotate_left_byte(self._read_r(r), 1))
 
@@ -3432,12 +3477,12 @@ class Z80(object) :
         # Affects : C.
         # Resets : H, N.
         self._log_instruction_trace("RLCA")
-        self._write_r('a', rotate_left_byte(self._read_r('a'), 1))
+        self._write_r("a", rotate_left_byte(self._read_r("a"), 1))
 
-        if self._read_r('a') & 0x1 :
+        if self._read_r("a") & 0x1 :
             self._set_carry_flag()
         else :
-            self._reset_carry_flag
+            self._reset_carry_flag()
 
         # Flags sets & resets.
         self._reset_half_carry_flag()
@@ -3455,10 +3500,10 @@ class Z80(object) :
 
         if self._test_carry_flag() :
             self._write_n_ram(rotate_right_byte(byte, 1) | 0x80, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
         else :
             self._write_n_ram(rotate_right_byte(byte, 1) & 0x7F, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
 
         if byte & 0x1 :
             self._set_carry_flag()
@@ -3481,18 +3526,19 @@ class Z80(object) :
         """
         # Affects : S, Z, P, C.
         # Resets : H, N.
+
         self._log_instruction_trace("RR (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
         if self._test_carry_flag() :
             self._write_n_ram(rotate_right_byte(byte, 1) | 0x80, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
         else :
             self._write_n_ram(rotate_right_byte(byte, 1) & 0x7F, \
-            ho_addr, lo_addr)
+                ho_addr, lo_addr)
 
         if byte & 0x1 :
             self._set_carry_flag()
@@ -3515,10 +3561,11 @@ class Z80(object) :
         """
         # Affects : S, Z, P, C.
         # Resets : H, N.
+
         self._log_instruction_trace("RR (%s + 0x%0.2X), %s" % (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_r(r)
         self._write_r(r, rotate_right_byte(self._read_r(r), 1))
 
@@ -3579,8 +3626,8 @@ class Z80(object) :
         # Affects : C.
         # Resets : H, N.
         self._log_instruction_trace("RRA")
-        self._write_r('a', rotate_right_byte(self._read_r('a'), 1))
-        lsb = self._read_r('a') & 0x1
+        self._write_r("a", rotate_right_byte(self._read_r("a"), 1))
+        lsb = self._read_r("a") & 0x1
         carry_flag = self._test_carry_flag()
 
         if lsb :
@@ -3589,7 +3636,7 @@ class Z80(object) :
             self._reset_carry_flag()
 
         if carry_flag :
-            self._write_r('a', self._read_r('a') | 0x1)
+            self._write_r("a", self._read_r("a") | 0x1)
 
         # Flags sets & resets.
         self._reset_half_carry_flag()
@@ -3632,7 +3679,7 @@ class Z80(object) :
         self._log_instruction_trace("RRC (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
 
         if self._read_n_ram(ho_addr, lo_addr) & 0x1 :
             self._set_carry_flag()
@@ -3668,7 +3715,7 @@ class Z80(object) :
 
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._write_r(r, rotate_right_byte(self._read_r(r), 1))
         self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
 
@@ -3713,12 +3760,12 @@ class Z80(object) :
         # Resets : H, N.
         self._log_instruction_trace("RRCA")
 
-        if self._read_r('a') & 0x1 :
+        if self._read_r("a") & 0x1 :
             self._set_carry_flag()
         else :
             self._reset_carry_flag()
 
-        self._write_r('a', rotate_right_byte(self._read_r('a'), 1))
+        self._write_r("a", rotate_right_byte(self._read_r("a"), 1))
 
         # Flag sets & resets.
         self._reset_half_carry_flag()
@@ -3729,42 +3776,56 @@ class Z80(object) :
         RLD. Rotate left decimal.
         """
         self._log_instruction_trace("RLD")
-        byte = self._read_n_ram(*self._read_rr('hl'))
+        byte = self._read_n_ram(*self._read_rr("hl"))
         ho_nibble, lo_nibble = decompose_byte(byte)
-        ho_a, lo_a = decompose_byte(self._read_r('a'))
-        self._write_r('a', compose_byte(ho_a, ho_nibble))
-        self._write_n_ram(compose_byte(lo_nibble, lo_a), *self._read_rr('hl'))
+        ho_a, lo_a = decompose_byte(self._read_r("a"))
+        self._write_r("a", compose_byte(ho_a, ho_nibble))
+        self._write_n_ram(compose_byte(lo_nibble, lo_a), *self._read_rr("hl"))
 
     def _rrd(self) :
         """
         RRD. Rotate right decimal.
         """
         self._log_instruction_trace("RRD")
-        byte = self._read_n_ram(*self._read_rr('hl'))
+        byte = self._read_n_ram(*self._read_rr("hl"))
         ho_nibble, lo_nibble = decompose_byte(byte)
-        ho_a, lo_a = decompose_byte(self._read_r('a'))
-        self._write_r('a', compose_byte(ho_a, lo_nibble))
-        self._write_n_ram(compose_byte(lo_a, ho_nibble), *self._read_rr('hl'))
+        ho_a, lo_a = decompose_byte(self._read_r("a"))
+        self._write_r("a", compose_byte(ho_a, lo_nibble))
+        self._write_n_ram(compose_byte(lo_a, ho_nibble), *self._read_rr("hl"))
 
     def _rst(self, lo_addr) :
         """
         RST. Restart at lo_addr.
         """
         self._log_instruction_trace("RST 0x%0.2X" % lo_addr)
-        self._write_nn_stack(*self._read_rr('pc'))
-        self._write_rr('pc', compose_word(0x0, lo_addr))
+        self._write_nn_stack(*self._read_rr("pc"))
+        self._write_rr("pc", compose_word(0x0, lo_addr))
+
+    def _sbc_flag_tests(self, n, m) :
+        # Affects : S, Z, H, P, C
+        # Sets : N.
+        l = n - m
+        self._test_and_set_sign_flag(l)
+        self._test_and_set_zero_flag(l)
+        self._test_and_set_half_carry_on_substract(n, m)
+        self._test_and_set_overflow_flag(n, m)
+        self._test_and_set_carry_flag(l)
+        self._set_add_substract_flag()
 
     def _sbc_r_addr_indx_d(self, r, rr) :
-        ho_addr, lo_addr = self._compute_indexed_address(ho_addr, lo_addr, \
-        self._read_n())
+        self._log_instruction_trace("SBC %s, (%s + 0x%0.2X)" % \
+            (r, rr, self._read_n()))
+        ho_base_addr, lo_base_addr = self._read_rr(rr)
+        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+            lo_base_addr, self._read_n())
         byte = self._read_r(r) - self._read_n_ram(ho_addr, lo_addr) - \
-        self._test_carry_flag()
+            self._test_carry_flag()
 
         # Flag tests.
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r), \
-        self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag())
+            self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag())
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
@@ -3774,13 +3835,13 @@ class Z80(object) :
     def _sbc_r_addr_rr(self, r, rr) :
         self._log_instruction_trace("SBC %s, 0x%0.2X" % (r, rr))
         byte = self._read_r(r) - self._read_n_ram(*self._read_rr(rr)) - \
-        self._test_carry_flag()
+            self._test_carry_flag()
 
         # Flag tests.
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r), \
-        self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag())
+            self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag())
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
@@ -3795,7 +3856,7 @@ class Z80(object) :
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r), \
-        self._read_n() - self._test_carry_flag())
+            self._read_n() - self._test_carry_flag())
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
@@ -3810,7 +3871,7 @@ class Z80(object) :
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r1), \
-        self._read_r(r2) - self._test_carry_flag())
+            self._read_r(r2) - self._test_carry_flag())
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
@@ -3862,9 +3923,9 @@ class Z80(object) :
         self._log_instruction_trace("SET 0x%0.2X, (%s + 0x%0.2X)" % (n, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
-        self._write_n_ram(self._read_n_ram(ho_addr, lo_adrr) | n, \
-        ho_addr, lo_addr)
+            lo_base_addr, self._read_n())
+        self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) | n, \
+            ho_addr, lo_addr)
 
     def _set_n_indx_d_r(self, n, rr, r) :
         """
@@ -3873,7 +3934,7 @@ class Z80(object) :
         self._log_instruction_trace("SET 0x%0.2X, (%s + 0x%0.2X), %s" % (n, rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._write_r(r, self._read_r(r) | n)
         self._write_n_ram(self._read_r(r) | n, ho_addr, lo_addr)
 
@@ -3918,10 +3979,10 @@ class Z80(object) :
         # Affects : S, Z, P, C.
         # Resets : H, N.
         self._log_instruction_trace("SLA (%s + 0x%0.2X), %s" % (rr, \
-        self._read_n(), r))
+            self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x80 :
             self._set_carry_flag()
@@ -3950,7 +4011,7 @@ class Z80(object) :
         self._log_instruction_trace("SLA (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
         self._write_n_ram(shift_left_byte(byte, 1), ho_addr, lo_addr)
 
@@ -3975,6 +4036,7 @@ class Z80(object) :
         # Affects : S, Z, P, C.
         # Resets : H, N.
         self._log_instruction_trace("SLA %s" % r)
+
         if self._read_r(r) & 0x80 :
             self._set_carry_flag()
         else :
@@ -4025,10 +4087,10 @@ class Z80(object) :
         # Affects : S, Z, P, C.
         # Resets : H, N.
         self._log_instruction_trace("SLL (%s + 0x%0.2X), %s" % (rr, \
-        self._read_n(), r))
+            self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x80 :
             self._set_carry_flag()
@@ -4057,7 +4119,7 @@ class Z80(object) :
         self._log_instruction_trace("SLL (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
         self._write_n_ram(shift_left_byte(byte, 1) | 0x1, ho_addr, lo_addr)
 
@@ -4136,10 +4198,11 @@ class Z80(object) :
         """
         # Affects : S, Z, P, C.
         # Resets : H, N.
-        self._log_instruction_trace("SRA (%s + 0x%0.2X)" % (rr, self._read_n()))
+        self._log_instruction_trace("SRA (%s + 0x%0.2X)" % \
+            (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
         if byte & 0x1 :
@@ -4169,10 +4232,10 @@ class Z80(object) :
         # Affects : S, Z, P, C.
         # Resets : H, N.
         self._log_instruction_trace("SRA (%s + 0x%0.2X), %s" % (rr, \
-        self._read_n(), r))
+            self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x1 :
             self._set_carry_flag()
@@ -4259,10 +4322,11 @@ class Z80(object) :
         """
         # Affects : S, Z, P, C.
         # Resets : H, N.
-        self._log_instruction_trace("SRL (%s + 0x%0.2X)" % (rr, self._read_n()))
+        self._log_instruction_trace("SRL (%s + 0x%0.2X)" % \
+            (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
         if byte & 0x1 :
@@ -4288,10 +4352,11 @@ class Z80(object) :
         """
         # Affects : S, Z, P, C.
         # Resets : H, N.
-        self._log_instruction_trace("SRL (%s + 0x%0.2X), %s" % (rr, self._read_n(), r))
+        self._log_instruction_trace("SRL (%s + 0x%0.2X), %s" % \
+            (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x1 :
             self._set_carry_flag()
@@ -4344,29 +4409,29 @@ class Z80(object) :
         self._set_add_substract_flag()
 
     def _sub_addr_indx_d(self, rr) :
+        self._log_instruction_trace("SUB (%s + %d)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
-        self._sub(self._read_r('a'), self._read_n_ram(ho_addr, lo_addr))
-        self._write_r('a', sub_bytes(self._read_r('a'), \
-        self._read_n_ram(ho_addr, lo_addr)))
-
+            lo_base_addr, self._read_n())
+        self._sub(self._read_r("a"), self._read_n_ram(ho_addr, lo_addr))
+        self._write_r("a", sub_bytes(self._read_r("a"), \
+            self._read_n_ram(ho_addr, lo_addr)))
 
     def _sub_addr_rr(self, rr) :
         self._log_instruction_trace("SUB (%s)" % rr)
-        self._sub(self._read_r('a'), self._read_n_ram(*self._read_rr(rr)))
-        self._write_r('a', sub_bytes(self._read_r('a'), \
-        self._read_n_ram(*self._read_rr(rr))))
+        self._sub(self._read_r("a"), self._read_n_ram(*self._read_rr(rr)))
+        self._write_r("a", sub_bytes(self._read_r("a"), \
+            self._read_n_ram(*self._read_rr(rr))))
 
     def _sub_n(self) :
         self._log_instruction_trace("SUB 0x%0.2X" % self._read_n())
-        self._sub(self._read_r('a'), self._read_n())
-        self._write_r('a', sub_bytes(self._read_r('a'), self._read_n()))
+        self._sub(self._read_r("a"), self._read_n())
+        self._write_r("a", sub_bytes(self._read_r("a"), self._read_n()))
 
     def _sub_r(self, r) :
         self._log_instruction_trace("SUB %s" % r)
-        self._sub(self._read_r('a'), self._read_r(r))
-        self._write_r('a', sub_bytes(self._read_r('a'), self._read_r(r)))
+        self._sub(self._read_r("a"), self._read_r(r))
+        self._write_r("a", sub_bytes(self._read_r("a"), self._read_r(r)))
 
     def _xor(self, n) :
         self._test_and_set_sign_flag(n)
@@ -4377,32 +4442,32 @@ class Z80(object) :
         self._reset_carry_flag()
 
     def _xor_addr_indx_d(self, rr) :
-        self._log_instruction_trace("XOR (%s + 0x%0.2X)" % (rr, self._read_n()))
+        self._log_instruction_trace("XOR (%s + 0x%0.2X)" % \
+            (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
-        byte = self._read_r('a') ^ self._read_n_ram(ho_addr, lo_addr)
-        self._write_r('a', byte)
+            lo_base_addr, self._read_n())
+        byte = self._read_r("a") ^ self._read_n_ram(ho_addr, lo_addr)
+        self._write_r("a", byte)
         self._xor(byte)
 
     def _xor_addr_rr(self, rr) :
         self._log_instruction_trace("XOR (%s)" % rr)
-        byte = self._read_r('a') ^ self._read_n_ram(*self._read_rr(rr))
-        self._write_r('a', byte)
+        byte = self._read_r("a") ^ self._read_n_ram(*self._read_rr(rr))
+        self._write_r("a", byte)
         self._xor(byte)
         
     def _xor_n(self) :
         self._log_instruction_trace("XOR %s" % self._read_n())
-        byte = self._read_r('a') ^ self._read_n()
-        self._write_r('a', byte)
+        byte = self._read_r("a") ^ self._read_n()
+        self._write_r("a", byte)
         self._xor(byte)
 
     def _xor_r(self, r) :
         self._log_instruction_trace("XOR %s" % r)
-        byte = self._read_r('a') ^ self._read_r(r)        
-        self._write_r('a', byte)
+        byte = self._read_r("a") ^ self._read_r(r)        
+        self._write_r("a", byte)
         self._xor(byte)
-
 
     def _test_and_set_sign_flag(self, n) :
         """

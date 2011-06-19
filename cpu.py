@@ -85,6 +85,9 @@ class CPU(object) :
         if not self.ram :
             raise NoRAM("No RAM module present.")
 
+        if cli_options["bdos_extension"] :
+            self.z80.bdos_extension = True
+
         self.z80.plug_ram(self.ram)
         self.z80.run(cli_options["start_address"])
 
@@ -93,7 +96,7 @@ if __name__ == "__main__" :
     ram64KiB = Ram64KiB()
     dummy_device = DummyDevice()
     dummy_device.name = "DUMMY_DEVICE"
-    dummy_device.address = 0xFF
+    dummy_device.address = 0x1
     
     # Computer.
     computer = CPU()
