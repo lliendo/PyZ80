@@ -3211,16 +3211,7 @@ class Z80(object) :
         else :
             self._reset_carry_flag()
 
-        #self._rl_flag_tests(self._read_n_ram(ho_addr, lo_addr))
-
-        # Flag tests.
-        self._test_and_set_sign_flag(self._read_n_ram(ho_addr, lo_addr))
-        self._test_and_set_zero_flag(self._read_n_ram(ho_addr, lo_addr))
-        self._test_and_set_parity_flag(self._read_n_ram(ho_addr, lo_addr))
-
-        # Flag sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_add_substract_flag()
+        self._rl_flag_tests(self._read_n_ram(ho_addr, lo_addr))
 
     def _rl_indx_d(self, rr) :
         """
@@ -3247,17 +3238,7 @@ class Z80(object) :
         else :
             self._reset_carry_flag()
 
-        #self._rl_flag_tests(self._read_n_ram(ho_addr, lo_addr))
-
-        # Flag tests.
-        self._test_and_set_sign_flag(self._read_n_ram(ho_addr, lo_addr))
-        self._test_and_set_zero_flag(self._read_n_ram(ho_addr, lo_addr))
-        self._test_and_set_parity_flag(self._read_n_ram(ho_addr, lo_addr))
-
-        # Flag sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_add_substract_flag()
-        
+        self._rl_flag_tests(self._read_n_ram(ho_addr, lo_addr))
 
     def _rl_indx_d_r(self, rr, r) :
         """
@@ -3288,16 +3269,7 @@ class Z80(object) :
         # WARNING !!! Probar este cambio. 
         #self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
 
-        #self._rl_flag_tests(self._read_r(r))
-
-        # Flag tests.
-        self._test_and_set_sign_flag(self._read_r(r))
-        self._test_and_set_zero_flag(self._read_r(r))
-        self._test_and_set_parity_flag(self._read_r(r))
-
-        # Flag sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_add_substract_flag()
+        self._rl_flag_tests(self._read_r(r))
 
     def _rl_r(self, r) :
         """
@@ -3319,16 +3291,7 @@ class Z80(object) :
         else :
             self._reset_carry_flag()
 
-        #self._rl_flag_tests(self._read_r(r))
-
-        # Flag tests.
-        self._test_and_set_sign_flag(self._read_r(r))
-        self._test_and_set_zero_flag(self._read_r(r))
-        self._test_and_set_parity_flag(self._read_r(r))
-
-        # Flag sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_add_substract_flag()
+        self._rl_flag_tests(self._read_r(r))
 
     def _rla(self) :
         """
