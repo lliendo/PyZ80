@@ -47,6 +47,19 @@ def test_word_sign(word) :
 
     return 0
 
+def compute_indexed_address(ho_base_addr, lo_base_addr, d) :
+    """ Computes an indexed address : base_addr + d. d is +127/-128 (displacement or offset).
+    """
+    if test_byte_sign(d) :
+        addr = compose_word(ho_base_addr, lo_base_addr) - \
+            twos_complement_byte(d)
+    else :
+        addr = compose_word(ho_base_addr, lo_base_addr) + d
+
+    ho_addr, lo_addr = decompose_word(addr)
+
+    return ho_addr, lo_addr
+
 def compose_byte(ho_nibble, lo_nibble) :
     """ Returns the composition of two nibbles into one byte. """
     return ((ho_nibble & 0xF) << 4) + (lo_nibble & 0xF)
@@ -151,21 +164,63 @@ def test_word_overflow(word) :
 
     return 0
 
-def test_signed_byte_overflow(n, m) :
-    n_sign_bit = n & 0x80
-    m_sign_bit = m & 0x80
+def binary(n, bits_alignment=8) :
+    """ Returns a string with the binary representation of n. """
 
-    if (n_sign_bit == m_sign_bit) and not(n_sign_bit == (n + m) & 0x80) :
+    return bin(n)[2:].zfill(bits_alignment)
+
+def dec_to_bin(x) :
+    """ Converts a decimal number to its twos complement
+        representation. """
+
+    #b = bin(x)[2:].zfill(8)
+    b = binary(x)
+    return x - (1 << len(b) if b[0] == '1' else 0)
+
+def test_signed_byte_overflow(n, m, op="ADD") :
+    n = dec_to_bin(n)
+    m = dec_to_bin(m)
+
+    if op == "ADD" :
+        l = n + m
+    else :
+        l = n - m
+
+    if (l > 0x7F) or (l < -0x80) :
         return 1
+
+    #n_sign_bit = n & 0x80
+    #m_sign_bit = m & 0x80
+
+    #if (n_sign_bit == m_sign_bit) and not(n_sign_bit == (n + m) & 0x80) :
+    #    return 1
 
     return 0
 
-def test_signed_word_overflow(n, m) :
-    n_sign_bit = n & 0x8000
-    m_sign_bit = m & 0x8000
+def test_signed_word_overflow(n, m, op="add") :
+    n = dec_to_bin(n)
+    m = dec_to_bin(m)
 
-    if (n_sign_bit == m_sign_bit) and not(n_sign_bit == (n + m) & 0x8000) :
+    if op == "add" :
+        l = n + m
+    else :
+        l = n - m
+
+    if (l > 0x7FFF) or (l < -0x8000) :
         return 1
+
+    #n_sign_bit = n & 0x8000
+    #m_sign_bit = m & 0x8000
+
+    #if (n_sign_bit == m_sign_bit) and (n_sign_bit != ((n + m) & 0x8000)) :
+    #    return 1
+
+    #if (n_sign_bit == m_sign_bit) and not(n_sign_bit == (n + m) & 0x8000) :
+    #    return 1
+
+    #if ((n_sign_bit == m_sign_bit) and (n_sign_bit != ((n + m) & 0x8000))) or \
+    #    (n + m > 0x7FFF) or (n + m < -0x8000) :
+    #    return 1
 
     return 0
 

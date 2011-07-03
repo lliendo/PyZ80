@@ -91,9 +91,7 @@ class DummyDevice(Device) :
 
     def read(self) :
         r = random.randint(0x0, 0xFF)
-        #print "Reading : 0x%0.2X" % r
         return r
 
     def write(self, byte) :
         sys.stdout.write(chr(byte))
-        #print "[Writing] H : 0x%0.2X, D : %c" % (byte, byte)

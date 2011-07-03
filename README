@@ -15,9 +15,9 @@ Using PyZ80 :
     command line options available. If impatient here's basic
     example :
     
-        python cpu.py -p /path/to/1st/binary:0x100,/path/to/2nd/binary:0x200 \
-                      -t /tmp/exec_trace.log
-                      -s 0xFF
+        python pyz80.py -p /path/to/1st/binary:0x100,/path/to/2nd/binary:0x200 \
+                        -t /tmp/exec_trace.log
+                        -s 0xFF
 
     The example above will perform the following actions :
 
@@ -35,6 +35,9 @@ Using PyZ80 :
     to /dev/null.
     When -s is not specified the emulator will start emulation
     from 0x0000.
+    The -b options adds very limited support of BDOS output
+    syscalls. This was added in order to test the emulator
+    using zexall.com and float.bin.
 
     In the example above note that if the first binary is more
     than 256 bytes long then the second binary will overwrite

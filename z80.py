@@ -1406,7 +1406,8 @@ class Z80(object) :
         0xDB : (self._in_r_addr_r, ("a",), 1),
         0xDC : (self._call_cc, (self._test_carry_flag,), 0),
         0xDD : self.dd_opcodes, # Ingress to self.dd_prefix. 
-        0xDE : (self._sbc_r_n, ("a",), 1),
+        #0xDE : (self._sbc_r_n, ("a",), 1),
+        0xDE : (self._sbc_r_n, ("a",), 2),
         0xDF : (self._rst, (0x18,), 0),
 
         0xE0 : (self._ret_not_cc, (self._test_parity_overflow_flag,), 0),
@@ -1491,7 +1492,7 @@ class Z80(object) :
             raise DeviceAddressInUse(device.name)
 
     def _log_instruction_trace(self, trace) :
-        self._log_trace(trace, left_justify=20)
+        self._log_trace(trace, left_justify=22)
 
     def _log_trace(self, trace, left_justify=1) :
         self._trace = "%s %s" % (self._trace, trace.ljust(left_justify))
@@ -1504,7 +1505,7 @@ class Z80(object) :
         return True
 
     def _log_trace_header(self) :
-        self._log_trace("\n PC     Instruction          A     SZYHXPNC  B    C    D    E    H    L    IR     IX     IY     SP     A'    SZYHXPNC'  B'   C'   D'   E'   H'   L'  \n")
+        self._log_trace("\n PC     Instruction            A     SZYHXPNC  B    C    D    E    H    L    IR     IX     IY     SP     A'    SZYHXPNC'  B'   C'   D'   E'   H'   L'  \n")
 
     def _fetch_instruction(self) :
         """ Fetches & stores the current instruction into the IR register. """
@@ -1809,18 +1810,6 @@ class Z80(object) :
         self._write_n_ram(lo_byte, *decompose_word(addr - 2))
         self._dec_n_sp(2)
 
-    def _compute_indexed_address(self, ho_base_addr, lo_base_addr, d) :
-        """ Computes an indexed address : base_addr + d. d is +127/-128 (displacement or offset).
-        """
-        if test_byte_sign(d) :
-            addr = compose_word(ho_base_addr, lo_base_addr) - \
-            twos_complement_byte(d)
-        else :
-            addr = compose_word(ho_base_addr, lo_base_addr) + d
-
-        ho_addr, lo_addr = decompose_word(addr)
-        return ho_addr, lo_addr
-
     def _inc_pc(self) :
         """ Increments the program counter by one. """
 
@@ -1862,14 +1851,6 @@ class Z80(object) :
         ho_addr, lo_addr = self._read_rr("sp")
         self._write_rr("sp", compose_word(ho_addr, lo_addr) - n)
 
-    def _binary_r(self, r) :
-        """ Returns the binary representation of register r.
-            :params:
-                r: The r register.
-        """
-        binary = bin(self._read_r(r))[2:]
-        return binary.zfill(8)
-
     def _registers_status(self) :
         a  = self._read_r("a")
         a_ = self._read_r("a_")
@@ -1881,8 +1862,8 @@ class Z80(object) :
         d_ = self._read_r("d_")
         e  = self._read_r("e")
         e_ = self._read_r("e_")
-        f  = self._binary_r("f")
-        f_ = self._binary_r("f_")
+        f  = binary(self._read_r("f"))
+        f_ = binary(self._read_r("f_"))
         h  = self._read_r("h")
         h_ = self._read_r("h_")
         l  = self._read_r("l")
@@ -1975,7 +1956,7 @@ class Z80(object) :
         self._log_instruction_trace("ADC %s, (%s + 0x%0.2X)" % \
             (r, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_r(r) + self._read_n_ram(ho_addr, lo_addr) + \
             self._test_carry_flag()
@@ -2048,7 +2029,7 @@ class Z80(object) :
         self._log_instruction_trace("ADD %s, (%s + 0x%0.2X)" % (r, rr, \
         self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
         self._add_flag_tests(self._read_r(r), self._read_n_ram(ho_addr, lo_addr))
         self._write_r(r, self._read_r(r) + self._read_n_ram(ho_addr, lo_addr))
@@ -2113,7 +2094,7 @@ class Z80(object) :
     def _and_addr_indx_d(self, rr) :
         self._log_instruction_trace("AND (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_r("a") & self._read_n_ram(ho_addr, lo_addr)
         self._and_flag_tests(byte)
@@ -2149,10 +2130,10 @@ class Z80(object) :
         # Resets : N.
         if n :
             self._reset_zero_flag()
-            self._reset_parity_overflow_flag()
+            #self._reset_parity_overflow_flag()
         else :
             self._set_zero_flag()
-            self._set_parity_overflow_flag()
+            #self._set_parity_overflow_flag()
 
         self._set_half_carry_flag()
         self._reset_add_substract_flag()
@@ -2190,7 +2171,7 @@ class Z80(object) :
         """
         self._log_instruction_trace("BIT 0x%0.2X, (%s + 0x%0.2X)" % (n, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._bit_flag_tests(self._read_n_ram(ho_addr, lo_addr) & n)
 
@@ -2287,14 +2268,15 @@ class Z80(object) :
         self._test_and_set_sign_flag(l)
         self._test_and_set_zero_flag(l)
         self._test_and_set_half_carry_on_substract(n, m)
-        self._test_and_set_overflow_flag(n, m)
+        #self._test_and_set_overflow_flag(n, m)
+        self._test_and_set_overflow_flag(n, m, "SUB")
         self._test_and_set_carry_flag(l)
         self._set_add_substract_flag()
 
     def _cp_addr_indx_d(self, rr) :
         self._log_instruction_trace("CP (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._cp_flag_tests(self._read_r("a"), self._read_n_ram(ho_addr, lo_addr))
 
@@ -2443,7 +2425,7 @@ class Z80(object) :
     def _dec_addr_indx_d(self, rr) :
         self._log_instruction_trace("DEC (%r + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._dec_flag_tests(self._read_n_ram(self, ho_addr, lo_addr), 1)
         self._write_n_ram(self._read_n_ram(self, ho_addr, lo_addr) - 1, \
@@ -2488,7 +2470,7 @@ class Z80(object) :
 
         if self._read_r("b") :
             ho_base_addr, lo_base_addr = self._read_rr("pc")
-            ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+            ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
                 lo_base_addr, self._read_n())
             self._write_rr("pc", compose_word(ho_addr, lo_addr))
 
@@ -2597,7 +2579,7 @@ class Z80(object) :
         """
         self._log_instruction_trace("INC (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._inc_flag_tests(self._read_n_ram(ho_addr, lo_addr), 1)
         self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) + 1, \
@@ -2723,7 +2705,7 @@ class Z80(object) :
 
     def _jr(self) :
         ho_base_addr, lo_base_addr = self._read_rr("pc")
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
         self._write_rr("pc", compose_word(ho_addr, lo_addr))
 
@@ -2779,7 +2761,7 @@ class Z80(object) :
         n, d = self._read_nn()
         self._log_instruction_trace("LD (%s + 0x%0.2X), 0x%0.2X" % (rr, d, n))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, d)
         self._write_n_ram(n, ho_addr, lo_addr)
 
@@ -2790,7 +2772,7 @@ class Z80(object) :
         """
         self._log_instruction_trace("LD (%s + 0x%0.2X), %s" % (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
 
@@ -2911,7 +2893,7 @@ class Z80(object) :
         self._log_instruction_trace("LD %s, (%s + 0x%0.2X)" % \
             (r, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
         lo_base_addr, self._read_n())
         self._write_r(r, self._read_n_ram(ho_addr, lo_addr))
 
@@ -3015,7 +2997,7 @@ class Z80(object) :
         self._log_instruction_trace("OR (%s + 0x%0.2X)" % \
             (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr()
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._or_flag_tests(self._read_r("a") | \
             self._read_n_ram(ho_addr, lo_addr))
@@ -3126,7 +3108,7 @@ class Z80(object) :
         self._log_instruction_trace("RES 0x%0.2X, (%s + 0x%0.2X)" % \
             (n, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) & n, \
             ho_addr, lo_addr)
@@ -3138,7 +3120,7 @@ class Z80(object) :
         self._log_instruction_trace("RES 0x%0.2X, (%s + 0x%0.2X), %s" % \
             (n, rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._write_r(r, self._read_r(r) & n)
         self._write_n_ram(self._read_r(r) & n, ho_addr, lo_addr)
@@ -3222,7 +3204,7 @@ class Z80(object) :
         # Resets : H, N.
         self._log_instruction_trace("RL (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
@@ -3249,7 +3231,7 @@ class Z80(object) :
         # Resets : H, N.
         self._log_instruction_trace("RL (%s + 0x%0.2X), %s" % (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_r(r)
         self._write_r(r, rotate_left_byte(self._read_r(r), 1))
@@ -3351,7 +3333,7 @@ class Z80(object) :
         # Resets : H, N.
         self._log_instruction_trace("RLC (%s + %d)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
 
         if self._read_n_ram(ho_addr, lo_addr) & 0x8 :
@@ -3387,7 +3369,7 @@ class Z80(object) :
             self._reset_carry_flag()
 
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._write_r(r, rotate_left_byte(self._read_r(r), 1))
         self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
@@ -3484,7 +3466,7 @@ class Z80(object) :
 
         self._log_instruction_trace("RR (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
@@ -3519,7 +3501,7 @@ class Z80(object) :
 
         self._log_instruction_trace("RR (%s + 0x%0.2X), %s" % (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_r(r)
         self._write_r(r, rotate_right_byte(self._read_r(r), 1))
@@ -3633,7 +3615,7 @@ class Z80(object) :
         # Resets : H, N.
         self._log_instruction_trace("RRC (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
 
         if self._read_n_ram(ho_addr, lo_addr) & 0x1 :
@@ -3669,7 +3651,7 @@ class Z80(object) :
             self._reset_carry_flag()
 
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._write_r(r, rotate_right_byte(self._read_r(r), 1))
         self._write_n_ram(self._read_r(r), ho_addr, lo_addr)
@@ -3756,31 +3738,36 @@ class Z80(object) :
         self._write_nn_stack(*self._read_rr("pc"))
         self._write_rr("pc", compose_word(0x0, lo_addr))
 
-    def _sbc_flag_tests(self, n, m) :
-        # Affects : S, Z, H, P, C
-        # Sets : N.
-        l = n - m
-        self._test_and_set_sign_flag(l)
-        self._test_and_set_zero_flag(l)
-        self._test_and_set_half_carry_on_substract(n, m)
-        self._test_and_set_overflow_flag(n, m)
-        self._test_and_set_carry_flag(l)
-        self._set_add_substract_flag()
+    #def _sbc_flag_tests(self, n, m) :
+    #    # Affects : S, Z, H, P, C
+    #    # Sets : N.
+    #    l = n - m
+    #    self._test_and_set_sign_flag(l)
+    #    self._test_and_set_zero_flag(l)
+    #    self._test_and_set_half_carry_on_substract(n, m)
+    #    #self._test_and_set_overflow_flag(n, m)
+    #    self._test_and_set_carry_flag(l)
+    #    self._set_add_substract_flag()
 
     def _sbc_r_addr_indx_d(self, r, rr) :
         self._log_instruction_trace("SBC %s, (%s + 0x%0.2X)" % \
             (r, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_r(r) - self._read_n_ram(ho_addr, lo_addr) - \
             self._test_carry_flag()
 
-        # Flag tests.
+        #self._sbc_flag_tests(self._read_r(r), \
+        #    self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag())
+
+        ## Flag tests.
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r), \
             self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag())
+        self._test_and_set_overflow_flag(self._read_r(r), \
+            self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag(), "SUB")
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
@@ -3792,11 +3779,16 @@ class Z80(object) :
         byte = self._read_r(r) - self._read_n_ram(*self._read_rr(rr)) - \
             self._test_carry_flag()
 
+        #self._sbc_flag_tests(self._read_r(r), \
+        #    self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag())
+
         # Flag tests.
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r), \
             self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag())
+        self._test_and_set_overflow_flag(self._read_r(r), \
+            self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag(), "SUB")
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
@@ -3807,11 +3799,16 @@ class Z80(object) :
         self._log_instruction_trace("SBC %s, 0x%0.2X" % (r, self._read_n()))
         byte = self._read_r(r) - self._read_n() - self._test_carry_flag()
 
+        #self._sbc_flag_tests(self._read_r(r), \
+        #    self._read_n() - self._test_carry_flag())
+
         # Flag tests.
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r), \
             self._read_n() - self._test_carry_flag())
+        self._test_and_set_overflow_flag(self._read_r(r), \
+            self._read_n() - self._test_carry_flag(), "SUB")
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
@@ -3822,25 +3819,30 @@ class Z80(object) :
         self._log_instruction_trace("SBC %s, %s" % (r1, r2))
         byte = self._read_r(r1) - self._read_r(r2) - self._test_carry_flag()
 
+        #self._sbc_flag_tests(self._read_r(r1), \
+        #    self._read_r(r2) - self._test_carry_flag())
+
         # Flag tests.
         self._test_and_set_sign_flag(byte)
         self._test_and_set_zero_flag(byte)
         self._test_and_set_half_carry_on_substract(self._read_r(r1), \
             self._read_r(r2) - self._test_carry_flag())
+        self._test_and_set_overflow_flag(self._read_r(r1), \
+            self._read_r(r2) - self._test_carry_flag(), "SUB")
         self._test_and_set_carry_flag(byte)
 
         # Flags sets & resets.
         self._set_add_substract_flag()
         self._write_r(r1, byte)
 
-    def _sbc_word(self, n, m) :
+    def _sbc_word_flag_tests(self, n, m) :
         # Affects : S, Z, H, P, C
         # Resets : N.
         sub = n - m
         self._test_and_set_sign_flag_word(sub)
         self._test_and_set_zero_flag_word(sub)
         self._test_and_set_half_carry_on_substract_word(n, m)
-        self._test_and_set_overflow_flag_word(n, m)
+        self._test_and_set_overflow_flag_word(n, m, "SUB")
         self._test_and_set_carry_flag_word(sub)
         self._set_add_substract_flag()
 
@@ -3849,7 +3851,7 @@ class Z80(object) :
         word_rr1 = compose_word(*self._read_rr(rr1))
         word_rr2 = compose_word(*self._read_rr(rr2))
         carry = self._test_carry_flag()
-        self._sbc_word(word_rr1, word_rr2 - carry)
+        self._sbc_word_flag_tests(word_rr1, word_rr2 - carry)
         self._write_rr(rr1, sub_words(word_rr1, word_rr2, carry))
 
     def _scf(self) :
@@ -3877,7 +3879,7 @@ class Z80(object) :
         """
         self._log_instruction_trace("SET 0x%0.2X, (%s + 0x%0.2X)" % (n, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._write_n_ram(self._read_n_ram(ho_addr, lo_addr) | n, \
             ho_addr, lo_addr)
@@ -3888,7 +3890,7 @@ class Z80(object) :
         """
         self._log_instruction_trace("SET 0x%0.2X, (%s + 0x%0.2X), %s" % (n, rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         self._write_r(r, self._read_r(r) | n)
         self._write_n_ram(self._read_r(r) | n, ho_addr, lo_addr)
@@ -3936,7 +3938,7 @@ class Z80(object) :
         self._log_instruction_trace("SLA (%s + 0x%0.2X), %s" % (rr, \
             self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x80 :
@@ -3965,7 +3967,7 @@ class Z80(object) :
         # Resets : H, N.
         self._log_instruction_trace("SLA (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
         self._write_n_ram(shift_left_byte(byte, 1), ho_addr, lo_addr)
@@ -4044,7 +4046,7 @@ class Z80(object) :
         self._log_instruction_trace("SLL (%s + 0x%0.2X), %s" % (rr, \
             self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x80 :
@@ -4073,7 +4075,7 @@ class Z80(object) :
         # Resets : H, N.
         self._log_instruction_trace("SLL (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
         self._write_n_ram(shift_left_byte(byte, 1) | 0x1, ho_addr, lo_addr)
@@ -4156,7 +4158,7 @@ class Z80(object) :
         self._log_instruction_trace("SRA (%s + 0x%0.2X)" % \
             (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
@@ -4189,7 +4191,7 @@ class Z80(object) :
         self._log_instruction_trace("SRA (%s + 0x%0.2X), %s" % (rr, \
             self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x1 :
@@ -4280,7 +4282,7 @@ class Z80(object) :
         self._log_instruction_trace("SRL (%s + 0x%0.2X)" % \
             (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_n_ram(ho_addr, lo_addr)
 
@@ -4310,7 +4312,7 @@ class Z80(object) :
         self._log_instruction_trace("SRL (%s + 0x%0.2X), %s" % \
             (rr, self._read_n(), r))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
 
         if self._read_r(r) & 0x1 :
@@ -4354,41 +4356,41 @@ class Z80(object) :
         self._reset_half_carry_flag()
         self._reset_add_substract_flag()
 
-    def _sub(self, n, m) :
+    def _sub_flag_tests(self, n, m) :
         sub = n - m
         self._test_and_set_sign_flag(sub)
         self._test_and_set_zero_flag(sub)
         self._test_and_set_half_carry_on_substract(n, m)
-        self._test_and_set_overflow_flag(n, m)
+        self._test_and_set_overflow_flag(n, m, "SUB")
         self._test_and_set_carry_flag(sub)
         self._set_add_substract_flag()
 
     def _sub_addr_indx_d(self, rr) :
         self._log_instruction_trace("SUB (%s + %d)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
-        self._sub(self._read_r("a"), self._read_n_ram(ho_addr, lo_addr))
+        self._sub_flag_tests(self._read_r("a"), self._read_n_ram(ho_addr, lo_addr))
         self._write_r("a", sub_bytes(self._read_r("a"), \
             self._read_n_ram(ho_addr, lo_addr)))
 
     def _sub_addr_rr(self, rr) :
         self._log_instruction_trace("SUB (%s)" % rr)
-        self._sub(self._read_r("a"), self._read_n_ram(*self._read_rr(rr)))
+        self._sub_flag_tests(self._read_r("a"), self._read_n_ram(*self._read_rr(rr)))
         self._write_r("a", sub_bytes(self._read_r("a"), \
             self._read_n_ram(*self._read_rr(rr))))
 
     def _sub_n(self) :
         self._log_instruction_trace("SUB 0x%0.2X" % self._read_n())
-        self._sub(self._read_r("a"), self._read_n())
+        self._sub_flag_tests(self._read_r("a"), self._read_n())
         self._write_r("a", sub_bytes(self._read_r("a"), self._read_n()))
 
     def _sub_r(self, r) :
         self._log_instruction_trace("SUB %s" % r)
-        self._sub(self._read_r("a"), self._read_r(r))
+        self._sub_flag_tests(self._read_r("a"), self._read_r(r))
         self._write_r("a", sub_bytes(self._read_r("a"), self._read_r(r)))
 
-    def _xor(self, n) :
+    def _xor_flag_tests(self, n) :
         self._test_and_set_sign_flag(n)
         self._test_and_set_zero_flag(n)
         self._test_and_set_parity_flag(n)
@@ -4400,29 +4402,29 @@ class Z80(object) :
         self._log_instruction_trace("XOR (%s + 0x%0.2X)" % \
             (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
-        ho_addr, lo_addr = self._compute_indexed_address(ho_base_addr, \
+        ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
         byte = self._read_r("a") ^ self._read_n_ram(ho_addr, lo_addr)
         self._write_r("a", byte)
-        self._xor(byte)
+        self._xor_flag_tests(byte)
 
     def _xor_addr_rr(self, rr) :
         self._log_instruction_trace("XOR (%s)" % rr)
         byte = self._read_r("a") ^ self._read_n_ram(*self._read_rr(rr))
         self._write_r("a", byte)
-        self._xor(byte)
+        self._xor_flag_tests(byte)
         
     def _xor_n(self) :
         self._log_instruction_trace("XOR %s" % self._read_n())
         byte = self._read_r("a") ^ self._read_n()
         self._write_r("a", byte)
-        self._xor(byte)
+        self._xor_flag_tests(byte)
 
     def _xor_r(self, r) :
         self._log_instruction_trace("XOR %s" % r)
         byte = self._read_r("a") ^ self._read_r(r)        
         self._write_r("a", byte)
-        self._xor(byte)
+        self._xor_flag_tests(byte)
 
     def _test_and_set_sign_flag(self, n) :
         """
@@ -4478,11 +4480,12 @@ class Z80(object) :
 
         self._reset_parity_overflow_flag()
 
-    def _test_and_set_overflow_flag(self, n, m) :
+    #def _test_and_set_overflow_flag(self, n, m) :
+    def _test_and_set_overflow_flag(self, n, m, op="ADD") :
         """
         Tests byte and sets V according to result.
         """
-        if test_signed_byte_overflow(n, m) :
+        if test_signed_byte_overflow(n, m, op) :
             self._set_parity_overflow_flag()
             return
 
@@ -4535,8 +4538,8 @@ class Z80(object) :
         
         self._reset_parity_overflow_flag()
 
-    def _test_and_set_overflow_flag_word(self, n, m) :
-        if test_signed_word_overflow(n, m) :
+    def _test_and_set_overflow_flag_word(self, n, m, op="ADD") :
+        if test_signed_word_overflow(n, m, op) :
             self._set_parity_overflow_flag()
             return
 
