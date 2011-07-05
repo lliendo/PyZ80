@@ -34,8 +34,8 @@ Using PyZ80 :
     When -t is not supplied log activity is discarded by writing
     to /dev/null.
     When -s is not specified the emulator will start emulation
-    from 0x0000.
-    The -b options adds very limited support of BDOS output
+    at 0x0000.
+    The -b options adds VERY limited support of BDOS output
     syscalls. This was added in order to test the emulator
     using zexall.com and float.bin.
 

@@ -42,7 +42,7 @@ class CPU(object) :
         self.z80 = Z80()
 
     def _read_program(self, path) :
-        fd = open(path)
+        fd = open(path, "rb")
         opcodes = fd.read()
 
         try :

@@ -2124,16 +2124,17 @@ class Z80(object) :
         self._and_flag_tests(byte)
         self._write_r("a", byte)
 
-    def _bit_flag_tests(self, n) :
+    def _bit_flag_tests(self, n, test_bit) :
         # Affects : Z.
         # Sets : H.
         # Resets : N.
         if n :
             self._reset_zero_flag()
-            #self._reset_parity_overflow_flag()
+
+            if test_bit == 0x80 :
+                self._set_sign_flag()
         else :
             self._set_zero_flag()
-            #self._set_parity_overflow_flag()
 
         self._set_half_carry_flag()
         self._reset_add_substract_flag()
@@ -2173,21 +2174,21 @@ class Z80(object) :
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
-        self._bit_flag_tests(self._read_n_ram(ho_addr, lo_addr) & n)
+        self._bit_flag_tests(self._read_n_ram(ho_addr, lo_addr) & n, n)
 
     def _bit_n_addr_rr(self, n, rr) :
         """
         BIT n, (rr). Test bit n of byte pointed by rr.
         """
         self._log_instruction_trace("BIT 0x%0.2X, (%s)" % (n, rr))
-        self._bit_flag_tests(self._read_n_ram(*self._read_rr(rr)) & n)
+        self._bit_flag_tests(self._read_n_ram(*self._read_rr(rr)) & n, n)
 
     def _bit_n_r(self, n, r) :
         """
         BIT n, r. Test bit n of register r.
         """
         self._log_instruction_trace("BIT 0x%0.2X, %s" % (n, r))
-        self._bit_flag_tests(self._read_r(r) & n)
+        self._bit_flag_tests(self._read_r(r) & n, n)
 
     def _call(self) :
         ho_byte, lo_byte = self._read_nn()
