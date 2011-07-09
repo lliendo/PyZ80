@@ -1449,14 +1449,13 @@ class Z80(object) :
         self.opcodes = None
 
         # Debug.
-        #self._force_flag_register(0x15)
         self._trace = ""
 
     def _force_flag_register(self, byte) :
+        """ Force the f register to byte.
+            This method is used ONLY for testing purposes.
         """
-        Force the f register to byte.
-        This method is used ONLY for testing purposes.
-        """
+
         self._write_r("f", byte)
 
     @property
@@ -1476,12 +1475,16 @@ class Z80(object) :
         self._bdos_extension = value
 
     def plug_ram(self, ram) :
+        """ Sets the RAM module of the emulator. """
+
         if not self.ram :
             self.ram = ram
         else :
             raise RAMModulePresent
 
     def plug_device(self, device) :
+        """ Installs a device to the processor. """
+
         if not self.devices :
             self.devices = {}
             
@@ -1498,13 +1501,21 @@ class Z80(object) :
         self._trace = "%s %s" % (self._trace, trace.ljust(left_justify))
 
     def _print_trace(self) :
+        """ Writes the current trace to the logger. """
+
         self._logger.write(self._trace)
         self._trace = ""
 
     def _dummy_true(self) :
+        """ This method is used only on some instruction just
+            to make a condition true.
+        """
+
         return True
 
     def _log_trace_header(self) :
+        """ Writes a header to the logfile. """
+
         self._log_trace("\n PC     Instruction            A     SZYHXPNC  B    C    D    E    H    L    IR     IX     IY     SP     A'    SZYHXPNC'  B'   C'   D'   E'   H'   L'  \n")
 
     def _fetch_instruction(self) :
@@ -1514,17 +1525,18 @@ class Z80(object) :
         self._write_rr("ir", self.ram.read(addr))
 
     def _fetch_instruction_ahead(self) :
+        """ Fetches & stores the instruction which is 2 bytes ahead
+            into the IR register. This method is only used when
+            processing the DDCB or FDCB instructions.
         """
-        Fetches & stores the instruction which is 2 bytes ahead
-        into the IR register. This method is only used when
-        processing the DDCB or FDCB instructions.
-        """
+
         addr = compose_word(*self._read_rr("pc")) + 2
         self._write_rr("ir", self.ram.read(addr))
 
     def _test_sign_flag(self) :
         """ Tests the sign flag (S) of the f register.     
-            returns: 1 if set, otherwise 0. 
+            :return:
+                1 if the S flag is set, otherwise 0.
         """
 
         if self.registers["f"] & 0x80 :
@@ -1545,7 +1557,8 @@ class Z80(object) :
 
     def _test_zero_flag(self) :
         """ Tests the zero flag (Z) of the f register. 
-            returns: 1 if set, otherwise 0. 
+            :return:
+                1 if the Z flag is set, otherwise 0.
         """
 
         if self.registers["f"] & 0x40 :
@@ -1566,7 +1579,8 @@ class Z80(object) :
 
     def _test_half_carry_flag(self) :
         """ Tests the half carry flag (H) of the f register. 
-            returns: 1 if set, otherwise 0. 
+            :return:
+                1 if the H flag is set, otherwise 0.
         """
 
         if self.registers["f"] & 0x10 :
@@ -1587,7 +1601,8 @@ class Z80(object) :
 
     def _test_parity_overflow_flag(self) :
         """ Tests the parity/overflow (P) flag of the f register. 
-            returns: 1 if set, otherwise 0. 
+            :return:
+                1 if the P flag is set, otherwise 0.
         """
 
         if self.registers["f"] & 0x4 :
@@ -1608,7 +1623,8 @@ class Z80(object) :
 
     def _test_add_substract_flag(self) :
         """ Tests the add/substract (N) flag of the f register. 
-            returns: 1 if set, otherwise 0. 
+            :return:
+                1 if the N flag is set, otherwise 0.
         """
 
         if self.registers["f"] & 0x2 :
@@ -1629,7 +1645,8 @@ class Z80(object) :
 
     def _test_carry_flag(self) :
         """ Tests the carry flag (C) of the f register. 
-            returns: 1 if set, otherwise 0. 
+            :return:
+                1 if the C flag is set, otherwise 0.
         """
 
         if self.registers["f"] & 0x1 :
@@ -1649,9 +1666,14 @@ class Z80(object) :
             self.registers["f"] ^= 0x1
 
     def _read_ix_iy_byte(self, r) :
+        """ Reads a byte from either ixh, ixl, iyh or iyl registers.
+            :params:
+                r: The register to read.
+
+            :return:
+                The byte in the r register.
         """
-        Reads a byte from either ixh, ixl, iyh or iyl registers.
-        """
+
         ho_byte, lo_byte = self._read_rr(r[:2])
         if (r == "ixh") or (r == "iyh") :
             return ho_byte
@@ -1659,9 +1681,12 @@ class Z80(object) :
         return lo_byte
 
     def _write_ix_iy_byte(self, r, byte) :
+        """ Writes byte on either ixh, ixl, iyx or iyl registers. 
+            :params:
+                r: The register to write.
+                byte: The byte to write.
         """
-        Writes byte on either ixh, ixl, iyx or iyl registers.
-        """
+
         if (r == "ixh") or (r == "iyh") :
             lo_byte = self._read_ix_iy_byte(r[:2] + "l")
             self._write_rr(r[:2], compose_word(byte, lo_byte))
@@ -1671,9 +1696,12 @@ class Z80(object) :
         self._write_rr(r[:2], compose_word(ho_byte, byte))
 
     def _write_r(self, r, byte) :
+        """ Writes the r register.
+            :params:
+                r: The register to write.
+                byte: The byte to write.
         """
-        Writes the r register.
-        """
+
         ix_iy_registers = ["ixh", "ixl", "iyh", "iyl"]
         if r in ix_iy_registers :
             self._write_ix_iy_byte(r, byte)
@@ -1720,8 +1748,10 @@ class Z80(object) :
 
     def _read_n(self) :
         """ Reads a byte from RAM. The address of byte
-        is relative to the current value of the PC
-        (program counter).
+            is relative to the current value of the PC
+            (program counter).
+            :return:
+                The read byte.
         """
 
         addr = compose_word(*self._read_rr("pc"))
@@ -1729,8 +1759,10 @@ class Z80(object) :
 
     def _read_nn(self) :
         """ Reads a word from RAM. The address of word
-        is relative to the current value of the PC
-        (program counter).
+            is relative to the current value of the PC
+            (program counter).
+            :return:
+                A tuple with the 2 bytes relative to PC.
         """
 
         addr = compose_word(*self._read_rr("pc"))
@@ -1787,9 +1819,9 @@ class Z80(object) :
 
     def _read_nn_stack(self) :
         """ Pops a word from the stack. 
-        
             :return:
-                
+                A tuple containing the bytes at the top
+                of the stack.
         """
 
         ho_addr, lo_addr = self._read_rr("sp")
@@ -1852,6 +1884,11 @@ class Z80(object) :
         self._write_rr("sp", compose_word(ho_addr, lo_addr) - n)
 
     def _registers_status(self) :
+        """ Gets the current status of the CPU. 
+            :return:
+                A formatted string with the CPU status.
+        """
+
         a  = self._read_r("a")
         a_ = self._read_r("a_")
         b  = self._read_r("b")
@@ -1878,9 +1915,9 @@ class Z80(object) :
         h, l, ir, ix, iy, sp, a_, f_, b_, c_, d_, e_, h_, l_)
 
     def run(self, start_address) :
-        """
-        Starts the execution of a program located at
-        start_address.
+        """ Starts the execution of a program located at start_address.
+            :params:
+                start_address: The initial address from which start emulation.
         """
 
         if self._bdos_extension :
@@ -1920,9 +1957,8 @@ class Z80(object) :
                 self._fetch_instruction_ahead()
 
     def _execute_opcode(self) :
-        """
-        Execute opcode. If opcode is invalid or 
-        not implemented an UnknownOpcode exception is raised.
+        """ Execute opcode. If opcode is invalid or 
+            not implemented an UnknownOpcode exception is raised.
         """
 
         try :
@@ -1931,7 +1967,6 @@ class Z80(object) :
             self._log_trace(self._registers_status())
 
         except KeyError :
-            #self.ram.dump_ram_range(self._read_r("pc") - 2, self._read_r("pc") + 2)
             print "0x%0.4X" % self._read_r("pc")
             raise UnknownOpcode("Unknown opcode : 0x%0.2X" % self._read_r("ir"))
 
@@ -1950,9 +1985,12 @@ class Z80(object) :
         self._reset_add_substract_flag()
 
     def _adc_r_addr_indx_d(self, r, rr) :
+        """ ADC r, (rr + d).
+            :params:
+                r:
+                rr: 
         """
-        ADC r, (rr + d).
-        """
+
         self._log_instruction_trace("ADC %s, (%s + 0x%0.2X)" % \
             (r, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
@@ -1965,9 +2003,12 @@ class Z80(object) :
         self._write_r(r, byte)
 
     def _adc_r_addr_rr(self, r, rr) :
+        """ ADC r, (rr).
+            :params:
+                r:
+                rr:
         """
-        ADC r, (rr).
-        """
+
         self._log_instruction_trace("ADC %s, (%s)" % (r, rr))
         byte = self._read_r(r) + self._read_n_ram(*(self._read_rr(rr))) + \
             self._test_carry_flag()
@@ -1976,9 +2017,11 @@ class Z80(object) :
         self._write_r(r, byte)
 
     def _adc_r_n(self, r) :
+        """ ADC r, n. Add r and n with carry.
+            :params:
+                r: 
         """
-        ADC r, n. Add r and n with carry.
-        """
+
         self._log_instruction_trace("ADC %s, 0x%0.2X" % (r, self._read_n()))
         byte = self._read_r(r) + self._read_n() + self._test_carry_flag()
         self._adc_flag_tests(self._read_r(r), \
@@ -1986,9 +2029,12 @@ class Z80(object) :
         self._write_r(r, byte)
 
     def _adc_r_r(self, r1, r2) :
+        """ ADC r, r'. Add r1 and r2 with carry.
+            :params:
+                r1:
+                r2:
         """
-        ADC r, r'. Add r1 and r2 with carry.
-        """
+
         self._log_instruction_trace("ADC %s, %s" % (r1, r2))
         byte = self._read_r(r1) + self._read_r(r2) + \
             self._test_carry_flag()
@@ -2035,10 +2081,13 @@ class Z80(object) :
         self._write_r(r, self._read_r(r) + self._read_n_ram(ho_addr, lo_addr))
 
     def _add_r_addr_rr(self, r, rr) :
+        """ ADD r, (rr). Add accumulator with indirectly addressed 
+            memory location (rr).
+            :params:
+                r:
+                rr:
         """
-        ADD r, (rr). Add accumulator with indirectly addressed 
-        memory location (rr).
-        """
+
         self._log_instruction_trace("ADD %s, (%s)" % (r, rr))
         self._add_flag_tests(self._read_r(r), self._read_n_ram(*self._read_rr(rr)))
         self._write_r(r, self._read_r(r) + self._read_n_ram(*self._read_rr(rr)))
@@ -2077,6 +2126,12 @@ class Z80(object) :
         self._reset_add_substract_flag()
 
     def _add_rr_rr(self, rr1, rr2) :
+        """ ADD rr, rr'
+            :params:
+                r1:
+                r2:
+        """
+
         self._log_instruction_trace("ADD %s, %s" % (rr1, rr2))
         word_rr1 = compose_word(*self._read_rr(rr1))
         word_rr2 = compose_word(*self._read_rr(rr2))
@@ -2084,6 +2139,16 @@ class Z80(object) :
         self._write_rr(rr1, word_rr1 + word_rr2)
 
     def _and_flag_tests(self, n) :
+        """ Helper method that performs all flag tests of
+            the AND instruction.
+            :params:
+                n: The value to test.
+        """
+
+        # Affects : S, Z, P.
+        # Sets : H.
+        # Resets : N, C.       
+
         self._test_and_set_sign_flag(n)
         self._test_and_set_zero_flag(n)
         self._test_and_set_parity_flag(n)
@@ -2092,6 +2157,11 @@ class Z80(object) :
         self._reset_carry_flag()
 
     def _and_addr_indx_d(self, rr) :
+        """ AND (rr + d).
+            :params:
+                rr: A double paired register.
+        """
+
         self._log_instruction_trace("AND (%s + 0x%0.2X)" % (rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
@@ -2101,33 +2171,47 @@ class Z80(object) :
         self._write_r("a", byte)
 
     def _and_addr_rr(self, rr) :
+        """ AND rr
+            :params:
+                rr: A double paired register.
+        """
+
         self._log_instruction_trace("AND (%s)" % rr)
         byte = self._read_r("a") & self._read_n_ram(*self._read_rr(rr))
         self._and_flag_tests(byte)
         self._write_r("a", byte)
 
     def _and_n(self) :
-        """
-        AND n. Logical AND accumulator with n.
-        """
+        """ AND n. Logical AND accumulator with n. """
+
         self._log_instruction_trace("AND 0x%0.2X" % self._read_n())
         byte = self._read_r("a") & self._read_n()
         self._and_flag_tests(byte)
         self._write_r("a", byte)
 
     def _and_r(self, r) :
+        """ AND r. Logical AND accumulator with register r.
+            :params:
+                r: The register to AND with the accumulator.
         """
-        AND r. Logical AND accumulator with register r.
-        """
+
         self._log_instruction_trace("AND %s" % r)
         byte = self._read_r("a") & self._read_r(r)
         self._and_flag_tests(byte)
         self._write_r("a", byte)
 
     def _bit_flag_tests(self, n, test_bit) :
-        # Affects : Z.
+        """ Helper method that performs all flag tests of
+            the BIT instruction.
+            :params:
+                n: The result of the BIT instruction.
+                test_bit: The bit being tested.
+        """
+
+        # Affects : S, Z.
         # Sets : H.
         # Resets : N.
+
         if n :
             self._reset_zero_flag()
 
@@ -2167,9 +2251,12 @@ class Z80(object) :
         }
 
     def _bit_n_indx_d(self, n, rr) :
+        """ BIT n, (rr + d). Test bit n of byte pointed by (rr + d).
+            :params:
+                n:
+                rr:
         """
-        BIT n, (rr + d). Test bit n of byte pointed by (rr + d).
-        """
+
         self._log_instruction_trace("BIT 0x%0.2X, (%s + 0x%0.2X)" % (n, rr, self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
@@ -2177,9 +2264,12 @@ class Z80(object) :
         self._bit_flag_tests(self._read_n_ram(ho_addr, lo_addr) & n, n)
 
     def _bit_n_addr_rr(self, n, rr) :
+        """ BIT n, (rr). Test bit n of byte pointed by rr.
+            :params:
+                n: 
+                rr:
         """
-        BIT n, (rr). Test bit n of byte pointed by rr.
-        """
+
         self._log_instruction_trace("BIT 0x%0.2X, (%s)" % (n, rr))
         self._bit_flag_tests(self._read_n_ram(*self._read_rr(rr)) & n, n)
 
