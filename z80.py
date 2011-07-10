@@ -1929,8 +1929,8 @@ class Z80(object) :
 
         # Note : When the program counter reaches 0xFFFF we
         # start all over again. This is not a bug, (as the
-        # pc is 16 bits long, when we reach 0xFFFF pc is under
-        # an overflow condition and holds 0x0).
+        # pc is 16 bits long, when we reach 0xFFFF the pc is 
+        # under an overflow condition and holds 0x0).
 
         while self._read_r("pc") <= 0xFFFF :
             self._log_trace("0x%0.4X" % compose_word(*self._read_rr("pc")))
@@ -3829,16 +3829,13 @@ class Z80(object) :
         self._write_nn_stack(*self._read_rr("pc"))
         self._write_rr("pc", compose_word(0x0, lo_addr))
 
-    #def _sbc_flag_tests(self, n, m) :
-    #    # Affects : S, Z, H, P, C
-    #    # Sets : N.
-    #    l = n - m
-    #    self._test_and_set_sign_flag(l)
-    #    self._test_and_set_zero_flag(l)
-    #    self._test_and_set_half_carry_on_substract(n, m)
-    #    #self._test_and_set_overflow_flag(n, m)
-    #    self._test_and_set_carry_flag(l)
-    #    self._set_add_substract_flag()
+    def _sbc_flag_tests(self, byte, n, m) :
+        self._test_and_set_sign_flag(byte)
+        self._test_and_set_zero_flag(byte)
+        self._test_and_set_half_carry_on_substract(n, m - self._test_carry_flag())
+        self._test_and_set_overflow_flag(n, m - self._test_carry_flag(), "SUB")
+        self._test_and_set_carry_flag(byte)
+        self._set_add_substract_flag()
 
     def _sbc_r_addr_indx_d(self, r, rr) :
         self._log_instruction_trace("SBC %s, (%s + 0x%0.2X)" % \
@@ -3848,82 +3845,30 @@ class Z80(object) :
             lo_base_addr, self._read_n())
         byte = self._read_r(r) - self._read_n_ram(ho_addr, lo_addr) - \
             self._test_carry_flag()
-
-        #self._sbc_flag_tests(self._read_r(r), \
-        #    self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag())
-
-        ## Flag tests.
-        self._test_and_set_sign_flag(byte)
-        self._test_and_set_zero_flag(byte)
-        self._test_and_set_half_carry_on_substract(self._read_r(r), \
-            self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag())
-        self._test_and_set_overflow_flag(self._read_r(r), \
-            self._read_n_ram(ho_addr, lo_addr) - self._test_carry_flag(), "SUB")
-        self._test_and_set_carry_flag(byte)
-
-        # Flags sets & resets.
-        self._set_add_substract_flag()
+        self._sbc_flag_tests(byte, self._read_r(r), \
+            self._read_n_ram(ho_addr, lo_addr))
         self._write_r(r, byte)
 
     def _sbc_r_addr_rr(self, r, rr) :
         self._log_instruction_trace("SBC %s, 0x%0.2X" % (r, rr))
         byte = self._read_r(r) - self._read_n_ram(*self._read_rr(rr)) - \
             self._test_carry_flag()
-
-        #self._sbc_flag_tests(self._read_r(r), \
-        #    self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag())
-
-        # Flag tests.
-        self._test_and_set_sign_flag(byte)
-        self._test_and_set_zero_flag(byte)
-        self._test_and_set_half_carry_on_substract(self._read_r(r), \
-            self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag())
-        self._test_and_set_overflow_flag(self._read_r(r), \
-            self._read_n_ram(*self._read_rr(rr)) - self._test_carry_flag(), "SUB")
-        self._test_and_set_carry_flag(byte)
-
-        # Flags sets & resets.
-        self._set_add_substract_flag()
+        self._sbc_flag_tests(byte, self._read_r(r), \
+            self._read_n_ram(*self._read_rr(rr)))
         self._write_r(r, byte)
 
     def _sbc_r_n(self, r) :
         self._log_instruction_trace("SBC %s, 0x%0.2X" % (r, self._read_n()))
         byte = self._read_r(r) - self._read_n() - self._test_carry_flag()
-
-        #self._sbc_flag_tests(self._read_r(r), \
-        #    self._read_n() - self._test_carry_flag())
-
-        # Flag tests.
-        self._test_and_set_sign_flag(byte)
-        self._test_and_set_zero_flag(byte)
-        self._test_and_set_half_carry_on_substract(self._read_r(r), \
-            self._read_n() - self._test_carry_flag())
-        self._test_and_set_overflow_flag(self._read_r(r), \
-            self._read_n() - self._test_carry_flag(), "SUB")
-        self._test_and_set_carry_flag(byte)
-
-        # Flags sets & resets.
-        self._set_add_substract_flag()
+        self._sbc_flag_tests(byte, self._read_r(r), \
+            self._read_n())
         self._write_r(r, byte)
 
     def _sbc_r_r(self, r1, r2) :
         self._log_instruction_trace("SBC %s, %s" % (r1, r2))
         byte = self._read_r(r1) - self._read_r(r2) - self._test_carry_flag()
-
-        #self._sbc_flag_tests(self._read_r(r1), \
-        #    self._read_r(r2) - self._test_carry_flag())
-
-        # Flag tests.
-        self._test_and_set_sign_flag(byte)
-        self._test_and_set_zero_flag(byte)
-        self._test_and_set_half_carry_on_substract(self._read_r(r1), \
-            self._read_r(r2) - self._test_carry_flag())
-        self._test_and_set_overflow_flag(self._read_r(r1), \
-            self._read_r(r2) - self._test_carry_flag(), "SUB")
-        self._test_and_set_carry_flag(byte)
-
-        # Flags sets & resets.
-        self._set_add_substract_flag()
+        self._sbc_flag_tests(byte, self._read_r(r1), \
+            self._read_r(r2))
         self._write_r(r1, byte)
 
     def _sbc_word_flag_tests(self, n, m) :
