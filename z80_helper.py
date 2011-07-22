@@ -73,6 +73,7 @@ def decompose_word(word) :
     word &= 0xFFFF 
     ho_byte = word >> 8
     lo_byte = word - (ho_byte << 8)
+
     return ho_byte, lo_byte
 
 def decompose_byte(byte) :
@@ -80,6 +81,7 @@ def decompose_byte(byte) :
     byte &= 0xFF
     ho_nibble = byte >> 4
     lo_nibble = byte - (ho_nibble << 4)
+
     return ho_nibble, lo_nibble
 
 def shift_left_byte(byte, n) :
@@ -103,6 +105,7 @@ def shift_right_byte(byte, n) :
 def rotate_right_byte(byte, n) :
     """ Rotates a byte right n times. """
     byte &= 0xFF
+
     while n :
         if byte & 0x1 :
             byte = (byte >> 1) + 0x80
@@ -115,7 +118,8 @@ def rotate_right_byte(byte, n) :
 
 def rotate_left_byte(byte, n) :
     """ Rotates a byte left n times. """
-    byte &= 0xFF 
+    byte &= 0xFF
+
     while n :
         if byte & 0x80 :
             byte = ((byte - 0x80) << 1) + 0x1
@@ -129,6 +133,7 @@ def rotate_left_byte(byte, n) :
 def rotate_right_word(word, n) :
     """ Rotates a word right n times. """
     word &= 0xFFFF
+
     while n :
         if word & 0x1 :
             word = (word >> 1) + 0x8000
@@ -142,6 +147,7 @@ def rotate_right_word(word, n) :
 def rotate_left_word(word, n) :
     """ Rotates a word left n times. """
     word &= 0xFFFF
+
     while n :
         if word & 0x8000 :
             word = ((word - 0x8000) << 1) + 0x1
@@ -169,11 +175,10 @@ def binary(n, bits_alignment=8) :
 
     return bin(n)[2:].zfill(bits_alignment)
 
-def dec_to_bin(x) :
+def dec_to_bin(x, bits_alignment=8) :
     """ Converts a decimal number to its twos complement
         representation. """
 
-    #b = bin(x)[2:].zfill(8)
     b = binary(x)
     return x - (1 << len(b) if b[0] == '1' else 0)
 
@@ -189,13 +194,23 @@ def test_signed_byte_overflow(n, m, op="ADD") :
     if (l > 0x7F) or (l < -0x80) :
         return 1
 
-    #n_sign_bit = n & 0x80
-    #m_sign_bit = m & 0x80
-
-    #if (n_sign_bit == m_sign_bit) and not(n_sign_bit == (n + m) & 0x80) :
-    #    return 1
-
     return 0
+
+# Replacement. Needs testing.
+#def test_signed_byte_overflow(l, op="ADD") :
+#    l = map(dec_to_bin, l)
+#    
+#    if op == "ADD" :
+#        f = lambda x, y : x + y
+#    elif op == "SUB" :
+#        f = lambda x, y : x - y
+#
+#    n = reduce(f, l)
+#
+#    if (n > 0x7F) or (n < -0x80) :
+#        return 1
+#
+#    return 0
 
 def test_signed_word_overflow(n, m, op="add") :
     n = dec_to_bin(n)
@@ -209,23 +224,27 @@ def test_signed_word_overflow(n, m, op="add") :
     if (l > 0x7FFF) or (l < -0x8000) :
         return 1
 
-    #n_sign_bit = n & 0x8000
-    #m_sign_bit = m & 0x8000
-
-    #if (n_sign_bit == m_sign_bit) and (n_sign_bit != ((n + m) & 0x8000)) :
-    #    return 1
-
-    #if (n_sign_bit == m_sign_bit) and not(n_sign_bit == (n + m) & 0x8000) :
-    #    return 1
-
-    #if ((n_sign_bit == m_sign_bit) and (n_sign_bit != ((n + m) & 0x8000))) or \
-    #    (n + m > 0x7FFF) or (n + m < -0x8000) :
-    #    return 1
-
     return 0
+
+# Replacement. Needs testing.
+#def test_signed_word_overflow(l, op="ADD") :
+#    l = map(dec_to_bin, l)
+#    
+#    if op == "ADD" :
+#        f = lambda x, y : x + y
+#    elif op == "SUB" :
+#        f = lambda x, y : x - y
+#
+#    n = reduce(f, l)
+#
+#    if (n > 0x7FFF) or (n < -0x8000) :
+#        return 1
+#
+#    return 0
 
 def test_byte_zero(byte) :
     """ Tests if byte is zero. """
+
     if (byte & 0xFF) == 0 :
         return 1
 
@@ -233,6 +252,7 @@ def test_byte_zero(byte) :
 
 def test_word_zero(word) :
     """ Tests if word is zero. """
+
     if (word & 0xFFFF) == 0 :
         return 1
 
@@ -240,6 +260,7 @@ def test_word_zero(word) :
 
 def test_even(n) :
     """ Tests if n is even. """
+
     if (n & 0x1) :
         return 0
 
@@ -247,11 +268,13 @@ def test_even(n) :
 
 def byte_parity(byte) :
     """ Returns the byte's parity. """
+
     byte &= 0xFF
     return test_even(bin(byte).count('1', 2))
 
 def word_parity(word) :
     """ Returns the word's parity. """
+
     word &= 0xFFFF
     return test_even(bin(word).count('1', 2))
 

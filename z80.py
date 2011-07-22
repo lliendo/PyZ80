@@ -709,6 +709,7 @@ class Z80(object) :
         0xE1 : (self._pop_rr, ("ix",), 1),
         0xE3 : (self._ex_addr_sp_rr, ("ix",), 1),
         0xE5 : (self._push_rr, ("ix",), 1),
+        0xE9 : (self._jp_rr, ("ix",), 0),
         }
 
         self.ed_opcodes = {0x40 : (self._in_r_addr_r, ("b", "c",), 1),
@@ -1166,7 +1167,7 @@ class Z80(object) :
         0xE1 : (self._pop_rr, ("iy",), 1),
         0xE3 : (self._ex_addr_sp_rr, ("iy",), 1),
         0xE5 : (self._push_rr, ("iy",), 1),
-        0xE9 : None,
+        0xE9 : (self._jp_rr, ("iy",), 0),
         
         0xF9 : (self._ld_rr_rr, ("sp", "hl",), 1)
         }
@@ -1976,12 +1977,12 @@ class Z80(object) :
     def _adc_flag_tests(self, n, m) :
         # Affects : S, Z, H, P, C
         # Resets : N.
-        l = n + m
-        self._test_and_set_sign_flag(l)
-        self._test_and_set_zero_flag(l)
+        adc = n + m
+        self._test_and_set_sign_flag(adc)
+        self._test_and_set_zero_flag(adc)
         self._test_and_set_half_carry_on_add(n, m)
         self._test_and_set_overflow_flag(n, m)
-        self._test_and_set_carry_flag(l)
+        self._test_and_set_carry_flag(adc)
         self._reset_add_substract_flag()
 
     def _adc_r_addr_indx_d(self, r, rr) :
@@ -2034,7 +2035,6 @@ class Z80(object) :
                 r1:
                 r2:
         """
-
         self._log_instruction_trace("ADC %s, %s" % (r1, r2))
         byte = self._read_r(r1) + self._read_r(r2) + \
             self._test_carry_flag()
@@ -2049,7 +2049,7 @@ class Z80(object) :
         self._test_and_set_sign_flag_word(l)
         self._test_and_set_zero_flag_word(l)
         self._test_and_set_half_carry_on_add_word(n, m)
-        self._test_and_set_overflow_flag_word(n, m)
+        self._test_and_set_overflow_flag_word(n, m + self._test_carry_flag())
         self._test_and_set_carry_flag_word(l)
         self._reset_add_substract_flag()
 
@@ -2073,10 +2073,10 @@ class Z80(object) :
 
     def _add_r_addr_indx_d(self, r, rr) :
         self._log_instruction_trace("ADD %s, (%s + 0x%0.2X)" % (r, rr, \
-        self._read_n()))
+            self._read_n()))
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._add_flag_tests(self._read_r(r), self._read_n_ram(ho_addr, lo_addr))
         self._write_r(r, self._read_r(r) + self._read_n_ram(ho_addr, lo_addr))
 
@@ -2101,21 +2101,6 @@ class Z80(object) :
         self._log_instruction_trace("ADD %s, %s" % (r1, r2))
         self._add_flag_tests(self._read_r(r1), self._read_r(r2))
         self._write_r(r1, self._read_r(r1) + self._read_r(r2))
-
-    def _add_rr_r(self, rr, r) :
-        # Affects : C
-        # Resets : N
-        # Sets : H (H is set by a carry from bit 11)
-        self._log_instruction_trace("ADD %s, %s" % (rr, r))
-        word = compose_word(*(self._read_rr(rr))) + self._read_r(r)
-
-        if test_word_overflow(word) :
-            self._set_carry_flag()
-        else :
-            self._reset_carry_flag()
-
-        self._reset_add_substract_flag()
-        self._write_rr(rr, word)
 
     def _add_word(self, n, m) :
         # Affects : H, C
@@ -2200,29 +2185,6 @@ class Z80(object) :
         self._and_flag_tests(byte)
         self._write_r("a", byte)
 
-    def _bit_flag_tests(self, n, test_bit) :
-        """ Helper method that performs all flag tests of
-            the BIT instruction.
-            :params:
-                n: The result of the BIT instruction.
-                test_bit: The bit being tested.
-        """
-
-        # Affects : S, Z.
-        # Sets : H.
-        # Resets : N.
-
-        if n :
-            self._reset_zero_flag()
-
-            if test_bit == 0x80 :
-                self._set_sign_flag()
-        else :
-            self._set_zero_flag()
-
-        self._set_half_carry_flag()
-        self._reset_add_substract_flag()
-
     def _bdos(self, r, rr) :
         c = self._read_r(r)
         self._bdos_system_calls[c] (*self._read_rr(rr))
@@ -2241,6 +2203,7 @@ class Z80(object) :
         print s
 
     def _bdos_patch(self) :
+        # Adds the EDE nstruction + RET.
         self._write_n_ram(0xED, 0x00, 0x05)
         self._write_n_ram(0x0E, 0x00, 0x06)
         self._write_n_ram(0xC9, 0x00, 0x07)
@@ -2249,6 +2212,35 @@ class Z80(object) :
 
         self._bdos_system_calls = {9 : self._bdos_c_writestr,
         }
+
+    def _bit_flag_tests(self, test_byte, n) :
+        """ Helper method that performs all flag tests of
+            the BIT instruction.
+            :params:
+                test_byte: The result of the BIT instruction.
+                n: The bit being tested.
+        """
+
+        # Affects : S, Z.
+        # Sets : H.
+        # Resets : N.
+        if test_byte & n :
+            self._reset_zero_flag()
+        else :
+            self._set_zero_flag()
+
+        if (test_byte == 0x80) and (n & 0x80) :
+            self._set_sign_flag()
+        else :
+            self._reset_sign_flag()
+
+        if self._test_zero_flag() :
+            self._set_parity_overflow_flag()
+        else :
+            self._reset_parity_overflow_flag()
+
+        self._set_half_carry_flag()
+        self._reset_add_substract_flag()
 
     def _bit_n_indx_d(self, n, rr) :
         """ BIT n, (rr + d). Test bit n of byte pointed by (rr + d).
@@ -2261,7 +2253,7 @@ class Z80(object) :
         ho_base_addr, lo_base_addr = self._read_rr(rr)
         ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
             lo_base_addr, self._read_n())
-        self._bit_flag_tests(self._read_n_ram(ho_addr, lo_addr) & n, n)
+        self._bit_flag_tests(n, self._read_n_ram(ho_addr, lo_addr))
 
     def _bit_n_addr_rr(self, n, rr) :
         """ BIT n, (rr). Test bit n of byte pointed by rr.
@@ -2271,14 +2263,14 @@ class Z80(object) :
         """
 
         self._log_instruction_trace("BIT 0x%0.2X, (%s)" % (n, rr))
-        self._bit_flag_tests(self._read_n_ram(*self._read_rr(rr)) & n, n)
+        self._bit_flag_tests(n, self._read_n_ram(*self._read_rr(rr)))
 
     def _bit_n_r(self, n, r) :
         """
         BIT n, r. Test bit n of register r.
         """
         self._log_instruction_trace("BIT 0x%0.2X, %s" % (n, r))
-        self._bit_flag_tests(self._read_r(r) & n, n)
+        self._bit_flag_tests(n, self._read_r(r))
 
     def _call(self) :
         ho_byte, lo_byte = self._read_nn()
@@ -2359,7 +2351,6 @@ class Z80(object) :
         self._test_and_set_sign_flag(l)
         self._test_and_set_zero_flag(l)
         self._test_and_set_half_carry_on_substract(n, m)
-        #self._test_and_set_overflow_flag(n, m)
         self._test_and_set_overflow_flag(n, m, "SUB")
         self._test_and_set_carry_flag(l)
         self._set_add_substract_flag()
@@ -2792,12 +2783,13 @@ class Z80(object) :
 
     def _jp_rr(self, rr) :
         self._log_instruction_trace("JP %s" % rr)
-        self._write_rr("pc", *self._read_rr(rr))
+        addr = compose_word(*self._read_rr(rr))
+        self._write_rr("pc", self.ram.read(addr))
 
     def _jr(self) :
         ho_base_addr, lo_base_addr = self._read_rr("pc")
         ho_addr, lo_addr = compute_indexed_address(ho_base_addr, \
-        lo_base_addr, self._read_n())
+            lo_base_addr, self._read_n())
         self._write_rr("pc", compose_word(ho_addr, lo_addr))
 
     def _jr_cc(self, cc) :
@@ -2917,10 +2909,8 @@ class Z80(object) :
             self._set_parity_overflow_flag()
         else :
             self._reset_parity_overflow_flag()
-
-        # Flags sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_add_substract_flag()
+            self._reset_half_carry_flag()
+            self._reset_add_substract_flag()
 
     def _lddr(self) :
         """
@@ -2934,9 +2924,9 @@ class Z80(object) :
         self._write_rr("bc", compose_word(*self._read_rr("bc")) - 1)
 
         if compose_word(*self._read_rr("bc")) :
+            self._set_parity_overflow_flag()
             self._dec_n_pc(2)
         else :
-            # Flags sets & resets.
             self._reset_half_carry_flag()
             self._reset_parity_overflow_flag()
             self._reset_add_substract_flag()
@@ -2956,10 +2946,8 @@ class Z80(object) :
             self._set_parity_overflow_flag()
         else :
             self._reset_parity_overflow_flag()
-
-        # Flags sets & resets.
-        self._reset_half_carry_flag()
-        self._reset_add_substract_flag()
+            self._reset_half_carry_flag()
+            self._reset_add_substract_flag()
 
     def _ldir(self) :
         """
@@ -2973,9 +2961,9 @@ class Z80(object) :
         self._write_rr("bc", compose_word(*self._read_rr("bc")) - 1)
 
         if compose_word(*self._read_rr("bc")) :
+            self._set_parity_overflow_flag()
             self._dec_n_pc(2)
         else :
-            # Flags sets & resets.
             self._reset_half_carry_flag()
             self._reset_parity_overflow_flag()
             self._reset_add_substract_flag()
@@ -3093,7 +3081,7 @@ class Z80(object) :
         self._or_flag_tests(self._read_r("a") | \
             self._read_n_ram(ho_addr, lo_addr))
         self._write_r("a", self._read_r("a") | \
-        self._read_n_ram(ho_addr, lo_addr))
+            self._read_n_ram(ho_addr, lo_addr))
 
     def _or_addr_rr(self, rr) :
         """
@@ -3867,8 +3855,7 @@ class Z80(object) :
     def _sbc_r_r(self, r1, r2) :
         self._log_instruction_trace("SBC %s, %s" % (r1, r2))
         byte = self._read_r(r1) - self._read_r(r2) - self._test_carry_flag()
-        self._sbc_flag_tests(byte, self._read_r(r1), \
-            self._read_r(r2))
+        self._sbc_flag_tests(byte, self._read_r(r1), self._read_r(r2))
         self._write_r(r1, byte)
 
     def _sbc_word_flag_tests(self, n, m) :
@@ -3879,6 +3866,7 @@ class Z80(object) :
         self._test_and_set_zero_flag_word(sub)
         self._test_and_set_half_carry_on_substract_word(n, m)
         self._test_and_set_overflow_flag_word(n, m, "SUB")
+        #self._test_and_set_overflow_flag_word([n, m, self._test_carry_flag()], "SUB")
         self._test_and_set_carry_flag_word(sub)
         self._set_add_substract_flag()
 
@@ -3887,7 +3875,9 @@ class Z80(object) :
         word_rr1 = compose_word(*self._read_rr(rr1))
         word_rr2 = compose_word(*self._read_rr(rr2))
         carry = self._test_carry_flag()
-        self._sbc_word_flag_tests(word_rr1, word_rr2 - carry)
+        self._sbc_word_flag_tests(word_rr1, word_rr2)
+        # Revisar la funcion sub_words....
+        #self._write_rr(rr1, sub_words(word_rr1, word_rr2, self._test_carry_flag()))
         self._write_rr(rr1, sub_words(word_rr1, word_rr2, carry))
 
     def _scf(self) :
@@ -4516,7 +4506,6 @@ class Z80(object) :
 
         self._reset_parity_overflow_flag()
 
-    #def _test_and_set_overflow_flag(self, n, m) :
     def _test_and_set_overflow_flag(self, n, m, op="ADD") :
         """
         Tests byte and sets V according to result.
