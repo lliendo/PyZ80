@@ -39,13 +39,14 @@ def validate_address(address) :
     """ Validates an hexadecimal address. """
 
     try :
-        if (int(address, 16) < 0x0) or (int(address, 16) > 0xFFFF) :
-            raise CLIException("Address out of range.")
-
+        address = int(address, 16)
     except ValueError :
-        raise CLIException("Invalid address.")
+        raise CLIException("Invalid RAM address : \'%s\'." % address)
 
-    return int(address, 16)
+    if (address < 0x0) or (address > 0xFFFF) :
+        raise CLIException("Address out of range : \'%s\'." % address)
+
+    return address
 
 def parse_cli_options() :
     """ Returns a dictionary with options read from the CLI. """
@@ -58,11 +59,16 @@ def parse_cli_options() :
     parser.add_option("-s", "--start-address", default="0x0000", \
             help="Start execution at specified address. Default is 0x0000.")
     parser.add_option("-p", "--programs", default=None, \
-            help="Load program/s. PROGRAM_1:ADDRESS_1[, PROGRAM_2:ADDRESS_2[, ...]]")
+            help="Load program/s. PROGRAM:ADDRESS[,PROGRAM:ADDRESS_2[, ...]]")
     options, _ = parser.parse_args()
 
-    programs = map(lambda x : (validate_file(x.split(":") [0]), \
-        validate_address(x.split(":") [1])), options.programs.split(","))
+    programs = options.programs.split(",")
+
+    if all(map(lambda p: p.find(":") > 0, programs)) :
+        programs = map(lambda x : (validate_file(x.split(":") [0]), \
+            validate_address(x.split(":") [1])), programs)
+    else :
+        raise CLIException("Missing RAM address for some or all programs.")
 
     return {"programs" : programs, \
         "trace_log" : options.trace_log, \
