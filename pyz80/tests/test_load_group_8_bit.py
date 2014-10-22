@@ -1,0 +1,454 @@
+# -*- coding: utf-8 -*-
+
+"""
+This file is part of PyZ80.
+
+PyZ80 is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+PyZ80 is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+Lesser GNU General Public License for more details.
+
+You should have received a copy of the Lesser GNU General Public License
+along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
+
+Copyright 2014 Lucas Liendo.
+"""
+
+from itertools import product
+from ..instruction.load_group_8_bit import *
+from .test_z80_base import TestZ80
+
+
+class TestLoadInstructions(TestZ80):
+    def __init__(self, *args, **kwargs):
+        super(TestLoadInstructions, self).__init__(*args, **kwargs)
+
+    def test_load_register_register_rr(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterRegisterRR(self._z80)
+
+        for (destination, source) in product(registers.keys(), registers.keys()):
+            self._load_z80_registers([registers[destination], registers[source]])
+            opcode = '01{0}{1}'.format(destination, source)
+            instruction.execute(self._opcode_to_int(opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[destination]).bits,
+                getattr(self._z80, registers[source]).bits
+            )
+
+    def test_load_register_register_pp(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'ixh',
+            '101': 'ixl',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterRegisterPP(self._z80)
+
+        for (destination, source) in product(registers.keys(), registers.keys()):
+            self._load_z80_registers([registers[destination], registers[source]])
+            opcode = '11011101', '01{0}{1}'.format(destination, source)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[destination]).bits,
+                getattr(self._z80, registers[source]).bits
+            )
+
+    def test_load_register_register_qq(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'iyh',
+            '101': 'iyl',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterRegisterQQ(self._z80)
+
+        for (destination, source) in product(registers.keys(), registers.keys()):
+            self._load_z80_registers([registers[destination], registers[source]])
+            opcode = '11111101', '01{0}{1}'.format(destination, source)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[destination]).bits,
+                getattr(self._z80, registers[source]).bits
+            )
+
+
+
+    def test_load_register_r_number(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterRNumber(self._z80)
+
+        for destination in registers.keys():
+            n = self._int_to_bin(self._get_random_byte())
+            opcode = '00{0}110'.format(destination), '{0}'.format(n)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[destination]).bits,
+                int(n, base=2)
+            )
+
+    def test_load_register_p_number(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'ixh',
+            '101': 'ixl',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterPNumber(self._z80)
+
+        for destination in registers.keys():
+            n = self._int_to_bin(self._get_random_byte())
+            opcode = '11011101', '00{0}110'.format(destination), '{0}'.format(n)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[destination]).bits,
+                int(n, base=2)
+            )
+
+    def test_load_register_q_number(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'iyh',
+            '101': 'iyl',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterQNumber(self._z80)
+
+        for destination in registers.keys():
+            n = self._int_to_bin(self._get_random_byte())
+            opcode = '11111101', '00{0}110'.format(destination), '{0}'.format(n)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[destination]).bits,
+                int(n, base=2)
+            )
+
+    def test_load_register_indirect_hl(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterIndirectHL(self._z80)
+
+        for destination in registers.keys():
+            n = self._get_random_byte()
+            address = self._get_random_word()
+            self._z80.ram.write(address, n)
+            self._z80.hl.bits = address
+            opcode = '01{0}110'.format(destination)
+            instruction.execute(self._opcode_to_int(opcode))
+            self.assertEqual(getattr(self._z80, registers[destination]).bits, n)
+
+    def test_load_register_indirect_ix(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterIndirectIX(self._z80)
+
+        for destination in registers.keys():
+            n = self._get_random_byte()
+            address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
+            offset = self._get_random_byte()
+            self._z80.ram.write(address + offset, n)
+            self._z80.ix.bits = address
+            opcode = '11011101', '01{0}110'.format(destination), \
+                self._int_to_bin(offset)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(getattr(self._z80, registers[destination]).bits, n)
+
+    # TODO: Implement.
+    def test_load_register_indirect_ix_raises_invalid_ram_address(self):
+        pass
+
+    def test_load_register_indirect_iy(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadRegisterIndirectIY(self._z80)
+
+        for destination in registers.keys():
+            n = self._get_random_byte()
+            address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
+            offset = self._get_random_byte()
+            self._z80.ram.write(address + offset, n)
+            self._z80.iy.bits = address
+            opcode = '11111101', '01{0}110'.format(destination), \
+                self._int_to_bin(offset)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(getattr(self._z80, registers[destination]).bits, n)
+
+    # TODO: Implement.
+    def test_load_register_indirect_iy_raises_invalid_ram_address(self):
+        pass
+
+    def test_load_indirect_address_hl_register(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadIndirectAddressHLRegister(self._z80)
+
+        for source in registers.keys():
+            address = self._get_random_word()
+            getattr(self._z80, registers[source]).bits = self._get_random_byte()
+            self._z80.hl.bits = address
+            opcode = '01110{0}'.format(source)
+            instruction.execute(self._opcode_to_int(opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[source]).bits,
+                self._z80.ram.read(address)
+            )
+
+    def test_load_indirect_address_ix_register(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadIndirectAddressIXRegister(self._z80)
+
+        for source in registers.keys():
+            address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
+            offset = self._get_random_byte()
+            getattr(self._z80, registers[source]).bits = self._get_random_byte()
+            self._z80.ix.bits = address
+            opcode = '11011101', '01110{0}'.format(source), \
+                self._int_to_bin(offset)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[source]).bits,
+                self._z80.ram.read(address + offset)
+            )
+
+    # TODO: Implement.
+    def test_load_register_indirect_address_ix_raises_invalid_ram_address(self):
+        pass
+
+    def test_load_indirect_address_iy_register(self):
+        registers = {
+            '000': 'b',
+            '001': 'c',
+            '010': 'd',
+            '011': 'e',
+            '100': 'h',
+            '101': 'l',
+            '111': 'a',
+        }
+
+        instruction = LoadIndirectAddressIYRegister(self._z80)
+
+        for source in registers.keys():
+            address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
+            offset = self._get_random_byte()
+            getattr(self._z80, registers[source]).bits = self._get_random_byte()
+            self._z80.iy.bits = address
+            opcode = '11111101', '01110{0}'.format(source), \
+                self._int_to_bin(offset)
+            instruction.execute(self._opcode_to_int(*opcode))
+            self.assertEqual(
+                getattr(self._z80, registers[source]).bits,
+                self._z80.ram.read(address + offset)
+            )
+
+    # TODO: Implement.
+    def test_load_indirect_address_iy_register_raises_invalid_ram_address(self):
+        pass
+
+    def test_load_indirect_address_hl_number(self):
+        n = self._get_random_byte()
+        address = self._get_random_word()
+        self._z80.hl.bits = address
+        opcode = '00110110', self._int_to_bin(n)
+        instruction = LoadIndirectAddressHLNumber(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.ram.read(address), n)
+
+    def test_load_indirect_address_ix_number(self):
+        n = self._get_random_byte()
+        address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
+        offset = self._get_random_byte()
+        self._z80.ix.bits = address
+        opcode = '11011101', '00110110', \
+            self._int_to_bin(offset), self._int_to_bin(n)
+        instruction = LoadIndirectAddressIXNumber(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.ram.read(address + offset), n)
+
+    # TODO: Implement.
+    def test_load_indirect_address_ix_number_raises_invalid_ram_address(self):
+        pass
+
+    def test_load_indirect_address_iy_number(self):
+        n = self._get_random_byte()
+        address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
+        offset = self._get_random_byte()
+        self._z80.iy.bits = address
+        opcode = '11111101', '00110110', \
+            self._int_to_bin(offset), self._int_to_bin(n)
+        instruction = LoadIndirectAddressIYNumber(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.ram.read(address + offset), n)
+
+    # TODO: Implement.
+    def test_load_indirect_address_iy_number_raises_invalid_ram_address(self):
+        pass
+
+    def test_load_a_indirect_address_bc(self):
+        n = self._get_random_byte()
+        address = self._get_random_word()
+        self._z80.ram.write(address, n)
+        self._z80.bc.bits = address
+        opcode = '00001010'
+        instruction = LoadAIndirectAddressBC(self._z80)
+        instruction.execute(self._opcode_to_int(opcode))
+        self.assertEqual(self._z80.a.bits, n)
+ 
+    def test_load_a_indirect_address_de(self):
+        n = self._get_random_byte()
+        address = self._get_random_word()
+        self._z80.ram.write(address, n)
+        self._z80.de.bits = address
+        opcode = '00011010'
+        instruction = LoadAIndirectAddressDE(self._z80)
+        instruction.execute(self._opcode_to_int(opcode))
+        self.assertEqual(self._z80.a.bits, n)
+
+    def test_load_a_indirect_address_nn(self):
+        m = self._get_random_byte()
+        n = self._get_random_byte()
+        address = int(self._int_to_bin(m) + self._int_to_bin(n), base=2)
+        opcode = '00111010', self._int_to_bin(m), self._int_to_bin(n)
+        instruction = LoadAIndirectAddressNN(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.a.bits, self._z80.ram.read(address))
+
+    def test_load_indirect_bc_register_a(self):
+        n = self._get_random_byte()
+        address = self._get_random_word()
+        self._z80.a.bits = n
+        self._z80.bc.bits = address
+        opcode = '00000010'
+        instruction = LoadIndirectBCRegisterA(self._z80)
+        instruction.execute(self._opcode_to_int(opcode))
+        self.assertEqual(self._z80.ram.read(address), self._z80.a.bits)
+
+    def test_load_indirect_de_register_a(self):
+        n = self._get_random_byte()
+        address = self._get_random_word()
+        self._z80.a.bits = n
+        self._z80.de.bits = address
+        opcode = '00010010'
+        instruction = LoadIndirectDERegisterA(self._z80)
+        instruction.execute(self._opcode_to_int(opcode))
+        self.assertEqual(self._z80.ram.read(address), self._z80.a.bits)
+
+    def test_load_indirect_nn_register_a(self):
+        m = self._get_random_byte()
+        n = self._get_random_byte()
+        address = int(self._int_to_bin(m) + self._int_to_bin(n), base=2)
+        opcode = '00110010', self._int_to_bin(m), self._int_to_bin(n)
+        instruction = LoadIndirectNNRegisterA(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.ram.read(address), self._z80.a.bits)
+
+    def test_load_register_a_register_i(self):
+        n = self._get_random_byte()
+        self._z80.i.bits = n
+        opcode = '11101101', '01010111'
+        instruction = LoadRegisterARegisterI(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.a.bits, self._z80.i.bits)
+
+    def test_load_register_a_register_r(self):
+        n = self._get_random_byte()
+        self._z80.r.bits = n
+        opcode = '11101101', '01011111'
+        instruction = LoadRegisterARegisterR(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.a.bits, self._z80.r.bits)
+
+    def test_load_register_i_register_a(self):
+        n = self._get_random_byte()
+        self._z80.a.bits = n
+        opcode = '11101101', '01000111'
+        instruction = LoadRegisterIRegisterA(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.i.bits, self._z80.a.bits)
+
+    def test_load_register_r_register_a(self):
+        n = self._get_random_byte()
+        self._z80.a.bits = n
+        opcode = '11101101', '01001111'
+        instruction = LoadRegisterRRegisterA(self._z80)
+        instruction.execute(self._opcode_to_int(*opcode))
+        self.assertEqual(self._z80.r.bits, self._z80.a.bits)
