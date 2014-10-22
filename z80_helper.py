@@ -17,42 +17,69 @@
     Copyright 2010-2011 Lucas Liendo.
 """
 
-def ones_complement_byte(byte) :
-    """ Computes the ones complement of a byte (8 bits). """
-    return ~byte & 0xFF
+def ones_complement_n(n, bitmask=0xFF) :
+    """ Computes the ones complement of n.
+        :params:
+            n: The value to complement.
+            bitmask: A bitmask applied after computing the complement.
+                     Default bitmask is 0xFF.
+    """
 
-def ones_complement_word(word) :
-    """ Computes the ones complement of a word (16 bits). """
-    return ~byte & 0xFFFF
+    return ~n & bitmask
 
-def twos_complement_byte(byte) :
-    """ Computes the twos complement of a byte (8 bits). """
-    return (~byte + 1) & 0xFF
+def twos_complement_n(n, bitmask=0xFF) :
+    """ Computes the twos complement of n.
+        :params:
+            n: The value to complement.
+            bitmask: A bitmask applied after computing the complement.
+                     Default bitmask is 0xFF.
+    """
 
-def twos_complement_word(word) :
-    """ Computes the twos complement of a word (16 bits). """
-    return (~word + 1) & 0xFFFF
+    return (~n + 0x1) & bitmask
 
-def test_byte_sign(byte) :
-    """ Tests the most significat bit of a byte (8 bits). """
-    if (byte & 0xFF) & 0x80 :
+#def twos_complement_byte(byte) :
+#    """ Computes the twos complement of a byte (8 bits). """
+#    return (~byte + 1) & 0xFF
+#
+#def twos_complement_word(word) :
+#    """ Computes the twos complement of a word (16 bits). """
+#    return (~word + 1) & 0xFFFF
+
+def test_sign_n(n, bitmask=0xFF, msb=0x80) :
+    """ Test the most significat bit of n.
+        :params:
+            n: The value to test its sign.
+            bitmask : A bitmask applied to n.
+            msb: Most significat bit to test.
+    """
+
+    if (n & bitmask) & msb :
         return 1
 
     return 0
 
-def test_word_sign(word) :
-    """ Tests the most significat bit of a word (16 bits). """
-    if (word & 0xFFFF) & 0x8000 :
-        return 1
-
-    return 0
+#def test_byte_sign(byte) :
+#    """ Tests the most significat bit of a byte (8 bits). """
+#    if (byte & 0xFF) & 0x80 :
+#        return 1
+#
+#    return 0
+#
+#def test_word_sign(word) :
+#    """ Tests the most significat bit of a word (16 bits). """
+#    if (word & 0xFFFF) & 0x8000 :
+#        return 1
+#
+#    return 0
 
 def compute_indexed_address(ho_base_addr, lo_base_addr, d) :
     """ Computes an indexed address : base_addr + d. d is +127/-128 (displacement or offset).
     """
-    if test_byte_sign(d) :
+    #if test_byte_sign(d) :
+    if test_sign_n(d) :
         addr = compose_word(ho_base_addr, lo_base_addr) - \
-            twos_complement_byte(d)
+            twos_complement_n(d)
+        #twos_complement_byte(d)
     else :
         addr = compose_word(ho_base_addr, lo_base_addr) + d
 
@@ -63,6 +90,14 @@ def compute_indexed_address(ho_base_addr, lo_base_addr, d) :
 def compose_byte(ho_nibble, lo_nibble) :
     """ Returns the composition of two nibbles into one byte. """
     return ((ho_nibble & 0xF) << 4) + (lo_nibble & 0xF)
+
+def decompose_byte(byte) :
+    """ Splits a byte into its high and low order nibbles. """
+    byte &= 0xFF
+    ho_nibble = byte >> 4
+    lo_nibble = byte - (ho_nibble << 4)
+
+    return ho_nibble, lo_nibble
 
 def compose_word(ho_byte, lo_byte) :
     """ Returns the composition of two bytes into one word. """
@@ -75,14 +110,6 @@ def decompose_word(word) :
     lo_byte = word - (ho_byte << 8)
 
     return ho_byte, lo_byte
-
-def decompose_byte(byte) :
-    """ Splits a byte into its high and low order nibbles. """
-    byte &= 0xFF
-    ho_nibble = byte >> 4
-    lo_nibble = byte - (ho_nibble << 4)
-
-    return ho_nibble, lo_nibble
 
 def shift_left_byte(byte, n) :
     """ Shifts a byte left n times. """
@@ -158,17 +185,23 @@ def rotate_left_word(word, n) :
 
     return word
 
-def test_byte_overflow(byte) :
-    if (byte > 0xFF) or (byte < 0) :
+def test_n_overflow(n, limit=0xFF) :
+    if (n > limit) or (n < 0) :
         return 1
 
     return 0
 
-def test_word_overflow(word) :
-    if (word > 0xFFFF) or (word < 0) :
-        return 1
-
-    return 0
+#def test_byte_overflow(byte) :
+#    if (byte > 0xFF) or (byte < 0) :
+#        return 1
+#
+#    return 0
+#
+#def test_word_overflow(word) :
+#    if (word > 0xFFFF) or (word < 0) :
+#        return 1
+#
+#    return 0
 
 def binary(n, bits_alignment=8) :
     """ Returns a string with the binary representation of n. """
@@ -242,41 +275,36 @@ def test_signed_word_overflow(n, m, op="add") :
 #
 #    return 0
 
-def test_byte_zero(byte) :
-    """ Tests if byte is zero. """
+def test_n_zero(n, bitmask=0xFF) :
+    """ Tests if n is zero.
+        :params:
+            n: The number to test.
+            bitmask: A bitmask to apply when comparing n against zero.
+                     Default bitmask is 0xFF.
+    """
 
-    if (byte & 0xFF) == 0 :
-        return 1
-
-    return 0
-
-def test_word_zero(word) :
-    """ Tests if word is zero. """
-
-    if (word & 0xFFFF) == 0 :
+    if (n & bitmask) == 0 :
         return 1
 
     return 0
 
 def test_even(n) :
-    """ Tests if n is even. """
+    """ Tests if n is even. 
+        :params:
+            n: The value to test.
+    """
 
-    if (n & 0x1) :
-        return 0
+    return (n & 0x1)
 
-    return 1
+def test_n_parity(n, bitmask=0xFF) :
+    """ Tests the parity of n.
+        :params:
+            n: The number to test its parity.
+            bitmask: A bitmask to apply to n before to compute its parity.
+                     Default bitmask is 0xFF.
+    """
 
-def byte_parity(byte) :
-    """ Returns the byte's parity. """
-
-    byte &= 0xFF
-    return test_even(bin(byte).count('1', 2))
-
-def word_parity(word) :
-    """ Returns the word's parity. """
-
-    word &= 0xFFFF
-    return test_even(bin(word).count('1', 2))
+    return test_even(bin(n & bitmask).count('1', 2))
 
 def test_carry_from_bit_n_on_add(word1, word2, n) :
     n = pow(2, n) - 1 
@@ -321,10 +349,12 @@ def sub_bytes(*bytes) :
     bytes = list(bytes)
     bytes.reverse()
     n = bytes.pop()
-    return n + sum(map(twos_complement_byte, bytes)) & 0xFF
+    #return n + sum(map(twos_complement_byte, bytes)) & 0xFF
+    return n + sum(map(twos_complement_n, bytes)) & 0xFF
 
 def sub_words(*words) :
     words = list(words)
     words.reverse()
     n = words.pop()
-    return n + sum(map(twos_complement_word, words)) & 0xFFFF
+    #return n + sum(map(twos_complement_word, words)) & 0xFFFF
+    return n + sum(map(lambda b: twos_complement_n(b, bitmask=0xFFFF), words)) & 0xFFFF

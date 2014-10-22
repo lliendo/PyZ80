@@ -2429,7 +2429,8 @@ class Z80(object) :
         """
         # Sets : H, N.
         self._log_instruction_trace("CPL")
-        self._write_r("a", ones_complement_byte(self._read_r("a")))
+        #self._write_r("a", ones_complement_byte(self._read_r("a")))
+        self._write_r("a", ones_complement_n(self._read_r("a")))
 
         # Flags sets & resets.
         self._set_half_carry_flag()
@@ -3052,7 +3053,8 @@ class Z80(object) :
         else :
             self._reset_parity_overflow_flag()
 
-        self._write_r("a", twos_complement_byte(self._read_r("a")))
+        #self._write_r("a", twos_complement_byte(self._read_r("a")))
+        self._write_r("a", twos_complement_n(self._read_r("a")))
         self._test_and_set_sign_flag(self._read_r("a"))
         self._test_and_set_zero_flag(self._read_r("a"))
         self._set_add_substract_flag()
@@ -4456,7 +4458,8 @@ class Z80(object) :
         """
         Tests n and sets S according to result.
         """
-        if test_byte_sign(n) :
+        #if test_byte_sign(n) :
+        if test_sign_n(n) :
             self._set_sign_flag()
             return
         
@@ -4466,7 +4469,8 @@ class Z80(object) :
         """
         Tests n and sets Z according to result.
         """
-        if test_byte_zero(n) :
+        #if test_byte_zero(n) :
+        if test_n_zero(n) :
             self._set_zero_flag()
             return
 
@@ -4500,7 +4504,8 @@ class Z80(object) :
         """
         # If parity is even set the parity/overflow flag, 
         # otherwise reset it.
-        if byte_parity(n) :
+        #if byte_parity(n) :
+        if test_n_parity(n) :
             self._set_parity_overflow_flag()
             return
 
@@ -4520,21 +4525,24 @@ class Z80(object) :
         """
         Tests n and sets C according to result.
         """
-        if test_byte_overflow(n) :
+        #if test_byte_overflow(n) :
+        if test_n_overflow(n) :
             self._set_carry_flag()
             return
 
         self._reset_carry_flag()
 
     def _test_and_set_sign_flag_word(self, n) :
-        if test_word_sign(n) :
+        #if test_word_sign(n) :
+        if test_sign_n(n, bitmask=0xFFFF, msb=0x8000) :
             self._set_sign_flag()
             return
 
         self._reset_sign_flag()
 
     def _test_and_set_zero_flag_word(self, n) :
-        if test_word_zero(n) :
+        #if test_word_zero(n) :
+        if test_n_zero(n, bitmask=0xFFFF) :
             self._set_zero_flag()
             return
         
@@ -4557,7 +4565,8 @@ class Z80(object) :
     def _test_and_set_parity_flag_word(self, n) :
         # If parity is even set the parity/overflow flag, 
         # otherwise reset it.
-        if word_parity(n) :
+        #if word_parity(n) :
+        if test_n_parity(n, bitmask=0xFFFF) :
             self._set_parity_overflow_flag()
             return
         
@@ -4574,7 +4583,8 @@ class Z80(object) :
         """
         Tests n and sets C according to result.
         """
-        if test_word_overflow(n) :
+        #if test_word_overflow(n) :
+        if test_n_overflow(n, limit=0xFFFF) :
             self._set_carry_flag()
             return
 
