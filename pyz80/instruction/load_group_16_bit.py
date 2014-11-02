@@ -56,7 +56,7 @@ class LoadIYNN(Instruction):
         self._z80.iy.lower.bits = n
 
 
-class LoadHLIndirectNN(Instruction):
+class LoadHLIndirectAddressNN(Instruction):
     """ LD HL, (nn) """
 
     def _instruction_regexp(self):
@@ -68,7 +68,7 @@ class LoadHLIndirectNN(Instruction):
         self._z80.hl.lower.bits = self._z80.ram.read(address)
 
 
-class LoadDDIndirectNN(LoadRegister16Bit):
+class LoadDDIndirectAddressNN(LoadRegister16Bit):
     """ LD dd, (nn) """
 
     def _instruction_regexp(self):
@@ -81,7 +81,7 @@ class LoadDDIndirectNN(LoadRegister16Bit):
         register.lower.bits = self._z80.ram.read(address)
 
 
-class LoadIXIndirectNN(Instruction):
+class LoadIXIndirectAddressNN(Instruction):
     """ LD IX, (nn) """
 
     def _instruction_regexp(self):
@@ -93,7 +93,7 @@ class LoadIXIndirectNN(Instruction):
         self._z80.ix.lower.bits = self._z80.ram.read(address)
 
 
-class LoadIYIndirectNN(Instruction):
+class LoadIYIndirectAddressNN(Instruction):
     """ LD IY, (nn) """
 
     def _instruction_regexp(self):
@@ -105,7 +105,7 @@ class LoadIYIndirectNN(Instruction):
         self._z80.iy.lower.bits = self._z80.ram.read(address)
 
 
-class LoadIndirectNNHL(Instruction):
+class LoadIndirectAddressNNHL(Instruction):
     """ LD (nn), HL """
 
     def _instruction_regexp(self):
@@ -117,7 +117,7 @@ class LoadIndirectNNHL(Instruction):
         self._z80.ram.write(address, self._z80.l.bits)
 
 
-class LoadIndirectNNDD(LoadRegister16Bit):
+class LoadIndirectAddressNNDD(LoadRegister16Bit):
     """ LD (nn), dd """
 
     def _instruction_regexp(self):
@@ -130,7 +130,7 @@ class LoadIndirectNNDD(LoadRegister16Bit):
         self._z80.ram.write(address, register.lower.bits)
 
 
-class LoadIndirectNNIX(Instruction):
+class LoadIndirectAddressNNIX(Instruction):
     """ LD (nn), IX """
 
     def _instruction_regexp(self):
@@ -142,7 +142,7 @@ class LoadIndirectNNIX(Instruction):
         self._z80.ram.write(address, self._z80.ix.lower.bits)
 
 
-class LoadIndirectNNIY(Instruction):
+class LoadIndirectAddressNNIY(Instruction):
     """ LD (nn), IY """
 
     def _instruction_regexp(self):
