@@ -19,18 +19,7 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from abc import ABCMeta, abstractmethod
-from . import Instruction
-
-
-class LoadRegisterRegister(Instruction):
-
-    __metaclass__ = ABCMeta
-
-    def _instruction_logic(self, destination_selector, source_selector):
-        destination_register = self._register_selector(destination_selector)
-        source_register = self._register_selector(source_selector)
-        destination_register.bits = source_register.bits
+from abc_load_group_8_bit import *
 
 
 # The RR, PP, QQ in the class names refer to the different 
@@ -97,14 +86,6 @@ class LoadRegisterRegisterQQ(LoadRegisterRegister):
         return registers[selector]
 
 
-class LoadRegisterNumber(Instruction):
-    __metaclass__ = ABCMeta
-
-    def _instruction_logic(self, destination_selector, bits):
-        destination_register = self._register_selector(destination_selector)
-        destination_register.bits = bits
-
-
 # The R, P, Q in the class names refer to the different 
 # table 'selectors' found in The Undocumented Z80 Documented
 # by Sean Young. See page 26.
@@ -169,28 +150,6 @@ class LoadRegisterQNumber(LoadRegisterNumber):
         return registers[selector]
 
 
-class LoadRegisterIndirectAddress(Instruction):
-
-    __metaclass__ = ABCMeta
-
-    def _register_selector(self, selector):
-        registers = {
-            0b000: self._z80.b,
-            0b001: self._z80.c,
-            0b010: self._z80.d,
-            0b011: self._z80.e,
-            0b100: self._z80.h,
-            0b101: self._z80.l,
-            0b111: self._z80.a,
-        }
-
-        return registers[selector]
-
-    def _load_register_from_ram(self, selector, address):
-        destination_register = self._register_selector(selector)
-        destination_register.bits = self._z80.ram.read(address)
-
-
 class LoadRegisterIndirectHL(LoadRegisterIndirectAddress):
     """ LD r, (HL) """
 
@@ -222,28 +181,6 @@ class LoadRegisterIndirectIY(LoadRegisterIndirectAddress):
     def _instruction_logic(self, selector, offset):
         address = self._z80.iy.bits + offset
         self._load_register_from_ram(selector, address)
-
-
-class LoadIndirectAddressRegister(Instruction):
-
-    __metaclass__ = ABCMeta
-
-    def _register_selector(self, selector):
-        registers = {
-            0b000: self._z80.b,
-            0b001: self._z80.c,
-            0b010: self._z80.d,
-            0b011: self._z80.e,
-            0b100: self._z80.h,
-            0b101: self._z80.l,
-            0b111: self._z80.a,
-        }
-
-        return registers[selector]
-
-    def _load_ram_from_register(self, selector, address):
-        source_register = self._register_selector(selector)
-        self._z80.ram.write(address, source_register.bits)
 
 
 class LoadIndirectAddressHLRegister(LoadIndirectAddressRegister):
