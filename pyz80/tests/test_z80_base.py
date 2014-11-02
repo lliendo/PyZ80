@@ -36,13 +36,12 @@ class TestZ80(TestCase):
 
     def _load_z80_registers(self, registers):
         for r in registers:
-            getattr(self._z80, r).bits = self._get_random_byte()
+            r.bits = self._get_random_byte()
 
     def _bin_to_int(self, n):
         return int(n, base=2)
 
     def _opcode_to_int(self, *opcode):
-        # return map(lambda o: int(o, base=2), opcode)
         return map(lambda o: self._bin_to_int(o), opcode)
 
     def _int_to_bin(self, n, padding=8):
@@ -51,3 +50,11 @@ class TestZ80(TestCase):
     def _word_to_bin(self, n):
         word = self._int_to_bin(n, padding=16)
         return word[:8], word[8:]
+
+    def _load_ram_with_word(self, address, value):
+        n, m = self._word_to_bin(value)
+        self._z80.ram.write(address + 1, self._bin_to_int(n))
+        self._z80.ram.write(address, self._bin_to_int(m))
+
+    def _read_ram_word(self, address):
+        return self._z80.ram.read(address) + self._z80.ram.read(address + 1) * 256
