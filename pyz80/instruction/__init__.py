@@ -71,10 +71,6 @@ class Instruction(object):
             10101010101110111100110011011101
         """
 
-        # TODO: Delete this commented code later on but before committing.
-        # base = 256
-        # bits = 8
-        # n = sum([byte * pow(base, n) for n, byte in enumerate(reversed(bytes))])
         bits_per_byte = 8
         n = self._bytes_to_int(bytes)
         return bin(n).lstrip('0b').zfill(len(bytes) * bits_per_byte)
@@ -86,13 +82,6 @@ class Instruction(object):
         order bytes.
         """
         return self._bytes_to_int([ho_byte, lo_byte])
-
-    # TODO: Not necessary.
-    # def _get_displaced_address(self, ho_byte, lo_byte, offset):
-    #     """
-    #     Similar to _get_address method plus an offset.
-    #     """
-    #     return self._compose_address(ho_byte, lo_byte) + offset
 
     def _sign_flag_update(self):
         pass
