@@ -19,24 +19,7 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from abc import ABCMeta, abstractmethod
-from . import Instruction
-
-
-# TODO: Rename this class with a more appropiate name.
-class LoadRegister16Bit(Instruction):
-
-    __metaclass__ = ABCMeta
-
-    def _register_selector(self, selector):
-        registers = {
-            0b00: self._z80.bc,
-            0b01: self._z80.de,
-            0b10: self._z80.hl,
-            0b11: self._z80.sp,
-        }
-
-        return registers[selector]
+from abc_load_group_16_bit import *
 
 
 class LoadDDNN(LoadRegister16Bit):
@@ -134,7 +117,7 @@ class LoadIndirectNNHL(Instruction):
         self._z80.ram.write(address, self._z80.l.bits)
 
 
-class LoadIndirectNNDD(Instruction):
+class LoadIndirectNNDD(LoadRegister16Bit):
     """ LD (nn), dd """
 
     def _instruction_regexp(self):
@@ -201,33 +184,6 @@ class LoadSPIY(Instruction):
         self._z80.sp.bits = self._z80.iy.bits
 
 
-class Push(Instruction):
-    
-    __metaclass__ = ABCMeta
-
-    def _register_selector(self, selector):
-        # Test if this is valid -> the combine is called each
-        # time the dictionary is accessed and not computed on definition.
-        # Otherwise use :
-        # if selector == 0b11:
-        #     return self._z80.a.combine(self._z80.f)
-
-        registers = {
-            0b00: self._z80.bc,
-            0b01: self._z80.de,
-            0b10: self._z80.hl,
-            0b11: self._z80.a.combine(self._z80.f),
-
-        }
-
-        return registers[selector]
-
-    def _instruction_logic(self, register):
-        self._z80.ram.write(self._z80.sp.bits - 2, register.lower.bits)
-        self._z80.ram.write(self._z80.sp.bits - 1, register.higher.bits)
-        self._z80.sp.bits -= 2
-
-
 class PushQQ(Push):
     """ PUSH qq """
 
@@ -257,33 +213,6 @@ class PushIY(Push):
 
     def _instruction_logic(self):
         super(PushIY, self)._instruction_logic(self._z80.iy)
-
-
-class Pop(Instruction):
-    
-    __metaclass__ = ABCMeta
-
-    def _register_selector(self, selector):
-        # Test if this is valid -> the combine is called each
-        # time the dictionary is accessed and not computed on definition.
-        # Otherwise use :
-        # if selector == 0b11:
-        #     return self._z80.a.combine(self._z80.f)
-
-        registers = {
-            0b00: self._z80.bc,
-            0b01: self._z80.de,
-            0b10: self._z80.hl,
-            0b11: self._z80.a.combine(self._z80.f),
-
-        }
-
-        return registers[selector]
-
-    def _instruction_logic(self, register):
-        register.higher.bits = self._z80.ram.read(self._z80.sp.bits + 1)
-        register.lower.bits = self._z80.ram.read(self._z80.sp.bits)
-        self._z80.sp.bits += 2
 
 
 class PopQQ(Pop):
