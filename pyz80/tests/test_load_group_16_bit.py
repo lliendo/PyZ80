@@ -67,7 +67,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_hl_indirect_nn(self):
         """ Test LD HL, (nn) """
 
-        instruction = LoadHLIndirectNN(self._z80)
+        instruction = LoadHLIndirectAddressNN(self._z80)
         address = self._get_random_word()
         nn = self._get_random_word()
         self._load_ram_with_word(address, nn)
@@ -83,7 +83,7 @@ class TestLoadInstructions(TestZ80):
             '11': self._z80.sp,
         }
 
-        instruction = LoadDDIndirectNN(self._z80)
+        instruction = LoadDDIndirectAddressNN(self._z80)
 
         for destination in registers.keys():
             address = self._get_random_word()
@@ -96,7 +96,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_ix_indirect_nn(self):
         """ Test LD IX, (nn) """
 
-        instruction = LoadIXIndirectNN(self._z80)
+        instruction = LoadIXIndirectAddressNN(self._z80)
         address = self._get_random_word()
         nn = self._get_random_word()
         self._load_ram_with_word(address, nn)
@@ -107,7 +107,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_iy_indirect_nn(self):
         """ Test LD IY, (nn) """
         
-        instruction = LoadIYIndirectNN(self._z80)
+        instruction = LoadIYIndirectAddressNN(self._z80)
         address = self._get_random_word()
         nn = self._get_random_word()
         self._load_ram_with_word(address, nn)
@@ -118,7 +118,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_hl(self):
         """ Test LD (nn), HL """
 
-        instruction = LoadIndirectNNHL(self._z80)
+        instruction = LoadIndirectAddressNNHL(self._z80)
         address = self._get_random_word()
         nn = self._get_random_word()
         self._z80.hl.bits = nn
@@ -136,7 +136,7 @@ class TestLoadInstructions(TestZ80):
             '11': self._z80.sp,
         }
 
-        instruction = LoadIndirectNNDD(self._z80)
+        instruction = LoadIndirectAddressNNDD(self._z80)
 
         for destination in registers.keys():
             address = self._get_random_word()
@@ -149,7 +149,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_ix(self):
         """ Test LD (nn), IX """
 
-        instruction = LoadIndirectNNIX(self._z80)
+        instruction = LoadIndirectAddressNNIX(self._z80)
         address = self._get_random_word()
         nn = self._get_random_word()
         self._z80.ix.bits = nn
@@ -160,7 +160,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_iy(self):
         """ Test LD (nn), IY """
 
-        instruction = LoadIndirectNNIY(self._z80)
+        instruction = LoadIndirectAddressNNIY(self._z80)
         address = self._get_random_word()
         nn = self._get_random_word()
         self._z80.iy.bits = nn
