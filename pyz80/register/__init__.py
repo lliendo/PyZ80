@@ -21,7 +21,10 @@ Copyright 2014 Lucas Liendo.
 
 from abc import ABCMeta
 from math import log
-from exceptions import Z80RegisterError
+
+
+class Z80RegisterError(Exception):
+    pass
 
 
 class Z80Register(object):
@@ -73,13 +76,6 @@ class Z80Register(object):
 
     def _most_significant_bit_mask(self):
         return self._nth_bit_mask(self._size - 1)
-
-    # TODO: Not used. Why ?
-    # def _check_size(self, size):
-    #     if pow(2, log(size, 2)) != size:
-    #         raise Z80RegisterError('Register size must be a power of 2.')
-
-    #     return size
 
     @property
     def msb(self):
