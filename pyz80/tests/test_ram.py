@@ -21,8 +21,7 @@ Copyright 2014 Lucas Liendo.
 
 from nose.tools import raises
 from unittest import TestCase
-from ..ram import Ram
-from ..ram.exceptions import RamInvalidAddress
+from ..ram import Ram, RamInvalidAddress
 
 
 class TestRam(TestCase):
