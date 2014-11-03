@@ -19,7 +19,9 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from .exceptions import RamInvalidAddress
+
+class RamInvalidAddress(Exception):
+    pass
 
 
 class Ram(object):
@@ -42,7 +44,9 @@ class Ram(object):
 
     def _check_address(self, address):
         if (address < 0x0) or (address > self.size - 1):
-            raise RamInvalidAddress(address)
+            raise RamInvalidAddress(
+                'Error - {0} is not a valid RAM address.'.format(address)
+            )
 
     def load(self, opcodes, address=0x0):
         self._check_address(address)
