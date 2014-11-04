@@ -66,10 +66,10 @@ class Z80(object):
         self.iyh = self.iy.higher
         self.iyl = self.iy.lower
 
+    # TODO: Still missing iff1, iff2 & im registers.
     def _build_registers(self):
         self._build_16_bits_registers()
         self._build_8_bits_registers()
-        # TODO: Still missing iff1, iff2 & im registers.
 
     def inc_pc(self):
         self.pc.bits += 1
@@ -86,5 +86,5 @@ class Z80(object):
     def run(self):
         while True:
             opcode = self._fetch_opcode()
-            instruction = self._instruction_decoder.decode(opcode)
-            instruction.execute(opcode)
+            instruction, operands = self._instruction_decoder.decode(opcode)
+            self.f = instruction.execute(operands)
