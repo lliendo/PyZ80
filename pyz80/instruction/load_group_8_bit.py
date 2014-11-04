@@ -29,8 +29,7 @@ from abc_load_group_8_bit import *
 class LoadRegisterRegisterRR(LoadRegisterRegister):
     """ LD r, r' """
 
-    def _instruction_regexp(self):
-        return '^01((?:0|1){3})((?:0|1){3})$'
+    instruction_regexp = '^01((?:0|1){3})((?:0|1){3})$'
 
     def _register_selector(self, selector):
         registers = {
@@ -48,9 +47,8 @@ class LoadRegisterRegisterRR(LoadRegisterRegister):
 
 class LoadRegisterRegisterPP(LoadRegisterRegister):
     """ LD p, p' """
-
-    def _instruction_regexp(self):
-        return '^1101110101((?:0|1){3})((?:0|1){3})$'
+    
+    instruction_regexp = '^1101110101((?:0|1){3})((?:0|1){3})$'
 
     def _register_selector(self, selector):
         registers = {
@@ -69,8 +67,7 @@ class LoadRegisterRegisterPP(LoadRegisterRegister):
 class LoadRegisterRegisterQQ(LoadRegisterRegister):
     """ LD q, q' """
 
-    def _instruction_regexp(self):
-        return '^1111110101((?:0|1){3})((?:0|1){3})$'
+    instruction_regexp = '^1111110101((?:0|1){3})((?:0|1){3})$'
 
     def _register_selector(self, selector):
         registers = {
@@ -93,8 +90,7 @@ class LoadRegisterRegisterQQ(LoadRegisterRegister):
 class LoadRegisterRNumber(LoadRegisterNumber):
     """ LD r, n """
 
-    def _instruction_regexp(self):
-        return '^00((?:0|1){3})110((?:0|1){8})$'
+    instruction_regexp = '^00((?:0|1){3})110((?:0|1){8})$'
 
     def _register_selector(self, selector):
         registers = {
@@ -113,8 +109,7 @@ class LoadRegisterRNumber(LoadRegisterNumber):
 class LoadRegisterPNumber(LoadRegisterNumber):
     """ LD p, n """
 
-    def _instruction_regexp(self):
-        return '^1101110100((?:0|1){3})110((?:0|1){8})$'
+    instruction_regexp = '^1101110100((?:0|1){3})110((?:0|1){8})$'
 
     def _register_selector(self, selector):
         registers = {
@@ -133,8 +128,7 @@ class LoadRegisterPNumber(LoadRegisterNumber):
 class LoadRegisterQNumber(LoadRegisterNumber):
     """ LD q, n """
 
-    def _instruction_regexp(self):
-        return '^1111110100((?:0|1){3})110((?:0|1){8})$'
+    instruction_regexp = '^1111110100((?:0|1){3})110((?:0|1){8})$'
 
     def _register_selector(self, selector):
         registers = {
@@ -153,8 +147,7 @@ class LoadRegisterQNumber(LoadRegisterNumber):
 class LoadRegisterIndirectHL(LoadRegisterIndirectAddress):
     """ LD r, (HL) """
 
-    def _instruction_regexp(self):
-        return '^01((?:0|1){3})110$'
+    instruction_regexp = '^01((?:0|1){3})110$'
 
     def _instruction_logic(self, selector):
         address = self._z80.hl.bits
@@ -164,8 +157,7 @@ class LoadRegisterIndirectHL(LoadRegisterIndirectAddress):
 class LoadRegisterIndirectIX(LoadRegisterIndirectAddress):
     """ LD r, (IX + d) """
 
-    def _instruction_regexp(self):
-        return '^1101110101((?:0|1){3})110((?:0|1){8})$'
+    instruction_regexp = '^1101110101((?:0|1){3})110((?:0|1){8})$'
 
     def _instruction_logic(self, selector, offset):
         address = self._z80.ix.bits + offset
@@ -175,8 +167,7 @@ class LoadRegisterIndirectIX(LoadRegisterIndirectAddress):
 class LoadRegisterIndirectIY(LoadRegisterIndirectAddress):
     """ LD r, (IY + d) """
 
-    def _instruction_regexp(self):
-        return '^1111110101((?:0|1){3})110((?:0|1){8})$'
+    instruction_regexp = '^1111110101((?:0|1){3})110((?:0|1){8})$'
 
     def _instruction_logic(self, selector, offset):
         address = self._z80.iy.bits + offset
@@ -186,8 +177,7 @@ class LoadRegisterIndirectIY(LoadRegisterIndirectAddress):
 class LoadIndirectAddressHLRegister(LoadIndirectAddressRegister):
     """ LD (HL), r """
 
-    def _instruction_regexp(self):
-        return '^01110((?:0|1){3})$'
+    instruction_regexp = '^01110((?:0|1){3})$'
 
     def _instruction_logic(self, source_selector):
         address = self._z80.hl.bits
@@ -197,8 +187,7 @@ class LoadIndirectAddressHLRegister(LoadIndirectAddressRegister):
 class LoadIndirectAddressIXRegister(LoadIndirectAddressRegister):
     """ LD (IX + d), r """
 
-    def _instruction_regexp(self):
-        return '^1101110101110((?:0|1){3})((?:0|1){8})$'
+    instruction_regexp = '^1101110101110((?:0|1){3})((?:0|1){8})$'
 
     def _instruction_logic(self, source_selector, offset):
         address = self._z80.ix.bits + offset
@@ -207,6 +196,8 @@ class LoadIndirectAddressIXRegister(LoadIndirectAddressRegister):
 
 class LoadIndirectAddressIYRegister(LoadIndirectAddressRegister):
     """ LD (IY + d), r """
+
+    instruction_regexp = '^1111110101110((?:0|1){3})((?:0|1){8})$'
 
     def _instruction_regexp(self):
         return '^1111110101110((?:0|1){3})((?:0|1){8})$'
@@ -219,8 +210,7 @@ class LoadIndirectAddressIYRegister(LoadIndirectAddressRegister):
 class LoadIndirectAddressHLNumber(Instruction):
     """ LD (HL), n """
 
-    def _instruction_regexp(self):
-        return '^00110110((?:0|1){8})$'
+    instruction_regexp = '^00110110((?:0|1){8})$'
 
     def _instruction_logic(self, n):
         self._z80.ram.write(self._z80.hl.bits, n)
@@ -229,8 +219,7 @@ class LoadIndirectAddressHLNumber(Instruction):
 class LoadIndirectAddressIXNumber(Instruction):
     """ LD (IX + d), n """
 
-    def _instruction_regexp(self):
-        return '^1101110100110110((?:0|1){8})((?:0|1){8})$'
+    instruction_regexp = '^1101110100110110((?:0|1){8})((?:0|1){8})$'
 
     def _instruction_logic(self, offset, n):
         address = self._z80.ix.bits + offset
@@ -240,8 +229,7 @@ class LoadIndirectAddressIXNumber(Instruction):
 class LoadIndirectAddressIYNumber(Instruction):
     """ LD (IY + d), n """
 
-    def _instruction_regexp(self):
-        return '^1111110100110110((?:0|1){8})((?:0|1){8})$'
+    instruction_regexp = '^1111110100110110((?:0|1){8})((?:0|1){8})$'
 
     def _instruction_logic(self, offset, n):
         address = self._z80.iy.bits + offset
@@ -250,9 +238,8 @@ class LoadIndirectAddressIYNumber(Instruction):
 
 class LoadAIndirectAddressBC(Instruction):
     """ LD A, (BC) """
-
-    def _instruction_regexp(self):
-        return '^00001010$'
+    
+    instruction_regexp = '^00001010$'
 
     def _instruction_logic(self):
         self._z80.a.bits = self._z80.ram.read(self._z80.bc.bits)
@@ -261,8 +248,7 @@ class LoadAIndirectAddressBC(Instruction):
 class LoadAIndirectAddressDE(Instruction):
     """ LD A, (DE) """
 
-    def _instruction_regexp(self):
-        return '^00011010$'
+    instruction_regexp = '^00011010$'
 
     def _instruction_logic(self):
         self._z80.a.bits = self._z80.ram.read(self._z80.de.bits)
@@ -271,8 +257,7 @@ class LoadAIndirectAddressDE(Instruction):
 class LoadAIndirectAddressNN(Instruction):
     """ LD A, (nn) """
 
-    def _instruction_regexp(self):
-        return '^00111010((?:0|1){8})((?:0|1){8})$'
+    instruction_regexp = '^00111010((?:0|1){8})((?:0|1){8})$'
 
     def _instruction_logic(self, high_order_byte, low_order_byte):
         address = self._get_address(high_order_byte, low_order_byte)
@@ -282,8 +267,7 @@ class LoadAIndirectAddressNN(Instruction):
 class LoadIndirectBCRegisterA(Instruction):
     """ LD (BC), A """
 
-    def _instruction_regexp(self):
-        return '^00000010$'
+    instruction_regexp = '^00000010$'
 
     def _instruction_logic(self):
         self._z80.ram.write(self._z80.bc.bits, self._z80.a.bits)
@@ -292,8 +276,7 @@ class LoadIndirectBCRegisterA(Instruction):
 class LoadIndirectDERegisterA(Instruction):
     """ LD (DE), A """
 
-    def _instruction_regexp(self):
-        return '^00010010$'
+    instruction_regexp = '^00010010$'
 
     def _instruction_logic(self):
         self._z80.ram.write(self._z80.de.bits, self._z80.a.bits)
@@ -302,8 +285,7 @@ class LoadIndirectDERegisterA(Instruction):
 class LoadIndirectNNRegisterA(Instruction):
     """ LD (nn), A """
 
-    def _instruction_regexp(self):
-        return '^00110010((?:0|1){8})((?:0|1){8})$'
+    instruction_regexp = '^00110010((?:0|1){8})((?:0|1){8})$'
 
     def _instruction_logic(self, high_order_byte, low_order_byte):
         address = self._get_address(high_order_byte, low_order_byte)
@@ -314,8 +296,7 @@ class LoadIndirectNNRegisterA(Instruction):
 class LoadRegisterARegisterI(Instruction):
     """ LD A, I """
 
-    def _instruction_regexp(self):
-        return '^1110110101010111$'
+    instruction_regexp = '^1110110101010111$'
 
     def _instruction_logic(self):
         self._z80.a.bits = self._z80.i.bits
@@ -325,8 +306,7 @@ class LoadRegisterARegisterI(Instruction):
 class LoadRegisterARegisterR(Instruction):
     """ LD A, R """
 
-    def _instruction_regexp(self):
-        return '^1110110101011111$'
+    instruction_regexp = '^1110110101011111$'
 
     def _instruction_logic(self):
         self._z80.a.bits = self._z80.r.bits
@@ -335,8 +315,7 @@ class LoadRegisterARegisterR(Instruction):
 class LoadRegisterIRegisterA(Instruction):
     """ LD I, A """
 
-    def _instruction_regexp(self):
-        return '^1110110101000111$'
+    instruction_regexp = '^1110110101000111$'
 
     def _instruction_logic(self):
         self._z80.i.bits = self._z80.a.bits
@@ -345,8 +324,7 @@ class LoadRegisterIRegisterA(Instruction):
 class LoadRegisterRRegisterA(Instruction):
     """ LD R, A """
 
-    def _instruction_regexp(self):
-        return '^1110110101001111$'
+    instruction_regexp = '^1110110101001111$'
 
     def _instruction_logic(self):
         self._z80.r.bits = self._z80.a.bits
