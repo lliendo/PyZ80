@@ -22,6 +22,7 @@ Copyright 2014 Lucas Liendo.
 from unittest import TestCase
 from random import randint
 from ..cpu import Z80
+from ..instruction.decoder import InstructionDecoder
 
 
 class TestZ80(TestCase):
@@ -41,7 +42,7 @@ class TestZ80(TestCase):
     def _bin_to_int(self, n):
         return int(n, base=2)
 
-    def _opcode_to_int(self, *opcode):
+    def _opcode_to_int(self, opcode):
         return map(lambda o: self._bin_to_int(o), opcode)
 
     def _int_to_bin(self, n, padding=8):
@@ -58,3 +59,8 @@ class TestZ80(TestCase):
 
     def _read_ram_word(self, address):
         return self._z80.ram.read(address) + self._z80.ram.read(address + 1) * 256
+
+    def _decode_instruction(self, opcode):
+        bytes = self._opcode_to_int(opcode)
+        instruction, operands = InstructionDecoder(self._z80).decode(bytes)
+        return instruction.execute(operands)
