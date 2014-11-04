@@ -19,13 +19,14 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
+from re import compile as compile_re
 from abc_load_group_16_bit import *
 
 
 class LoadDDNN(LoadRegister16Bit):
     """ LD dd, nn """
 
-    instruction_regexp = '^00((?:0|1){2})0001((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^00((?:0|1){2})0001((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, selector, m, n):
         register = self._register_selector(selector)
@@ -36,7 +37,7 @@ class LoadDDNN(LoadRegister16Bit):
 class LoadIXNN(Instruction):
     """ LD IX, nn """
 
-    instruction_regexp = '^1101110100100001((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1101110100100001((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         self._z80.ix.higher.bits = m
@@ -46,7 +47,7 @@ class LoadIXNN(Instruction):
 class LoadIYNN(Instruction):
     """ LD IY, nn """
 
-    instruction_regexp = '^1111110100100001((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1111110100100001((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         self._z80.iy.higher.bits = m
@@ -56,7 +57,7 @@ class LoadIYNN(Instruction):
 class LoadHLIndirectAddressNN(Instruction):
     """ LD HL, (nn) """
 
-    instruction_regexp = '^00101010((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^00101010((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
@@ -67,7 +68,7 @@ class LoadHLIndirectAddressNN(Instruction):
 class LoadDDIndirectAddressNN(LoadRegister16Bit):
     """ LD dd, (nn) """
 
-    instruction_regexp = '^1110110101((?:0|1){2})1011((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1110110101((?:0|1){2})1011((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, selector, m, n):
         address = self._get_address(m, n)
@@ -79,7 +80,7 @@ class LoadDDIndirectAddressNN(LoadRegister16Bit):
 class LoadIXIndirectAddressNN(Instruction):
     """ LD IX, (nn) """
 
-    instruction_regexp = '^1101110100101010((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1101110100101010((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
@@ -90,7 +91,7 @@ class LoadIXIndirectAddressNN(Instruction):
 class LoadIYIndirectAddressNN(Instruction):
     """ LD IY, (nn) """
 
-    instruction_regexp = '^1111110100101010((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1111110100101010((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
@@ -101,7 +102,7 @@ class LoadIYIndirectAddressNN(Instruction):
 class LoadIndirectAddressNNHL(Instruction):
     """ LD (nn), HL """
 
-    instruction_regexp = '^00100010((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^00100010((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
@@ -112,7 +113,7 @@ class LoadIndirectAddressNNHL(Instruction):
 class LoadIndirectAddressNNDD(LoadRegister16Bit):
     """ LD (nn), dd """
 
-    instruction_regexp = '^1110110101((?:0|1){2})0011((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1110110101((?:0|1){2})0011((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, selector, m, n):
         address = self._get_address(m, n)
@@ -124,7 +125,7 @@ class LoadIndirectAddressNNDD(LoadRegister16Bit):
 class LoadIndirectAddressNNIX(Instruction):
     """ LD (nn), IX """
 
-    instruction_regexp = '^1101110100100010((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1101110100100010((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
@@ -135,7 +136,7 @@ class LoadIndirectAddressNNIX(Instruction):
 class LoadIndirectAddressNNIY(Instruction):
     """ LD (nn), IY """
 
-    instruction_regexp = '^1111110100100010((?:0|1){8})((?:0|1){8})$'
+    regexp = compile_re('^1111110100100010((?:0|1){8})((?:0|1){8})$')
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
@@ -146,7 +147,7 @@ class LoadIndirectAddressNNIY(Instruction):
 class LoadSPHL(Instruction):
     """ LD SP, HL """
 
-    instruction_regexp = '^11111001$'
+    regexp = compile_re('^11111001$')
 
     def _instruction_logic(self):
         self._z80.sp.bits = self._z80.hl.bits
@@ -155,7 +156,7 @@ class LoadSPHL(Instruction):
 class LoadSPIX(Instruction):
     """ LD SP, IX """
 
-    instruction_regexp = '^1101110111111001$'
+    regexp = compile_re('^1101110111111001$')
 
     def _instruction_logic(self):
         self._z80.sp.bits = self._z80.ix.bits
@@ -164,7 +165,7 @@ class LoadSPIX(Instruction):
 class LoadSPIY(Instruction):
     """ LD SP, IY """
 
-    instruction_regexp = '^1111110111111001$'
+    regexp = compile_re('^1111110111111001$')
 
     def _instruction_logic(self):
         self._z80.sp.bits = self._z80.iy.bits
@@ -173,7 +174,7 @@ class LoadSPIY(Instruction):
 class PushQQ(Push):
     """ PUSH qq """
 
-    instruction_regexp = '^11((?:0|1){2})0101$'
+    regexp = compile_re('^11((?:0|1){2})0101$')
 
     def _instruction_logic(self, selector):
         register = self._register_selector(selector)
@@ -183,7 +184,7 @@ class PushQQ(Push):
 class PushIX(Push):
     """ PUSH IX """
 
-    instruction_regexp = '^1101110111100101$'
+    regexp = compile_re('^1101110111100101$')
 
     def _instruction_logic(self):
         super(PushIX, self)._instruction_logic(self._z80.ix)
@@ -192,7 +193,7 @@ class PushIX(Push):
 class PushIY(Push):
     """ PUSH IY """
 
-    instruction_regexp = '^1111110111100101$'
+    regexp = compile_re('^1111110111100101$')
 
     def _instruction_logic(self):
         super(PushIY, self)._instruction_logic(self._z80.iy)
@@ -201,7 +202,7 @@ class PushIY(Push):
 class PopQQ(Pop):
     """ POP qq """
 
-    instruction_regexp = '^11((?:0|1){2})0001$'
+    regexp = compile_re('^11((?:0|1){2})0001$')
 
     def _instruction_logic(self, selector):
         register = self._register_selector(selector)
@@ -211,7 +212,7 @@ class PopQQ(Pop):
 class PopIX(Pop):
     """ POP IX """
 
-    instruction_regexp = '^1101110111100001$'
+    regexp = compile_re('^1101110111100001$')
 
     def _instruction_logic(self):
         super(PopIX, self)._instruction_logic(self._z80.ix)
@@ -220,7 +221,7 @@ class PopIX(Pop):
 class PopIY(Pop):
     """ POP IY """
 
-    instruction_regexp = '^1111110111100001$'
+    regexp = compile_re('^1111110111100001$')
 
     def _instruction_logic(self):
         super(PopIY, self)._instruction_logic(self._z80.iy)
