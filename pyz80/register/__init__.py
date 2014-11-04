@@ -146,7 +146,7 @@ class Z80Register(object):
     def __eq__(self, register):
         return (self.size == register.size) and (self.bits == register.bits)
 
-    # TODO: Add unit test !
+    # TODO: Add test.
     def _add(self, other, RegisterClass):
         # TODO: Is it possible to avoid the 'type' call ?.
 
@@ -157,15 +157,13 @@ class Z80Register(object):
         else:
             raise Z80RegisterError('Can\'t sum {0} and {1} types.'.format(type(self), type(other)))
 
-        register = RegisterClass(bits=add_result)
+        return RegisterClass(bits=add_result)
 
         # TODO: Possibly also create & set: carry, add_substract & remaining
         # properties on the register side. This is useful to get overflow,
         # add_substract, carry conditions after an add operator is
         # performed, and avoids re-executing the same code to verify
         # these conditions.
-
-        return register
 
     @property
     def even(self):
