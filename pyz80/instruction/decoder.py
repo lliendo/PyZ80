@@ -19,7 +19,6 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from re import compile as compile_re
 from .load_group_8_bit import *
 from .load_group_16_bit import *
 
@@ -114,21 +113,16 @@ class InstructionDecoder(object):
         n = self._bytes_to_int(bytes)
         return bin(n).lstrip('0b').zfill(len(bytes) * bits_per_byte)
 
-    # TODO: Try to avoid compiling the re 2 times.
-    def _instruction_match(self, Instruction, bytes):
-        compiled_regexp = compile_re(Instruction.instruction_regexp)
-        return compiled_regexp.match(self._translate(bytes))
+    def _get_instruction(self, bytes):
+        return filter(lambda I: I.regexp.match(self._translate(bytes)), self._instructions).pop()
 
-    def _get_instruction_operands(self, Instruction, bytes):
-        compiled_regexp = compile_re(Instruction.instruction_regexp)
-        return map(lambda s: int(s, base=2), compiled_regexp.match(self._translate(bytes)).groups())
+    def _get_operands(self, Instruction, bytes):
+        return map(lambda s: int(s, base=2), Instruction.regexp.match(self._translate(bytes)).groups())
 
     def decode(self, bytes):
         try:
-            Instruction = filter(lambda I: self._instruction_match(I, bytes), self._instructions).pop()
+            Instruction = self._get_instruction(bytes)
         except IndexError:
             raise InvalidInstruction('Not recognized instruction: {0}'.format(bytes))
 
-        operands = self._get_instruction_operands(Instruction, bytes)
-
-        return Instruction(self._z80), operands
+        return Instruction(self._z80), self._get_operands(Instruction, bytes)
