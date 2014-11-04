@@ -20,60 +20,26 @@ Copyright 2014 Lucas Liendo.
 """
 
 from abc import ABCMeta, abstractmethod
-from re import compile as compile_re
+from ..register import Z80FlagsRegister
 
 
 class Instruction(object):
     
     __metaclass__ = ABCMeta
+    instruction_regexp = None
 
     def __init__(self, z80):
         self._z80 = z80
-        self._compiled_regexp = compile_re(self._instruction_regexp())
+        self._instruction_flags = Z80FlagsRegister(bits=self._z80.f.bits)
 
     @abstractmethod
-    def _instruction_logic(self, *args):
+    def _instruction_logic(self, *operands):
         pass
 
-    def _update_flags(self):
-        pass
-
-    @abstractmethod
-    def _instruction_regexp(self):
-        pass
-
-    def regexp_match(self, bytes):
-        return self._compiled_regexp.match(self._decode(bytes))
-
-    def execute(self, bytes):
-        operands = map(lambda s: int(s, base=2), self.regexp_match(bytes).groups())
+    def execute(self, operands):
         self._instruction_logic(*operands)
-        self._update_flags()
-
-    def _bytes_to_int(self, bytes):
-        """
-        Translates a list of bytes into an integer value.
-        E.g.
-            Given [0xAA, 0xCC]
-            then this method will return
-            43724
-        """
-
-        base = 256
-        return sum([byte * pow(base, n) for n, byte in enumerate(reversed(bytes))])
-
-    def _decode(self, bytes):
-        """
-        Translates a list of bytes into a padded binary string.
-        E.g.
-            Given [0xAA, 0xBB, 0xCC, 0xDD]
-            then this method will return
-            10101010101110111100110011011101
-        """
-
-        bits_per_byte = 8
-        n = self._bytes_to_int(bytes)
-        return bin(n).lstrip('0b').zfill(len(bytes) * bits_per_byte)
+        return self._instruction_flags
+        # self._update_flags()
 
     def _get_address(self, ho_byte, lo_byte):
         """
@@ -81,25 +47,5 @@ class Instruction(object):
         an address which is the composition of the high and low
         order bytes.
         """
-        return self._bytes_to_int([ho_byte, lo_byte])
-
-    def _sign_flag_update(self):
-        pass
-
-    def _zero_flag_update(self):
-        pass
-
-    def _carry_flag_update(self):
-        pass
-
-    def _add_substract_flag_update(self):
-        pass
-
-    def _parity_flag_update(self):
-        pass
-
-    def _overflow_flag_update(self, bits=8):
-        pass
-
-    def _half_carry_flag_update(self, bits=8):
-        pass
+        base = 256
+        return (ho_byte * base) + lo_byte
