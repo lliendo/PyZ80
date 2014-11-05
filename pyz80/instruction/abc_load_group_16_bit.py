@@ -77,6 +77,3 @@ class Pop(Instruction):
         register.higher.bits = self._z80.ram.read(self._z80.sp.bits + 1)
         register.lower.bits = self._z80.ram.read(self._z80.sp.bits)
         self._z80.sp.bits += 2
-
-
-
