@@ -20,7 +20,7 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
-from abc_load_group_16_bit import *
+from abc_load_16_bit import *
 
 
 class LoadDDNN(LoadRegister16Bit):

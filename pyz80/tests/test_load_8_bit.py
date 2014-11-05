@@ -20,7 +20,7 @@ Copyright 2014 Lucas Liendo.
 """
 
 from itertools import product
-from ..instruction.load_group_8_bit import *
+from ..instruction.load_8_bit import *
 from .test_z80_base import TestZ80
 
 

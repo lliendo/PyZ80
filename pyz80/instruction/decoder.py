@@ -19,8 +19,8 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from .load_group_8_bit import *
-from .load_group_16_bit import *
+from .load_8_bit import *
+from .load_16_bit import *
 
 
 class InvalidInstructionError(Exception):

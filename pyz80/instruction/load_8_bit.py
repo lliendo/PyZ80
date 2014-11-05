@@ -20,7 +20,7 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
-from abc_load_group_8_bit import *
+from abc_load_8_bit import *
 
 
 # The RR, PP, QQ in the class names refer to the different 
