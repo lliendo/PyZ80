@@ -192,32 +192,38 @@ class TestLoadInstructions(TestZ80):
         }
 
         for destination in registers.keys():
-            self._z80.sp.bits = self._get_random_word()
+            address = self._get_random_word()
+            self._z80.sp.bits = address
             nn = self._get_random_word()
             registers[destination].bits = nn
             opcode = ['11{0}0101'.format(destination)]
             self._decode_instruction(opcode)
             self.assertEqual(self._read_ram_word(self._z80.sp.bits), nn)
+            self.assertEqual(self._z80.sp.bits, address - 2)
 
     def test_push_ix(self):
         """ Test PUSH IX """
 
-        self._z80.sp.bits = self._get_random_word()
+        address = self._get_random_word()
+        self._z80.sp.bits = address
         nn = self._get_random_word()
         self._z80.ix.bits = nn
         opcode = ['11011101', '11100101']
         self._decode_instruction(opcode)
         self.assertEqual(self._read_ram_word(self._z80.sp.bits), nn)
+        self.assertEqual(self._z80.sp.bits, address - 2)
 
     def test_push_iy(self):
         """ Test PUSH IY """
 
-        self._z80.sp.bits = self._get_random_word()
+        address = self._get_random_word()
+        self._z80.sp.bits = address
         nn = self._get_random_word()
         self._z80.iy.bits = nn
         opcode = ['11111101', '11100101']
         self._decode_instruction(opcode)
         self.assertEqual(self._read_ram_word(self._z80.sp.bits), nn)
+        self.assertEqual(self._z80.sp.bits, address - 2)
 
     def test_pop_qq(self):
         """ Test POP qq """
@@ -230,29 +236,35 @@ class TestLoadInstructions(TestZ80):
         }
 
         for destination in registers.keys():
-            self._z80.sp.bits = self._get_random_word()
+            address = self._get_random_word()
+            self._z80.sp.bits = address
             nn = self._get_random_word()
             self._load_ram_with_word(self._z80.sp.bits, nn)
             opcode = ['11{0}0001'.format(destination)]
             self._decode_instruction(opcode)
             self.assertEqual(registers[destination].bits, nn)
+            self.assertEqual(self._z80.sp.bits, address + 2)
 
     def test_pop_ix(self):
         """ Test POP IX """
 
-        self._z80.sp.bits = self._get_random_word()
+        address = self._get_random_word()
+        self._z80.sp.bits = address
         nn = self._get_random_word()
         self._load_ram_with_word(self._z80.sp.bits, nn)
         opcode = ['11011101', '11100001']
         self._decode_instruction(opcode)
         self.assertEqual(self._z80.ix.bits, nn)
+        self.assertEqual(self._z80.sp.bits, address + 2)
 
     def test_pop_iy(self):
         """ Test POP IY """
 
-        self._z80.sp.bits = self._get_random_word()
+        address = self._get_random_word()
+        self._z80.sp.bits = address
         nn = self._get_random_word()
         self._load_ram_with_word(self._z80.sp.bits, nn)
         opcode = ['11111101', '11100001']
         self._decode_instruction(opcode)
         self.assertEqual(self._z80.iy.bits, nn)
+        self.assertEqual(self._z80.sp.bits, address + 2)
