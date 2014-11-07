@@ -37,15 +37,18 @@ class Z80Register(object):
         self._msb_mask = self._most_significant_bit_mask()
         self._higher_mask, self._lower_mask = self._build_masks()
 
-        if bits > (self._higher_mask | self._lower_mask):
-            self._overflow_cond = True
-        else:
-            self._overflow_cond = False
+        # if bits > (self._higher_mask | self._lower_mask):
+        #     self._overflow_cond = True
+        # else:
+        #     self._overflow_cond = False
 
+        self._overflow_cond = self._check_overflow(bits)
         self._bits = self._apply_register_bit_mask(bits)
-
         self._carry_cond = False
         self._add_substract_cond = False
+
+    def _check_overflow(self, bits):
+        return bits > (self._higher_mask | self._lower_mask)
 
     def _build_masks(self):
         lower_mask = self._lsb_mask
