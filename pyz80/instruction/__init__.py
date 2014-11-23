@@ -26,6 +26,9 @@ from ..register import Z80FlagsRegister
 class Instruction(object):
     
     __metaclass__ = ABCMeta
+    NIBBLE_SIZE = 4
+    BYTE_SIZE = 8
+    WORD_SIZE = 16
     instruction_regexp = None
 
     def __init__(self, z80):
@@ -39,13 +42,72 @@ class Instruction(object):
     def execute(self, operands):
         self._instruction_logic(*operands)
         return self._instruction_flags
-        # self._update_flags()
 
-    def _get_address(self, ho_byte, lo_byte):
+    def _get_address(self, high_order_byte, low_order_byte):
         """
         Given high and a low order byte this method returns
         an address which is the composition of the high and low
         order bytes.
         """
         base = 256
-        return (ho_byte * base) + lo_byte
+        return (high_order_byte * base) + low_order_byte
+
+    def _msb(self, n, bits=BYTE_SIZE):
+        return (n >> (bits - 1)) & 0x1
+
+    def _bitmask(self, bits=BYTE_SIZE):
+        return int(pow(2, bits) - 1)
+
+    def _parity(self, n):
+        parity_even = True
+        ones_count = len(filter(lambda s: s is '1', bin(n).lstrip('0b')))
+
+        if ones_count & 0x1:
+            parity_even = False
+
+        return parity_even
+
+    def _zero(self, n):
+        return n is 0
+
+    def _sign(self, n, bits=BYTE_SIZE):
+        return self._msb(n, bits=bits)
+
+    def _half_carry(self, operands, bits=BYTE_SIZE):
+        return self._carry(operands, bits=((bits / self.NIBBLE_SIZE) - 1) * self.NIBBLE_SIZE)
+
+    def _update_overflow_flag(self, operands):
+        if self._overflow(operands):
+            self._instruction_flags.set_parity_flag()
+        else:
+            self._instruction_flags.reset_parity_flag()
+
+    def _update_carry_flag(self, operands):
+        if self._carry(operands):
+            self._instruction_flags.set_carry_flag()
+        else:
+            self._instruction_flags.reset_carry_flag()
+
+    def _update_half_carry_flag(self, operands):
+        if self._half_carry(operands):
+            self._instruction_flags.set_half_carry_flag()
+        else:
+            self._instruction_flags.reset_half_carry_flag()
+
+    def _update_sign_flag(self, instruction_result):
+        if self._sign(instruction_result):
+            self._instruction_flags.set_sign_flag()
+        else:
+            self._instruction_flags.reset_sign_flag()
+
+    def _update_zero_flag(self, instruction_result):
+        if self._zero(instruction_result):
+            self._instruction_flags.set_zero_flag()
+        else:
+            self._instruction_flags.reset_zero_flag()
+
+    def _update_parity_flag(self, instruction_result):
+        if self._parity(instruction_result):
+            self._instruction_flags.set_parity_flag()
+        else:
+            self._instruction_flags.reset_parity_flag()
