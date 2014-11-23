@@ -20,7 +20,6 @@ Copyright 2014 Lucas Liendo.
 """
 
 from abc import ABCMeta
-from math import log
 
 
 class Z80RegisterError(Exception):
@@ -37,13 +36,8 @@ class Z80Register(object):
         self._msb_mask = self._most_significant_bit_mask()
         self._higher_mask, self._lower_mask = self._build_masks()
 
-        # if bits > (self._higher_mask | self._lower_mask):
-        #     self._overflow_cond = True
-        # else:
-        #     self._overflow_cond = False
-
         self._overflow_cond = self._check_overflow(bits)
-        self._bits = self._apply_register_bit_mask(bits)
+        self._bits = self._apply_bit_mask(bits)
         self._carry_cond = False
         self._add_substract_cond = False
 
@@ -60,7 +54,7 @@ class Z80Register(object):
 
         return higher_mask, lower_mask
 
-    def _apply_register_bit_mask(self, n):
+    def _apply_bit_mask(self, n):
         return n & (self._higher_mask | self._lower_mask)
 
     def _nth_bit_mask(self, n):
@@ -94,7 +88,7 @@ class Z80Register(object):
 
     @bits.setter
     def bits(self, n):
-        self._bits = self._apply_register_bit_mask(n)
+        self._bits = self._apply_bit_mask(n)
 
     @property
     def size(self):
@@ -151,8 +145,6 @@ class Z80Register(object):
 
     # TODO: Add test.
     def _add(self, other, RegisterClass):
-        # TODO: Is it possible to avoid the 'type' call ?.
-
         if type(other) is int:
             add_result = self.bits + other
         elif type(other) is RegisterClass:
@@ -161,54 +153,6 @@ class Z80Register(object):
             raise Z80RegisterError('Can\'t sum {0} and {1} types.'.format(type(self), type(other)))
 
         return RegisterClass(bits=add_result)
-
-        # TODO: Possibly also create & set: carry, add_substract & remaining
-        # properties on the register side. This is useful to get overflow,
-        # add_substract, carry conditions after an add operator is
-        # performed, and avoids re-executing the same code to verify
-        # these conditions.
-
-    @property
-    def even(self):
-        return self.lsb
-
-    @property
-    def signed(self):
-        return self.msb
-
-    @property
-    def zero(self):
-        return self._bits is 0x00
-
-    """
-    This set of properties reflect how a register
-    is affected after a certain operation and serves as an entry
-    point for updating the cpu's flag register.
-    """
-
-    @property
-    def overflow_cond(self):
-        return self._overflow_cond
-
-    @overflow_cond.setter
-    def overflow_cond(self, cond):
-        self._overflow_cond = cond
-
-    @property
-    def carry_cond(self):
-        return self._carry_cond
-
-    @carry_cond.setter
-    def carry_cond(self, cond):
-        self._carry_cond = cond
-
-    @property
-    def add_substract_cond(self):
-        return self._add_substract_cond
-
-    @add_substract_cond.setter
-    def add_substract_cond(self, cond):
-        self._add_substract_cond = cond
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -278,7 +222,7 @@ class Z80WordRegister(Z80Register):
 
 
 # TODO: Add undocumented flags properties.
-class Z80FlagsRegister(Z80Register):
+class Z80FlagsRegister(Z80ByteRegister):
     SIGN_BIT = 7
     ZERO_BIT = 6
     HALF_CARRY_BIT = 4 
