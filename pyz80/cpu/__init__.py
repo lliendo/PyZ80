@@ -19,7 +19,7 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from ..register import Z80Register, Z80ByteRegister, Z80WordRegister, Z80FlagsRegister
+from ..register import Z80ByteRegister, Z80WordRegister, Z80FlagsRegister
 from ..fsm import Z80FSMBuilder
 from ..ram import Ram
 from ..instruction.decoder import InstructionDecoder
@@ -39,7 +39,7 @@ class Z80(object):
         bc, de, hl, sp, pc, ix, iy, bc_, de_, hl_
         """
 
-        registers = ['af', 'bc', 'de', 'hl']    
+        registers = ['bc', 'de', 'hl']    
         [setattr(self, r, Z80WordRegister()) for r in registers + ['sp', 'pc', 'ix', 'iy']]
         [setattr(self, r + '_', Z80WordRegister()) for r in registers]
 
@@ -51,10 +51,10 @@ class Z80(object):
 
         self.i = Z80ByteRegister()
         self.r = Z80ByteRegister()
-        self.a_ = self.af_.higher
-        self.f_ = self.af_.lower
-        self.a = self.af.higher
-        self.f = self.af.lower
+        self.a_ = Z80ByteRegister()
+        self.f_ = Z80FlagsRegister()
+        self.a = Z80ByteRegister()
+        self.f = Z80FlagsRegister()
         self.b = self.bc.higher
         self.c = self.bc.lower
         self.d = self.de.higher
