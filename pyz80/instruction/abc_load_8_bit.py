@@ -34,6 +34,7 @@ class LoadRegisterRegister(Instruction):
 
 
 class LoadRegisterNumber(Instruction):
+    
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, destination_selector, bits):
