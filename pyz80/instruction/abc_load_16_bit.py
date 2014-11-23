@@ -48,10 +48,14 @@ class Push(Instruction):
             0b00: self._z80.bc,
             0b01: self._z80.de,
             0b10: self._z80.hl,
-            0b11: self._z80.af,
         }
 
-        return registers[selector]
+        if selector == 0b11:
+            register = self._z80.a.combine(self._z80.f)
+        else:
+            register = registers[selector]
+
+        return register
 
     def _instruction_logic(self, register):
         self._z80.ram.write(self._z80.sp.bits - 2, register.lower.bits)
@@ -68,12 +72,18 @@ class Pop(Instruction):
             0b00: self._z80.bc,
             0b01: self._z80.de,
             0b10: self._z80.hl,
-            0b11: self._z80.af
         }
+        
+        if selector == 0b11:
+            higher_register = self._z80.a
+            lower_register = self._z80.f
+        else:
+            higher_register = registers[selector].higher
+            lower_register = registers[selector].lower
 
-        return registers[selector]
+        return higher_register, lower_register
 
-    def _instruction_logic(self, register):
-        register.higher.bits = self._z80.ram.read(self._z80.sp.bits + 1)
-        register.lower.bits = self._z80.ram.read(self._z80.sp.bits)
+    def _instruction_logic(self, higher_register, lower_register):
+        higher_register.bits = self._z80.ram.read(self._z80.sp.bits + 1)
+        lower_register.bits = self._z80.ram.read(self._z80.sp.bits)
         self._z80.sp.bits += 2
