@@ -21,6 +21,7 @@ Copyright 2014 Lucas Liendo.
 
 from .load_8_bit import *
 from .load_16_bit import *
+from .arithmetic_8_bit import *
 
 
 class InvalidInstructionError(Exception):
@@ -85,8 +86,14 @@ class InstructionDecoder(object):
             PopIY,
         ]
 
+    def _8_bit_arithmetic_instructions(self):
+        return [
+            AddAR,
+        ]
+
     def _z80_instructions(self):
-        return self._8_bit_load_instructions() + self._16_bit_load_instructions()
+        return self._8_bit_load_instructions() + \
+            self._16_bit_load_instructions() + self._8_bit_arithmetic_instructions()
 
     def _bytes_to_int(self, bytes):
         """
