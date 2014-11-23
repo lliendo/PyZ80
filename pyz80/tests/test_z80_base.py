@@ -60,7 +60,7 @@ class TestZ80(TestCase):
     def _read_ram_word(self, address):
         return self._z80.ram.read(address) + self._z80.ram.read(address + 1) * 256
 
-    def _decode_instruction(self, opcode):
+    def _decode_and_execute_opcode(self, opcode):
         bytes = self._opcode_to_int(opcode)
         instruction, operands = InstructionDecoder(self._z80).decode(bytes)
         return instruction.execute(operands)
