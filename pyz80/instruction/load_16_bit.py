@@ -205,8 +205,8 @@ class PopQQ(Pop):
     regexp = compile_re('^11((?:0|1){2})0001$')
 
     def _instruction_logic(self, selector):
-        register = self._register_selector(selector)
-        super(PopQQ, self)._instruction_logic(register)
+        higher_register, lower_register = self._register_selector(selector)
+        super(PopQQ, self)._instruction_logic(higher_register, lower_register)
 
 
 class PopIX(Pop):
@@ -215,7 +215,7 @@ class PopIX(Pop):
     regexp = compile_re('^1101110111100001$')
 
     def _instruction_logic(self):
-        super(PopIX, self)._instruction_logic(self._z80.ix)
+        super(PopIX, self)._instruction_logic(self._z80.ix.higher, self._z80.ix.lower)
 
 
 class PopIY(Pop):
@@ -224,4 +224,4 @@ class PopIY(Pop):
     regexp = compile_re('^1111110111100001$')
 
     def _instruction_logic(self):
-        super(PopIY, self)._instruction_logic(self._z80.iy)
+        super(PopIY, self)._instruction_logic(self._z80.iy.higher, self._z80.iy.lower)
