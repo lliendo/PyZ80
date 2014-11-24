@@ -28,7 +28,7 @@ class Ram(object):
     def __init__(self, size=1024 * 64):
         self._size = size
         self._ram = None
-        self.reset()
+        self.clear()
 
     @property
     def size(self):
@@ -43,18 +43,17 @@ class Ram(object):
         self._ram[address] = bits
 
     def _check_address(self, address):
-        if (address < 0x0) or (address > self.size - 1):
+        if (address < 0x00) or (address > self._size - 1):
             raise RamInvalidAddress(
                 'Error - {0} is not a valid RAM address.'.format(address)
             )
 
-    def load(self, opcodes, address=0x0):
+    def load(self, opcodes, address=0x00):
         self._check_address(address)
 
         for opcode in opcodes:
             self.write(address, opcode)
-            self._check_address(address)
             address += 1
 
-    def reset(self):
-        self._ram = [0x0 for i in range(0, self._size)]
+    def clear(self):
+        self._ram = [0x00 for i in range(0, self._size)]
