@@ -26,12 +26,11 @@ from ..instruction.decoder import InstructionDecoder
 
 
 class Z80(object):
-    def __init__(self, address=0x00):
+    def __init__(self):
         self._build_registers()
-        self.ram = Ram()
         self._fsms = Z80FSMBuilder(self).build()
         self._instruction_decoder = InstructionDecoder(self)
-        self.pc.bits = address
+        self.ram = Ram()
 
     def _build_16_bits_registers(self):
         """
@@ -83,7 +82,10 @@ class Z80(object):
 
         raise Z80InvalidOpcode()
 
-    def run(self):
+    def run(self, program=[], address=0x00):
+        self.ram.load(program, address=address)
+        self.pc.bits = address
+
         while True:
             opcode = self._fetch_opcode()
             instruction, operands = self._instruction_decoder.decode(opcode)
