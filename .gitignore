@@ -5,3 +5,4 @@ dist
 *.swp
 *.old.py
 pyz80-env
+run-tests.sh
