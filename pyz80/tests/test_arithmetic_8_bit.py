@@ -44,3 +44,30 @@ class TestLoadInstructions(TestZ80):
         opcode = ['10000000']
         flags = self._decode_and_execute_opcode(opcode)
         self.assertEqual(flags.sign_flag, False)
+
+    def test_add_a_r_overflow_is_set(self):
+        """ Test ADD A, r (overflow set) """
+
+        self._z80.a.bits = 120
+        self._z80.b.bits = 105
+        opcode = ['10000000']
+        flags = self._decode_and_execute_opcode(opcode)
+        self.assertEqual(flags.parity_flag, True)
+
+    def test_add_a_r_carry_is_set(self):
+        """ Test ADD A, r (carry set) """
+
+        self._z80.a.bits = 255
+        self._z80.b.bits = 1
+        opcode = ['10000000']
+        flags = self._decode_and_execute_opcode(opcode)
+        self.assertEqual(flags.carry_flag, True)
+
+    def test_add_a_r_carry_is_reset(self):
+        """ Test ADD A, r (carry reset) """
+
+        self._z80.a.bits = 254
+        self._z80.b.bits = 1
+        opcode = ['10000000']
+        flags = self._decode_and_execute_opcode(opcode)
+        self.assertEqual(flags.carry_flag, False)
