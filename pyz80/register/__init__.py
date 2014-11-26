@@ -67,9 +67,14 @@ class Z80Register(object):
 
     def nth_bit(self, n):
         """
-        Returns True/False if the nth bit is set/reset.
+        Returns 0x01/0x00 if the nth bit is set/reset.
         """
-        return (self._bits & self._nth_bit_mask(n)) is not 0x00
+        nth_bit = 0x00
+
+        if (self._bits & self._nth_bit_mask(n)) is not 0x00:
+            nth_bit = 0x01
+
+        return nth_bit
 
     def _most_significant_bit_mask(self):
         return self._nth_bit_mask(self._size - 1)
