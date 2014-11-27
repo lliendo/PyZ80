@@ -89,6 +89,33 @@ class InstructionDecoder(object):
     def _8_bit_arithmetic_instructions(self):
         return [
             AddAR,
+            AddAP,
+            AddAQ,
+            AddAN,
+            AddAIndirectAddressHLRegister,
+            AddAIndirectAddressIXRegister,
+            AddAIndirectAddressIYRegister,
+            AdcAR,
+            AdcAP,
+            AdcAQ,
+            AdcAN,
+            AdcAIndirectAddressHLRegister,
+            AdcAIndirectAddressIXRegister,
+            AdcAIndirectAddressIYRegister,
+            SubAR,
+            SubAP,
+            SubAQ,
+            SubAN,
+            SubAIndirectAddressHLRegister,
+            SubAIndirectAddressIXRegister,
+            SubAIndirectAddressIYRegister,
+            SbcAR,
+            SbcAP,
+            SbcAQ,
+            SbcAN,
+            SbcAIndirectAddressHLRegister,
+            SbcAIndirectAddressIXRegister,
+            SbcAIndirectAddressIYRegister,
         ]
 
     def _z80_instructions(self):
