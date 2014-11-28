@@ -186,3 +186,57 @@ class SbcAIndirectAddress(Sub8Bit):
         super(SbcAIndirectAddress, self)._instruction_logic(
             [self._z80.a.bits, n, self._z80.f.carry_flag]
         )
+
+
+class And8Bit(Arithmetic8Bit):
+
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, operands):
+        and_result = reduce(lambda n, m: n & m, operands)
+        self._update_flags(operands, and_result)
+        self._z80.a.bits = and_result
+
+    def _update_flags(self, operands, instruction_result):
+        self._update_sign_flag(instruction_result)
+        self._update_zero_flag(instruction_result)
+        self._instruction_flags.set_half_carry_flag()
+        self._update_parity_flag(operands)
+        self._instruction_flags.reset_carry_flag()
+        self._instruction_flags.reset_add_substract_flag()
+
+
+class Or8Bit(Arithmetic8Bit):
+ 
+    __metaclass__ = ABCMeta
+
+   def _instruction_logic(self, operands):
+        or_result = reduce(lambda n, m: n | m, operands)
+        self._update_flags(operands, or_result)
+        self._z80.a.bits = or_result
+
+    def _update_flags(self, operands, instruction_result):
+        self._update_sign_flag(instruction_result)
+        self._update_zero_flag(instruction_result)
+        self._instruction_flags.reset_half_carry_flag()
+        self._update_parity_flag(operands)
+        self._instruction_flags.reset_carry_flag()
+        self._instruction_flags.reset_add_substract_flag()
+
+
+class Xor8Bit(Arithmetic8Bit):
+ 
+    __metaclass__ = ABCMeta
+
+   def _instruction_logic(self, operands):
+        xor_result = reduce(lambda n, m: n ^ m, operands)
+        self._update_flags(operands, xor_result)
+        self._z80.a.bits = xor_result
+
+    def _update_flags(self, operands, instruction_result):
+        self._update_sign_flag(instruction_result)
+        self._update_zero_flag(instruction_result)
+        self._instruction_flags.reset_half_carry_flag()
+        self._update_parity_flag(operands)
+        self._instruction_flags.reset_carry_flag()
+        self._instruction_flags.reset_add_substract_flag()
