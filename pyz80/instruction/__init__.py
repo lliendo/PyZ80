@@ -67,8 +67,8 @@ class Instruction(object):
 
         return parity_even
 
-    def _zero(self, n):
-        return n is 0
+    def _zero(self, n, bits=BYTE_SIZE):
+        return (n & self._bitmask(bits=bits)) is 0
 
     def _sign(self, n, bits=BYTE_SIZE):
         return self._msb(n, bits=bits)
