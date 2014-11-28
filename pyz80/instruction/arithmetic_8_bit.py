@@ -349,3 +349,465 @@ class SbcAIndirectAddressIYRegister(SbcAIndirectAddress):
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
         super(SbcAIndirectAddressIYRegister, self)._instruction_logic(address)
+
+
+""" AND instructions. """
+
+class AndAR(And8Bit):
+    """ AND A, r """
+    
+    regexp = compile_re('^10100((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._r_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(AndAR, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class AndAP(And8Bit):
+    """ AND A, p """
+
+    regexp = compile_re('^1101110110100((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._p_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(AndAP, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class AndAQ(And8Bit):
+    """ AND A, q """
+
+    regexp = compile_re('^1111110110100((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._q_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(AndAQ, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class AndAN(And8Bit):
+    """ AND A, n """
+
+    regexp = compile_re('^11100110((?:0|1){8})$')
+
+    def _instruction_logic(self, n):
+        super(AndAN, self)._instruction_logic([self._z80.a.bits, n])
+
+
+class AndAIndirectAddressHLRegister(AndAIndirectAddress):
+    """ AND A, (HL) """
+
+    regexp = compile_re('^10100110$')
+
+    def _instruction_logic(self):
+        address = self._z80.hl.bits
+        super(AndAIndirectAddressHLRegister, self)._instruction_logic(address)
+
+
+class AndAIndirectAddressIXRegister(AndAIndirectAddress):
+    """ AND A, (IX + d) """
+
+    regexp = compile_re('^1101110110100110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(AndAIndirectAddressIXRegister, self)._instruction_logic(address)
+
+
+class AndAIndirectAddressIYRegister(AndAIndirectAddress):
+    """ AND A, (IY + d) """
+
+    regexp = compile_re('^1111110110100110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(AndAIndirectAddressIYRegister, self)._instruction_logic(address)
+
+
+""" OR instructions. """
+
+class OrAR(Or8Bit):
+    """ OR A, r """
+    
+    regexp = compile_re('^10110((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._r_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(OrAR, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class OrAP(Or8Bit):
+    """ OR A, p """
+
+    regexp = compile_re('^1101110110110((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._p_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(OrAP, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class OrAQ(Or8Bit):
+    """ OR A, q """
+
+    regexp = compile_re('^1111110110110((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._q_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(OrAQ, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class OrAN(Or8Bit):
+    """ OR A, n """
+
+    regexp = compile_re('^11110110((?:0|1){8})$')
+
+    def _instruction_logic(self, n):
+        super(OrAN, self)._instruction_logic([self._z80.a.bits, n])
+
+
+class OrAIndirectAddressHLRegister(OrAIndirectAddress):
+    """ OR A, (HL) """
+
+    regexp = compile_re('^10110110$')
+
+    def _instruction_logic(self):
+        address = self._z80.hl.bits
+        super(OrAIndirectAddressHLRegister, self)._instruction_logic(address)
+
+
+class OrAIndirectAddressIXRegister(OrAIndirectAddress):
+    """ OR A, (IX + d) """
+
+    regexp = compile_re('^1101110110110110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(OrAIndirectAddressIXRegister, self)._instruction_logic(address)
+
+
+class OrAIndirectAddressIYRegister(OrAIndirectAddress):
+    """ OR A, (IY + d) """
+
+    regexp = compile_re('^1111110110110110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(OrAIndirectAddressIYRegister, self)._instruction_logic(address)
+
+
+""" XOR instructions. """
+
+class XorAR(Xor8Bit):
+    """ XOR A, r """
+    
+    regexp = compile_re('^10101((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._r_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(XorAR, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class XorAP(Xor8Bit):
+    """ XOR A, p """
+
+    regexp = compile_re('^1101110110101((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._p_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(XorAP, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class XorAQ(Xor8Bit):
+    """ XOR A, q """
+
+    regexp = compile_re('^1111110110101((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._q_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(XorAQ, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class XorAN(Xor8Bit):
+    """ XOR A, n """
+
+    regexp = compile_re('^11101110((?:0|1){8})$')
+
+    def _instruction_logic(self, n):
+        super(XorAN, self)._instruction_logic([self._z80.a.bits, n])
+
+
+class XorAIndirectAddressHLRegister(XorAIndirectAddress):
+    """ XOR A, (HL) """
+
+    regexp = compile_re('^10101110$')
+
+    def _instruction_logic(self):
+        address = self._z80.hl.bits
+        super(XorAIndirectAddressHLRegister, self)._instruction_logic(address)
+
+
+class XorAIndirectAddressIXRegister(XorAIndirectAddress):
+    """ XOR A, (IX + d) """
+
+    regexp = compile_re('^1101110110101110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(XorAIndirectAddressIXRegister, self)._instruction_logic(address)
+
+
+class XorAIndirectAddressIYRegister(XorAIndirectAddress):
+    """ XOR A, (IY + d) """
+
+    regexp = compile_re('^1111110110101110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(XorAIndirectAddressIYRegister, self)._instruction_logic(address)
+
+
+""" CP instructions. """
+
+class CpAR(Cp8Bit):
+    """ CP A, r """
+    
+    regexp = compile_re('^10111((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._r_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(CpAR, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class CpAP(Cp8Bit):
+    """ CP A, p """
+
+    regexp = compile_re('^1101110110111((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._p_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(CpAP, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class CpAQ(Cp8Bit):
+    """ CP A, q """
+
+    regexp = compile_re('^1111110110111((?:0|1){3})$')
+
+    def _instruction_selector(self, selector):
+        return self._q_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(CpAQ, self)._instruction_logic([self._z80.a.bits, register.bits])
+
+
+class CpAN(Cp8Bit):
+    """ CP A, n """
+
+    regexp = compile_re('^11111110((?:0|1){8})$')
+
+    def _instruction_logic(self, n):
+        super(CpAN, self)._instruction_logic([self._z80.a.bits, n])
+
+
+class CpAIndirectAddressHLRegister(CpAIndirectAddress):
+    """ CP A, (HL) """
+
+    regexp = compile_re('^10111110$')
+
+    def _instruction_logic(self):
+        address = self._z80.hl.bits
+        super(CpAIndirectAddressHLRegister, self)._instruction_logic(address)
+
+
+class CpAIndirectAddressIXRegister(CpAIndirectAddress):
+    """ CP A, (IX + d) """
+
+    regexp = compile_re('^1101110110111110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(CpAIndirectAddressIXRegister, self)._instruction_logic(address)
+
+
+class CpAIndirectAddressIYRegister(CpAIndirectAddress):
+    """ CP A, (IY + d) """
+
+    regexp = compile_re('^1111110110111110((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(CpAIndirectAddressIYRegister, self)._instruction_logic(address)
+
+
+""" INC instructions. """
+
+class IncAR(Inc8Bit):
+    """ INC A, r """
+    
+    regexp = compile_re('^00((?:0|1){3})100$')
+
+    def _instruction_selector(self, selector):
+        return self._r_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(IncAR, self)._instruction_logic([self._z80.a.bits, 1])
+
+
+class IncAP(Inc8Bit):
+    """ INC A, p """
+
+    regexp = compile_re('^1101110100((?:0|1){3})100$')
+
+    def _instruction_selector(self, selector):
+        return self._p_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(IncAP, self)._instruction_logic([self._z80.a.bits, 1])
+
+
+class IncAQ(Inc8Bit):
+    """ INC A, q """
+
+    regexp = compile_re('^1111110100((?:0|1){3})100$')
+
+    def _instruction_selector(self, selector):
+        return self._q_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(IncAQ, self)._instruction_logic([self._z80.a.bits, 1])
+
+
+class IncIndirectAddressHLRegister(IncIndirectAddress):
+    """ INC (HL) """
+
+    regexp = compile_re('^00110100$')
+
+    def _instruction_logic(self):
+        address = self._z80.hl.bits
+        super(IncAIndirectAddressHLRegister, self)._instruction_logic(address)
+
+
+class IncIndirectAddressIXRegister(IncIndirectAddress):
+    """ INC (IX + d) """
+
+    regexp = compile_re('^1101110100110100((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(IncAIndirectAddressIXRegister, self)._instruction_logic(address)
+
+
+class IncIndirectAddressIYRegister(IncIndirectAddress):
+    """ INC (IY + d) """
+
+    regexp = compile_re('^1111110100110100((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(IncAIndirectAddressIYRegister, self)._instruction_logic(address)
+
+
+""" DEC instructions. """
+
+class DecAR(Dec8Bit):
+    """ DEC A, r """
+    
+    regexp = compile_re('^00((?:0|1){3})101$')
+
+    def _instruction_selector(self, selector):
+        return self._r_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(DecAR, self)._instruction_logic([self._z80.a.bits, 1])
+
+
+class DecAP(Dec8Bit):
+    """ DEC A, p """
+
+    regexp = compile_re('^1101110100((?:0|1){3})101$')
+
+    def _instruction_selector(self, selector):
+        return self._p_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(DecAP, self)._instruction_logic([self._z80.a.bits, 1])
+
+
+class DecAQ(Dec8Bit):
+    """ DEC A, q """
+
+    regexp = compile_re('^1111110100((?:0|1){3})101$')
+
+    def _instruction_selector(self, selector):
+        return self._q_selector(selector)
+
+    def _instruction_logic(self, selector):
+        register = self._select_register(selector)
+        super(DecAQ, self)._instruction_logic([self._z80.a.bits, 1])
+
+
+class DecIndirectAddressHLRegister(DecIndirectAddress):
+    """ DEC (HL) """
+
+    regexp = compile_re('^00110101$')
+
+    def _instruction_logic(self):
+        address = self._z80.hl.bits
+        super(DecAIndirectAddressHLRegister, self)._instruction_logic(address)
+
+
+class DecIndirectAddressIXRegister(DecIndirectAddress):
+    """ DEC (IX + d) """
+
+    regexp = compile_re('^1101110100110101((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(DecAIndirectAddressIXRegister, self)._instruction_logic(address)
+
+
+class DecIndirectAddressIYRegister(DecIndirectAddress):
+    """ DEC (IY + d) """
+
+    regexp = compile_re('^1111110100110101((?:0|1){8})$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(DecAIndirectAddressIYRegister, self)._instruction_logic(address)
