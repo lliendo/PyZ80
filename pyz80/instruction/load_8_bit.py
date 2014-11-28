@@ -84,10 +84,6 @@ class LoadRegisterRegisterQQ(LoadRegisterRegister):
         return registers[selector]
 
 
-# The R, P, Q in the class names refer to the different 
-# table 'selectors' found in The Undocumented Z80 Documented
-# by Sean Young. See page 26.
-
 class LoadRegisterRNumber(LoadRegisterNumber):
     """ LD r, n """
 
@@ -293,7 +289,6 @@ class LoadIndirectNNRegisterA(Instruction):
         self._z80.ram.write(address, self._z80.a.bits)
 
 
-# TODO: The flags register is affected by this instruction.
 class LoadRegisterARegisterI(Instruction):
     """ LD A, I """
 
@@ -301,9 +296,16 @@ class LoadRegisterARegisterI(Instruction):
 
     def _instruction_logic(self):
         self._z80.a.bits = self._z80.i.bits
+        self._update_flags()
+    
+    # TODO: Set parity/overflow flag if iff2 is set.
+    def _update_flags(self):
+        self._update_sign_flag(self._z80.a.bits)
+        self._update_zero_flag(self._z80.a.bits)
+        self._instruction_flags.reset_half_carry_flag()
+        self._instruction_flags.reset_add_substract_flag()
 
 
-# TODO: The flags register is affected by this instruction.
 class LoadRegisterARegisterR(Instruction):
     """ LD A, R """
 
@@ -311,6 +313,13 @@ class LoadRegisterARegisterR(Instruction):
 
     def _instruction_logic(self):
         self._z80.a.bits = self._z80.r.bits
+
+    # TODO: Set parity/overflow flag if iff2 is set.
+    def _update_flags(self):
+        self._update_sign_flag(self._z80.a.bits)
+        self._update_zero_flag(self._z80.a.bits)
+        self._instruction_flags.reset_half_carry_flag()
+        self._instruction_flags.reset_add_substract_flag()
 
 
 class LoadRegisterIRegisterA(Instruction):
