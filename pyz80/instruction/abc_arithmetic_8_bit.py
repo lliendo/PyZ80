@@ -206,11 +206,20 @@ class And8Bit(Arithmetic8Bit):
         self._instruction_flags.reset_add_substract_flag()
 
 
+class AndAIndirectAddress(And8Bit):
+
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, address):
+        n = self._z80._read_ram(address)
+        super(AndAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
+
+
 class Or8Bit(Arithmetic8Bit):
  
     __metaclass__ = ABCMeta
 
-   def _instruction_logic(self, operands):
+    def _instruction_logic(self, operands):
         or_result = reduce(lambda n, m: n | m, operands)
         self._update_flags(operands, or_result)
         self._z80.a.bits = or_result
@@ -224,11 +233,20 @@ class Or8Bit(Arithmetic8Bit):
         self._instruction_flags.reset_add_substract_flag()
 
 
+class OrAIndirectAddress(Or8Bit):
+
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, address):
+        n = self._z80._read_ram(address)
+        super(OrAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
+
+
 class Xor8Bit(Arithmetic8Bit):
  
     __metaclass__ = ABCMeta
 
-   def _instruction_logic(self, operands):
+    def _instruction_logic(self, operands):
         xor_result = reduce(lambda n, m: n ^ m, operands)
         self._update_flags(operands, xor_result)
         self._z80.a.bits = xor_result
@@ -240,3 +258,94 @@ class Xor8Bit(Arithmetic8Bit):
         self._update_parity_flag(operands)
         self._instruction_flags.reset_carry_flag()
         self._instruction_flags.reset_add_substract_flag()
+
+
+class XorAIndirectAddress(Xor8Bit):
+
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, address):
+        n = self._z80._read_ram(address)
+        super(XorAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
+
+
+class Cp8Bit(Sub8Bit):
+ 
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, operands):
+        cp_result = reduce(lambda n, m: n - m, operands)
+        self._update_flags(operands, cp_result)
+
+    def _update_flags(self, operands, instruction_result):
+        self._update_sign_flag(instruction_result)
+        self._update_zero_flag(instruction_result)
+        self._update_half_carry_flag(instruction_result)
+        self._update_overflow_flag(operands)
+        self._instruction_flags.set_add_substract_flag()
+        self._update_carry_flag(operands)
+
+
+class CpAIndirectAddress(Cp8Bit):
+
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, address):
+        n = self._z80._read_ram(address)
+        super(CpAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
+
+
+class Inc8Bit(Add8Bit):
+ 
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, operands):
+        inc_result = reduce(lambda n, m: n - m, operands)
+        self._update_flags(operands, inc_result)
+        return inc_result
+
+    def _update_flags(self, operands, instruction_result):
+        self._update_sign_flag(instruction_result)
+        self._update_zero_flag(instruction_result)
+        self._update_half_carry_flag(instruction_result)
+        self._update_overflow_flag(operands)
+        self._instruction_flags.reset_add_substract_flag()
+
+
+class IncIndirectAddress(Inc8Bit):
+
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, address):
+        n = self._z80._read_ram(address)
+        self._z80.a.bits = super(IncAIndirectAddress, self)._instruction_logic(
+            [n, 1]
+        )
+
+
+class Dec8Bit(Sub8Bit):
+ 
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, operands):
+        dec_result = reduce(lambda n, m: n - m, operands)
+        self._update_flags(operands, dec_result)
+        return dec_result
+
+    def _update_flags(self, operands, instruction_result):
+        self._update_sign_flag(instruction_result)
+        self._update_zero_flag(instruction_result)
+        self._update_half_carry_flag(instruction_result)
+        self._update_overflow_flag(operands)
+        self._instruction_flags.set_add_substract_flag()
+
+
+class DecIndirectAddress(Dec8Bit):
+
+    __metaclass__ = ABCMeta
+
+    def _instruction_logic(self, address):
+        n = self._z80._read_ram(address)
+        self._z80.a.bits = super(DecAIndirectAddress, self)._instruction_logic(
+            [n, 1]
+        )
