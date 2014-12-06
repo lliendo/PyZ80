@@ -21,9 +21,53 @@ Copyright 2014 Lucas Liendo.
 
 from abc import ABCMeta
 from abc_arithmetic_8_bit import Add8Bit, Sub8Bit
+from . import Instruction
 
 
-class Add16Bit(Add8Bit):
+class Arithmetic16Bit(Instruction):
+
+    __metaclass__ = ABCMeta
+
+    def _default_selector(self, selector):
+        registers = {
+            0b00: self._z80.bc,
+            0b01: self._z80.de,
+            0b11: self._z80.sp,
+        }
+ 
+        return registers[selector]
+
+    def _ss_selector(self, selector):
+        registers = {
+            0b10: self._z80.hl,
+        }
+ 
+        return registers[selector]
+
+    def _pp_selector(self, selector):
+        registers = {
+            0b10: self._z80.ix,
+        }
+
+        return registers[selector]
+
+    def _qq_selector(self, selector):
+        registers = {
+            0b10: self._z80.iy,
+        }
+ 
+        return registers[selector]
+
+    def _select_register(self, selector):
+        try:
+            register = self._default_selector(selector)
+        except KeyError:
+            register = self._instruction_selector(selector)
+
+        return register
+
+
+class Add16Bit(Arithmetic16Bit):
     
     __metaclass__ = ABCMeta
 
@@ -37,7 +81,7 @@ class Add16Bit(Add8Bit):
         return super(Add16Bit, self)._half_carry(operands, bits=WORD_SIZE)
 
 
-class Sub16Bit(Sub8Bit):
+class Sub16Bit(Arithmetic16Bit):
 
     __metaclass__ = ABCMeta
 
