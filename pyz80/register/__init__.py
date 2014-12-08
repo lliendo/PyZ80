@@ -35,14 +35,7 @@ class Z80Register(object):
         self._lsb_mask = 0x01
         self._msb_mask = self._most_significant_bit_mask()
         self._higher_mask, self._lower_mask = self._build_masks()
-
-        self._overflow_cond = self._check_overflow(bits)
         self._bits = self._apply_bit_mask(bits)
-        self._carry_cond = False
-        self._add_substract_cond = False
-
-    def _check_overflow(self, bits):
-        return bits > (self._higher_mask | self._lower_mask)
 
     def _build_masks(self):
         lower_mask = self._lsb_mask
@@ -76,12 +69,12 @@ class Z80Register(object):
 
         return nth_bit
 
-    def set_nth_bit(self, n):
-        self._bits |= self._nth_bit_mask(n) 
+    def set_nth_bit(self, nth_bit):
+        self._bits |= self._nth_bit_mask(nth_bit)
 
-    def reset_nth_bit(self, n):
-        if self.nth_bit(n) is 0x01:
-           self._bits ^= self._nth_bit_mask(n)
+    def reset_nth_bit(self, nth_bit):
+        if self.nth_bit(nth_bit) is 0x01:
+           self._bits ^= self._nth_bit_mask(nth_bit)
 
     def _most_significant_bit_mask(self):
         return self._nth_bit_mask(self._size - 1)
@@ -171,9 +164,6 @@ class Z80Register(object):
 
 
 class Z80ByteRegister(Z80Register):
-    def __init__(self, bits=0x00, size=8):
-        super(Z80ByteRegister, self).__init__(bits=bits, size=size)
-
     @property
     def lower(self):
         return self.bits & self._lower_mask
@@ -242,72 +232,62 @@ class Z80FlagsRegister(Z80ByteRegister):
     ADD_BIT = 1
     CARRY_BIT = 0 
 
-    def __init__(self, bits=0x00, size=8):
-        super(Z80FlagsRegister, self).__init__(bits=bits, size=size)
-
-    def _set_nth_bit(self, nth_bit):
-        self.bits |= self._nth_bit_mask(nth_bit)
-
-    def _reset_nth_bit(self, nth_bit):
-        if self.nth_bit(nth_bit):
-            self.bits ^= self._nth_bit_mask(nth_bit)
-        
     @property
     def sign_flag(self):
         return self.nth_bit(self.SIGN_BIT)
 
     def set_sign_flag(self):
-        self._set_nth_bit(self.SIGN_BIT)
+        self.set_nth_bit(self.SIGN_BIT)
 
     def reset_sign_flag(self):
-        self._reset_nth_bit(self.SIGN_BIT)
+        self.reset_nth_bit(self.SIGN_BIT)
 
     @property
     def zero_flag(self):
         return self.nth_bit(self.ZERO_BIT)
 
     def set_zero_flag(self):
-        self._set_nth_bit(self.ZERO_BIT)
+        self.set_nth_bit(self.ZERO_BIT)
 
     def reset_zero_flag(self):
-        self._reset_nth_bit(self.ZERO_BIT)
+        self.reset_nth_bit(self.ZERO_BIT)
 
     @property
     def half_carry_flag(self):
         return self.nth_bit(self.HALF_CARRY_BIT)
 
     def set_half_carry_flag(self):
-        self._set_nth_bit(self.HALF_CARRY_BIT)
+        self.set_nth_bit(self.HALF_CARRY_BIT)
 
     def reset_half_carry_flag(self):
-        self._reset_nth_bit(self.HALF_CARRY_BIT)
+        self.reset_nth_bit(self.HALF_CARRY_BIT)
 
     @property
     def parity_flag(self):
         return self.nth_bit(self.PARITY_BIT)
 
     def set_parity_flag(self):
-        self._set_nth_bit(self.PARITY_BIT)
+        self.set_nth_bit(self.PARITY_BIT)
 
     def reset_parity_flag(self):
-        self._reset_nth_bit(self.PARITY_BIT)
+        self.reset_nth_bit(self.PARITY_BIT)
 
     @property
     def add_substract_flag(self):
         return self.nth_bit(self.ADD_BIT)
 
     def set_add_substract_flag(self):
-        self._set_nth_bit(self.ADD_BIT)
+        self.set_nth_bit(self.ADD_BIT)
 
     def reset_add_substract_flag(self):
-        self._reset_nth_bit(self.ADD_BIT)
+        self.reset_nth_bit(self.ADD_BIT)
 
     @property
     def carry_flag(self):
         return self.nth_bit(self.CARRY_BIT)
 
     def set_carry_flag(self):
-        self._set_nth_bit(self.CARRY_BIT)
+        self.set_nth_bit(self.CARRY_BIT)
 
     def reset_carry_flag(self):
-        self._reset_nth_bit(self.CARRY_BIT)
+        self.reset_nth_bit(self.CARRY_BIT)
