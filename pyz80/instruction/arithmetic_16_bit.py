@@ -26,7 +26,7 @@ from abc_arithmetic_16_bit import Add16Bit, Sub16Bit
 class AddHLSS(Add16Bit):
     """ ADD HL, ss """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^00((?:0|1){2})1001$')
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -44,7 +44,7 @@ class AddHLSS(Add16Bit):
 class AddIXPP(AddHLSS):
     """ ADD IX, pp """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1101111000((?:0|1){2})1001$')
 
     def _instruction_selector(self, selector):
         return self.__selector(selector)
@@ -57,7 +57,7 @@ class AddIXPP(AddHLSS):
 class AddIYQQ(AddHLSS):
     """ ADD IY, qq """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1111111000((?:0|1){2})1001$')
 
     def _instruction_selector(self, selector):
         return self._pp_selector(selector)
@@ -70,7 +70,7 @@ class AddIYQQ(AddHLSS):
 class AdcHLSS(Add16Bit):
     """ ADC HL, ss """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1110110101((?:0|1){2})1010$')
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -93,7 +93,7 @@ class AdcHLSS(Add16Bit):
 class SbcHLSS(Sub16Bit):
     """ SUB HL, ss """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1110110101((?:0|1){2})0010$')
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -116,7 +116,7 @@ class SbcHLSS(Sub16Bit):
 class IncSS(Instruction):
     """ INC ss """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^00((?:0|1){2})0011$')
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -129,7 +129,7 @@ class IncSS(Instruction):
 class IncIX(Instruction):
     """ INC IX """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1101110100100011$')
 
     def _instruction_logic(self, selector):
         self._z80.ix.bits += 1
@@ -138,7 +138,7 @@ class IncIX(Instruction):
 class IncIY(Instruction):
     """ INC IY """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1111110100100011$')
 
     def _instruction_logic(self, selector):
         self._z80.iy.bits += 1
@@ -147,7 +147,7 @@ class IncIY(Instruction):
 class DecSS(Instruction):
     """ DEC ss """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^00((?:0|1){2})1011$')
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -160,7 +160,7 @@ class DecSS(Instruction):
 class DecIX(Instruction):
     """ DEC IX """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1101110100101011$')
 
     def _instruction_logic(self, selector):
         self._z80.ix.bits += 1
@@ -169,7 +169,7 @@ class DecIX(Instruction):
 class DecIY(Instruction):
     """ DEC IY """
 
-    regexp = compile_re('^$')
+    regexp = compile_re('^1111110100101011$')
 
     def _instruction_logic(self, selector):
         self._z80.iy.bits += 1
