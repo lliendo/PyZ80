@@ -21,26 +21,33 @@ Copyright 2014 Lucas Liendo.
 
 from abc import ABCMeta, abstractmethod
 from ..register import Z80FlagsRegister
+from ..arch import NIBBLE_SIZE, BYTE_SIZE
 
 
 class Instruction(object):
     
     __metaclass__ = ABCMeta
-    NIBBLE_SIZE = 4
-    BYTE_SIZE = 8
-    WORD_SIZE = 16
     instruction_regexp = None
+    log_message = ''
 
-    def __init__(self, z80):
+    def __init__(self, z80, log_fd=None):
         self._z80 = z80
         self._instruction_flags = Z80FlagsRegister(bits=self._z80.f.bits)
+        self._log_fd = log_fd
 
     @abstractmethod
     def _instruction_logic(self, *operands):
         pass
 
+    def _log(self, *args):
+        try:
+            self._log_fd.write(self.log_message.format(*args) + '\n')
+        except AttributeError:
+            pass
+
     def execute(self, operands):
         self._instruction_logic(*operands)
+        self._log(*operands)
         return self._instruction_flags
 
     def _get_address(self, high_order_byte, low_order_byte):
@@ -74,7 +81,7 @@ class Instruction(object):
         return self._msb(n, bits=bits)
 
     def _half_carry(self, operands, bits=BYTE_SIZE):
-        return self._carry(operands, bits=((bits / self.NIBBLE_SIZE) - 1) * self.NIBBLE_SIZE)
+        return self._carry(operands, bits=((bits / NIBBLE_SIZE) - 1) * NIBBLE_SIZE)
 
     def _update_overflow_flag(self, operands):
         if self._overflow(operands):
