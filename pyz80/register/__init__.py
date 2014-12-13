@@ -20,6 +20,7 @@ Copyright 2014 Lucas Liendo.
 """
 
 from abc import ABCMeta
+from ..arch import BYTE_SIZE, WORD_SIZE
 
 
 class Z80RegisterError(Exception):
@@ -30,7 +31,7 @@ class Z80Register(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, bits=0x00, size=8):
+    def __init__(self, bits=0x00, size=BYTE_SIZE):
         self._size = size
         self._lsb_mask = 0x01
         self._msb_mask = self._most_significant_bit_mask()
@@ -188,7 +189,7 @@ class Z80ByteRegister(Z80Register):
 
 
 class Z80WordRegister(Z80Register):
-    def __init__(self, bits=0x00, size=16):
+    def __init__(self, bits=0x00, size=WORD_SIZE):
         super(Z80WordRegister, self).__init__(bits=bits, size=size)
         self._lower = Z80ByteRegister()
         self._higher = Z80ByteRegister()
