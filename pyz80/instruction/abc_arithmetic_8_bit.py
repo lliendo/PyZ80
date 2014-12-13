@@ -21,6 +21,7 @@ Copyright 2014 Lucas Liendo.
 
 from abc import ABCMeta
 from . import Instruction
+from ..arch import BYTE_SIZE
 
 
 class Arithmetic8Bit(Instruction):
@@ -75,7 +76,7 @@ class Add8Bit(Arithmetic8Bit):
     
     __metaclass__ = ABCMeta
     
-    def _overflow(self, operands, bits=Instruction.BYTE_SIZE):
+    def _overflow(self, operands, bits=BYTE_SIZE):
         bitmask = self._bitmask(bits=bits)
         overflow_condition = False
         msbs = [self._msb(operand) for operand in operands]
@@ -92,7 +93,7 @@ class Add8Bit(Arithmetic8Bit):
 
         return overflow_condition
 
-    def _carry(self, operands, bits=Instruction.BYTE_SIZE):
+    def _carry(self, operands, bits=BYTE_SIZE):
         bitmask = self._bitmask(bits=bits)
         return reduce(lambda n, m: (n & bitmask) + (m & bitmask), operands) > bitmask
 
@@ -134,7 +135,7 @@ class Sub8Bit(Arithmetic8Bit):
 
     __metaclass__ = ABCMeta
 
-    def _overflow(self, operands, bits=Instruction.BYTE_SIZE):
+    def _overflow(self, operands, bits=BYTE_SIZE):
         bitmask = _bitmask(bits=bits)
         overflow_condition = False
         msbs = [self._msb(operand) for operand in operands]
@@ -151,7 +152,7 @@ class Sub8Bit(Arithmetic8Bit):
 
         return overflow_condition
 
-    def _carry(self, operands, bits=Instruction.BYTE_SIZE):
+    def _carry(self, operands, bits=BYTE_SIZE):
         return any([operands[i] < operands[i + 1] for i in range(0, len(operands) - 1)])
 
     def _instruction_logic(self, operands):
