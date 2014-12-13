@@ -60,7 +60,7 @@ class Instruction(object):
         return (high_order_byte * base) + low_order_byte
 
     def _msb(self, n, bits=BYTE_SIZE):
-        return (n >> (bits - 1)) & 0x1
+        return (n >> (bits - 1)) & 0x01
 
     def _bitmask(self, bits=BYTE_SIZE):
         return int(pow(2, bits) - 1)
@@ -69,13 +69,13 @@ class Instruction(object):
         parity_even = True
         ones_count = len(filter(lambda s: s is '1', bin(n).lstrip('0b')))
 
-        if ones_count & 0x1:
+        if ones_count & 0x01:
             parity_even = False
 
         return parity_even
 
     def _zero(self, n, bits=BYTE_SIZE):
-        return (n & self._bitmask(bits=bits)) is 0
+        return (n & self._bitmask(bits=bits)) is 0x00
 
     def _sign(self, n, bits=BYTE_SIZE):
         return self._msb(n, bits=bits)
