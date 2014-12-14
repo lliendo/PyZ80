@@ -65,10 +65,15 @@ class Z80(object):
         self.iyh = self.iy.higher
         self.iyl = self.iy.lower
 
-    # TODO: Still missing iff1, iff2 & im registers.
+    def _build_cpu_control_registers(self):
+        self._iff1 = 0x00
+        self._iff2 = 0x00
+        self._im = 0
+
     def _build_registers(self):
         self._build_16_bits_registers()
         self._build_8_bits_registers()
+        self._build_cpu_control_registers()
 
     def inc_pc(self):
         self.pc.bits += 1
