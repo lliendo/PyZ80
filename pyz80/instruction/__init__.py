@@ -39,9 +39,17 @@ class Instruction(object):
     def _instruction_logic(self, *operands):
         pass
 
+    def _translate_logging_args(self, *args):
+        """
+        Each instruction should implement this method in order
+        to be able to logged properly.
+        """
+        return args
+
     def _log(self, *args):
         try:
-            self._log_fd.write(self.log_message.format(*args) + '\n')
+            logging_args = self._translate_logging_args(*args)
+            self._log_fd.write(self.log_message.format(*logging_args) + '\n')
         except AttributeError:
             pass
 
