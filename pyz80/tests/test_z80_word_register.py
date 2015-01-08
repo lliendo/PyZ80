@@ -51,25 +51,25 @@ class TestZ80WordRegister(TestCase):
 
     def test_rotate_left(self):
         register = Z80WordRegister(bits=self._bit_pattern)
-        register.rotate_left(8)
+        [register.rotate_left() for i in range(0, 8)]
         self.assertEqual(register.lower.bits, self._higher_bit_pattern)
         self.assertEqual(register.higher.bits, self._lower_bit_pattern)
 
     def test_rotate_right(self):
         register = Z80WordRegister(bits=self._bit_pattern)
-        register.rotate_right(8)
+        [register.rotate_right() for i in range(0, 8)]
         self.assertEqual(register.lower.bits, self._higher_bit_pattern)
         self.assertEqual(register.higher.bits, self._lower_bit_pattern)
 
     def test_shift_left(self):
         register = Z80WordRegister(bits=self._bit_pattern)
-        register.shift_left(8)
+        [register.shift_left() for i in range(0, 8)]
         self.assertEqual(register.lower.bits, 0b0)
         self.assertEqual(register.higher.bits, self._lower_bit_pattern)
 
     def test_shift_right(self):
         register = Z80WordRegister(bits=self._bit_pattern)
-        register.shift_right(8)
+        [register.shift_right() for i in range(0, 8)]
         self.assertEqual(register.higher.bits, 0b0)
         self.assertEqual(register.lower.bits, self._higher_bit_pattern)
 

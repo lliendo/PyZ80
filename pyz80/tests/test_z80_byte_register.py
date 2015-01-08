@@ -51,25 +51,25 @@ class TestZ80ByteRegister(TestCase):
 
     def test_rotate_left(self):
         register = Z80ByteRegister(bits=self._bit_pattern)
-        register.rotate_left(4)
+        [register.rotate_left() for i in range(0, 4)]
         self.assertEqual(register.lower, self._higher_bit_pattern)
         self.assertEqual(register.higher, self._lower_bit_pattern)
 
     def test_rotate_right(self):
         register = Z80ByteRegister(bits=self._bit_pattern)
-        register.rotate_right(4)
+        [register.rotate_right() for i in range(0, 4)]
         self.assertEqual(register.lower, self._higher_bit_pattern)
         self.assertEqual(register.higher, self._lower_bit_pattern)
 
     def test_shift_left(self):
         register = Z80ByteRegister(bits=self._bit_pattern)
-        register.shift_left(4)
+        [register.shift_left() for i in range(0, 4)]
         self.assertEqual(register.lower, 0b0)
         self.assertEqual(register.higher, self._lower_bit_pattern)
 
     def test_shift_right(self):
         register = Z80ByteRegister(bits=self._bit_pattern)
-        register.shift_right(4)
+        [register.shift_right() for i in range(0, 4)]
         self.assertEqual(register.higher, 0b0)
         self.assertEqual(register.lower, self._higher_bit_pattern)
 
@@ -97,4 +97,3 @@ class TestZ80ByteRegister(TestCase):
         self.assertTrue(register.lsb)
         register.bits = 0x4
         self.assertFalse(register.lsb)
-        
