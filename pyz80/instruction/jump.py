@@ -20,6 +20,7 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
+from . import Instruction
 from abc_jump import *
 
 
