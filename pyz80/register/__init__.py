@@ -116,25 +116,29 @@ class Z80Register(object):
     def higher(self, n):
         pass
 
-    def shift_right(self, n):
-        self.bits = (self.bits >> n) & (self._higher_mask | self._lower_mask)
+    def shift_right(self):
+        self.bits = (self.bits >> 1) & (self._higher_mask | self._lower_mask)
+        return self
 
-    def shift_left(self, n):
-        self.bits = (self.bits << n) & (self._higher_mask | self._lower_mask)
+    def shift_left(self):
+        self.bits = (self.bits << 1) & (self._higher_mask | self._lower_mask)
+        return self
 
-    def rotate_right(self, n):
-        for i in range(0, n):
-            if (self.bits & self._lsb_mask) is not 0x00:
-                self.bits = (self.bits >> 1) | self._msb_mask
-            else:
-                self.bits >>= 1
+    def rotate_right(self):
+        if (self.bits & self._lsb_mask) is not 0x00:
+            self.bits = (self.bits >> 1) | self._msb_mask
+        else:
+            self.bits >>= 1
 
-    def rotate_left(self, n):
-        for i in range(0, n):
-            if (self.bits & self._msb_mask) is not 0x00:
-                self.bits = ((self.bits - self._msb_mask) << 1) | self._lsb_mask
-            else:
-                self.bits <<= 1
+        return self
+
+    def rotate_left(self):
+        if (self.bits & self._msb_mask) is not 0x00:
+            self.bits = ((self.bits - self._msb_mask) << 1) | self._lsb_mask
+        else:
+            self.bits <<= 1
+
+        return self
 
     def combine(self, register, RegisterClass):
         if self.size != register.size:
