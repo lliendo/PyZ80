@@ -23,7 +23,9 @@ from re import compile as compile_re
 from abc_rotate_and_shift import *
 
 
-class Rlca(RotateLeft):
+""" RLC instructions. """
+
+class Rlca(RotateLeftWithCarry):
     """ RLCA """
 
     regexp = compile_re('^$')
@@ -41,68 +43,7 @@ class Rlca(RotateLeft):
         super(Rlca, self)._instruction_logic(self._z80.a)
 
 
-class Rla(Rlca):
-    """ RLA """
-
-    regexp = compile_re('^$')
-
-    def _update_sign_flag(register):
-        pass
-
-    def _update_zero_flag(register):
-        pass
-
-    def _update_parity_flag(register):
-        pass
-
-    def _instruction_logic(self):
-        super(Rla, self)._instruction_logic()
-        self._z80.a.bits |= self._carry_flag
-
-
-class Rrca(RotateRight):
-    """ RRCA """
-
-    regexp = compile_re('^$')
-
-    def _update_sign_flag(register):
-        pass
-
-    def _update_zero_flag(register):
-        pass
-
-    def _update_parity_flag(register):
-        pass
-
-    def _instruction_logic(self):
-        super(Rrca, self)._instruction_logic(self._z80.a)
-    
-
-class Rra(Rrca):
-    """ RRA """
-
-    regexp = compile_re('^$')
-
-    def _update_sign_flag(register):
-        pass
-
-    def _update_zero_flag(register):
-        pass
-
-    def _update_parity_flag(register):
-        pass
-
-    def _instruction_logic(self):
-        super(Rra, self)._instruction_logic()
-        # This is wrong because it alters the a register AFTER
-        # flags are tested & updated.
-        self._z80.a.bits |= (self._carry_flag << (self._z80.a.size - 1))
-
-
-""" RLC instructions. """
-
-# TODO: Update _update_flags() method !
-class RlcR(RotateLeft):
+class RlcR(RotateLeftWithCarry):
     """ RLC r """
 
     regexp = compile_re('^$')
@@ -118,7 +59,8 @@ class RlcIndirectAddressHL(RlcIndirectAddress):
     regexp = compile_re('^$')
 
     def _instruction_logic(self):
-        super(RlcIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+        address = self._z80.hl.bits
+        super(RlcIndirectAddressHL, self)._instruction_logic(address)
 
 
 class RlcIndirectAddressIX(RlcIndirectAddress):
@@ -163,74 +105,26 @@ class RlcIndirectAddressIYR(RlcIndirectAddress):
         register.bits = super(RlcIndirectAddressIYR, self)._instruction_logic(address).bits
 
 
-""" RL instructions. """
-
-# TODO: Update _update_flags() method !
-class RlR(Rlcr):
-    """ RL r """
-
-    regexp = compile_re('^$')
-
-    def _instruction_logic(self, selector):
-        # carry_flag = self._z80.f.carry_flag()
-        super(RlR, self)._instruction_logic(selector)
-        register.bits |= self._carry_flag
-
-
-class RlIndirectAddressHL(RlIndirectAddress):
-    """ RL (HL) """
-
-    regexp = compile_re('^$')
-
-    def _instruction_logic(self):
-        super(RlIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
-
-
-class RlIndirectAddressIX(RlIndirectAddress):
-    """ RL (IX + d) """
-
-    regexp = compile_re('^$')
-
-    def _instruction_logic(self, offset):
-        address = self._z80.ix.bits + offset
-        super(RlIndirectAddressIX, self)._instruction_logic(address)
-
-
-class RlIndirectAddressIY(RlIndirectAddress):
-    """ RL (IY + d) """
-
-    regexp = compile_re('^$')
-
-    def _instruction_logic(self, offset):
-        address = self._z80.iy.bits + offset
-        super(RlIndirectAddressIY, self)._instruction_logic(address)
-
-
-class RlIndirectAddressIXR(RlIndirectAddress):
-    """ RL (IX + d), r """
-
-    regexp = compile_re('^$')
-
-    def _instruction_logic(self, offset, selector):
-        address = self._z80.ix.bits + offset
-        register = self._instruction_selector(selector)
-        register.bits = super(RlIndirectAddressIXR, self)._instruction_logic(address).bits
-
-
-class RlIndirectAddressIYR(RlIndirectAddress):
-    """ RL (IY + d), r """
-
-    regexp = compile_re('^$')
-
-    def _instruction_logic(self, offset, selector):
-        address = self._z80.iy.bits + offset
-        register = self._instruction_selector(selector)
-        register.bits = super(RlIndirectAddressIYR, self)._instruction_logic(address).bits
-
-
 """ RRC instructions. """
 
-# TODO: Update _update_flags() method !
+class Rrca(RotateRight):
+    """ RRCA """
+
+    regexp = compile_re('^$')
+
+    def _update_sign_flag(register):
+        pass
+
+    def _update_zero_flag(register):
+        pass
+
+    def _update_parity_flag(register):
+        pass
+
+    def _instruction_logic(self):
+        super(Rrca, self)._instruction_logic(self._z80.a)
+
+
 class RrcR(RotateRight):
     """ RRC r """
 
@@ -247,7 +141,8 @@ class RrcIndirectAddressHL(RrcIndirectAddress):
     regexp = compile_re('^$')
 
     def _instruction_logic(self):
-        super(RrcIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+        address = self._z80.hl.bits
+        super(RrcIndirectAddressHL, self)._instruction_logic(address)
 
 
 class RrcIndirectAddressIX(RrcIndirectAddress):
@@ -270,40 +165,94 @@ class RrcIndirectAddressIY(RrcIndirectAddress):
         super(RrcIndirectAddressIY, self)._instruction_logic(address)
 
 
-class RrcIndirectAddressIXR(RrcIndirectAddress):
-    """ RRC (IX + d), r """
+""" RL instructions. """
+
+class Rla(RotateLeftThroughCarry):
+    """ RLA """
 
     regexp = compile_re('^$')
 
-    def _instruction_logic(self, offset, selector):
+    def _update_sign_flag(register):
+        pass
+
+    def _update_zero_flag(register):
+        pass
+
+    def _update_parity_flag(register):
+        pass
+
+    def _instruction_logic(self):
+        super(Rla, self)._instruction_logic(self._z80.a)
+
+
+class RlR(RotateLeftThroughCarry):
+    """ RL r """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, selector):
+        register = self._instruction_selector(selector)
+        super(RlR, self)._instruction_logic(register)
+
+
+class RlIndirectAddressHL(RlIndirectAddress):
+    """ RL (HL) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self):
+        address = self._z80.hl.bits
+        super(RlIndirectAddressHL, self)._instruction_logic(address)
+
+
+class RlIndirectAddressIX(RlIndirectAddress):
+    """ RL (IX + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        register = self._instruction_selector(selector)
-        register.bits = super(RrcIndirectAddressIXR, self)._instruction_logic(address).bits
+        super(RlIndirectAddressIX, self)._instruction_logic(address)
 
 
-class RrcIndirectAddressIYR(RrcIndirectAddress):
-    """ RRC (IY + d), r """
+class RlIndirectAddressIY(RlIndirectAddress):
+    """ RL (IY + d) """
 
     regexp = compile_re('^$')
 
-    def _instruction_logic(self, offset, selector):
+    def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        register = self._instruction_selector(selector)
-        register.bits = super(RrcIndirectAddressIYR, self)._instruction_logic(address).bits
+        super(RlIndirectAddressIY, self)._instruction_logic(address)
 
 
 """ RR instructions. """
 
-# TODO: Update _update_flags() method !
-class RrR(Rrcr):
+class Rra(RotateRightThroughCarry):
+    """ RRA """
+
+    regexp = compile_re('^$')
+
+    def _update_sign_flag(register):
+        pass
+
+    def _update_zero_flag(register):
+        pass
+
+    def _update_parity_flag(register):
+        pass
+
+    def _instruction_logic(self):
+        super(Rra, self)._instruction_logic(self._z80.a)
+
+
+class RrR(RotateRightThroughCarry):
     """ RR r """
 
     regexp = compile_re('^$')
 
     def _instruction_logic(self, selector):
-        # carry_flag = self._z80.f.carry_flag()
-        super(RrR, self)._instruction_logic(selector)
-        register.bits |= self._carry_flag
+        register = self._instruction_selector(selector)
+        super(RrR, self)._instruction_logic(register)
 
 
 class RrIndirectAddressHL(RrIndirectAddress):
@@ -312,7 +261,8 @@ class RrIndirectAddressHL(RrIndirectAddress):
     regexp = compile_re('^$')
 
     def _instruction_logic(self):
-        super(RrIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+        address = self._z80.hl.bits
+        super(RrIndirectAddressHL, self)._instruction_logic(address)
 
 
 class RrIndirectAddressIX(RrIndirectAddress):
@@ -335,62 +285,203 @@ class RrIndirectAddressIY(RrIndirectAddress):
         super(RrIndirectAddressIY, self)._instruction_logic(address)
 
 
-class RrIndirectAddressIXR(RrIndirectAddress):
-    """ RR (IX + d), r """
+""" SLA instructions. """
+
+class SlaR(ShiftLeftArithmetic):
+    """ SLA r """
 
     regexp = compile_re('^$')
 
-    def _instruction_logic(self, offset, selector):
+    def _instruction_logic(self, selector):
+        register = self._instruction_selector(selector)
+        super(SlaR, self)._instruction_logic(register)
+
+
+class SlaIndirectAddressHL(SlaIndirectAddress):
+    """ SLA (HL) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self):
+        super(SlaIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+
+
+class SlaIndirectAddressIX(SlaIndirectAddress):
+    """ SLA (IX + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        register = self._instruction_selector(selector)
-        register.bits = super(RrIndirectAddressIXR, self)._instruction_logic(address).bits
+        super(SlaIndirectAddressIX, self)._instruction_logic(address)
 
 
-class RrIndirectAddressIYR(RrIndirectAddress):
-    """ RR (IY + d), r """
+class SlaIndirectAddressIY(SlaIndirectAddress):
+    """ SLA (IY + d) """
 
     regexp = compile_re('^$')
 
-    def _instruction_logic(self, offset, selector):
+    def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
+        super(SlaIndirectAddressIY, self)._instruction_logic(address)
+
+
+""" SLL instructions. """
+
+class SllR(ShiftLeftLogical):
+    """ SLL r """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, selector):
         register = self._instruction_selector(selector)
-        register.bits = super(RrIndirectAddressIYR, self)._instruction_logic(address).bits
+        super(SllR, self)._instruction_logic(register)
 
 
-# class SlaR(ShiftLeft):
-#     """ SLA r """
-# 
-#     regexp = compile_re('^$')
-# 
-#     def _instruction_logic(self, selector):
-#         register = self._instruction_selector(selector)
-#         super(SlaR, self)._instruction_logic(register)
-# 
-# 
-# class SlaIndirectAddressHL(SlaIndirectAddress):
-#     """ SLA (HL) """
-# 
-#     regexp = compile_re('^$')
-# 
-#     def _instruction_logic(self):
-#         super(SlaIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
-# 
-# 
-# class SlcIndirectAddressIX(SlcIndirectAddress):
-#     """ SLC (IX + d) """
-# 
-#     regexp = compile_re('^$')
-# 
-#     def _instruction_logic(self, offset):
-#         address = self._z80.ix.bits + offset
-#         super(SlcIndirectAddressIX, self)._instruction_logic(address)
-# 
-# 
-# class SlcIndirectAddressIY(SlcIndirectAddress):
-#     """ SLC (IY + d) """
-# 
-#     regexp = compile_re('^$')
-# 
-#     def _instruction_logic(self, offset):
-#         address = self._z80.iy.bits + offset
-#         super(SlcIndirectAddressIY, self)._instruction_logic(address)
+class SllIndirectAddressHL(SllIndirectAddress):
+    """ SLL (HL) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self):
+        super(SllIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+
+
+class SllIndirectAddressIX(SllIndirectAddress):
+    """ SLL (IX + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(SllIndirectAddressIX, self)._instruction_logic(address)
+
+
+class SllIndirectAddressIY(SllIndirectAddress):
+    """ SLL (IY + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(SllIndirectAddressIY, self)._instruction_logic(address)
+
+
+""" SRA instructions. """
+
+class SraR(ShiftRightArithmetic):
+    """ SRA r """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, selector):
+        register = self._instruction_selector(selector)
+        super(SraR, self)._instruction_logic(register)
+
+
+class SraIndirectAddressHL(SraIndirectAddress):
+    """ SRA (HL) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self):
+        super(SraIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+
+
+class SraIndirectAddressIX(SraIndirectAddress):
+    """ SRA (IX + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(SraIndirectAddressIX, self)._instruction_logic(address)
+
+
+class SraIndirectAddressIY(SraIndirectAddress):
+    """ SRA (IY + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(SraIndirectAddressIY, self)._instruction_logic(address)
+
+
+""" SRL instructions. """
+
+class SrlR(ShiftRightLogical):
+    """ SRL r """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, selector):
+        register = self._instruction_selector(selector)
+        super(SrlR, self)._instruction_logic(register)
+
+
+class SrlIndirectAddressHL(SrlIndirectAddress):
+    """ SRL (HL) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self):
+        super(SrlIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+
+
+class SrlIndirectAddressIX(SrlIndirectAddress):
+    """ SRL (IX + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.ix.bits + offset
+        super(SrlIndirectAddressIX, self)._instruction_logic(address)
+
+
+class SrlIndirectAddressIY(SrlIndirectAddress):
+    """ SRL (IY + d) """
+
+    regexp = compile_re('^$')
+
+    def _instruction_logic(self, offset):
+        address = self._z80.iy.bits + offset
+        super(SrlIndirectAddressIY, self)._instruction_logic(address)
+
+
+""" RLD & RRD instructions. """
+
+class Rld():
+    """ RLD """
+
+    regexp = compile_re('^$')
+
+    def _update_carry_flag(register):
+        pass
+
+    def _instruction_logic(self):
+        r = Z80ByteRegister(bits=self._z80.ram.read(self._z80.hl.bits))
+        lower_a = self._z80.a.lower
+        self._z80.a.lower = r.higher
+        r.higher = r.lower
+        r.lower = lower_a
+        self._z80.ram.write(self._z80.hl.bits, r.bits)
+        self._update_flags(self._z80.a)
+
+
+class Rrd():
+    """ RRD """
+
+    regexp = compile_re('^$')
+
+    def _update_carry_flag(register):
+        pass
+
+    def _instruction_logic(self):
+        r = Z80ByteRegister(bits=self._z80.ram.read(self._z80.hl.bits))
+        lower_r = r.lower
+        r.lower = r.higher
+        r.higher = self._z80.a.lower
+        self._z80.a.lower = lower_r
+        self._z80.ram.write(self._z80.hl.bits, r.bits)
+        self._update_flags(self._z80.a)
