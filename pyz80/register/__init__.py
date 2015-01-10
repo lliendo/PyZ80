@@ -228,7 +228,7 @@ class Z80WordRegister(Z80Register):
         return self._add(other, Z80WordRegister)
 
 
-# TODO: Add undocumented flags properties.
+# TODO: Add undocumented flags YF (bit 5), XF (bit 3) and its properties.
 class Z80FlagsRegister(Z80ByteRegister):
     SIGN_BIT = 7
     ZERO_BIT = 6
