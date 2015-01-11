@@ -31,7 +31,7 @@ class RotateAndShift(Instruction):
         super(RotateAndShift, self).__init__(*args, **kwargs)
         self._carry_flag = self._z80.f.carry_flag()
 
-    def _instruction_selector(self, selector):
+    def _select_register(self, selector):
         registers = {
             0b000: self._z80.b,
             0b001: self._z80.c,
