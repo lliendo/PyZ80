@@ -38,9 +38,19 @@ class Ram(object):
         self._check_address(address)
         return self._ram[address]
 
-    def write(self, address, bits):
+    def read_word(self, address):
+        high_order_byte = self.read(address + 1)
+        low_order_byte = self.read(address)
+
+        return high_order_byte, low_order_byte
+
+    def write(self, address, byte):
         self._check_address(address)
-        self._ram[address] = bits
+        self._ram[address] = byte
+
+    def write_word(self, address, high_order_byte, low_order_byte):
+        self.write(address + 1, high_order_byte)
+        self.write(address, low_order_byte)
 
     def _check_address(self, address):
         if (address < 0x00) or (address > self._size - 1):
