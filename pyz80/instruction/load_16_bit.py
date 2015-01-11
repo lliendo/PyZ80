@@ -61,8 +61,7 @@ class LoadHLIndirectAddressNN(Instruction):
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
-        self._z80.hl.higher.bits = self._z80.ram.read(address + 1)
-        self._z80.hl.lower.bits = self._z80.ram.read(address)
+        self._z80.hl.higher.bits, self._z80.hl.lower.bits = self._z80.ram.read_word(address)
 
 
 class LoadDDIndirectAddressNN(LoadRegister16Bit):
@@ -73,8 +72,7 @@ class LoadDDIndirectAddressNN(LoadRegister16Bit):
     def _instruction_logic(self, selector, m, n):
         address = self._get_address(m, n)
         register = self._register_selector(selector)
-        register.higher.bits = self._z80.ram.read(address + 1)
-        register.lower.bits = self._z80.ram.read(address)
+        register.higher.bits, register.lower.bits = self._z80.ram.read_word(address)
 
 
 class LoadIXIndirectAddressNN(Instruction):
@@ -84,8 +82,7 @@ class LoadIXIndirectAddressNN(Instruction):
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
-        self._z80.ix.higher.bits = self._z80.ram.read(address + 1)
-        self._z80.ix.lower.bits = self._z80.ram.read(address)
+        self._z80.ix.higher.bits, self._z80.ix.lower.bits = self._z80.ram.read_word(address)
 
 
 class LoadIYIndirectAddressNN(Instruction):
@@ -95,8 +92,7 @@ class LoadIYIndirectAddressNN(Instruction):
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
-        self._z80.iy.higher.bits = self._z80.ram.read(address + 1)
-        self._z80.iy.lower.bits = self._z80.ram.read(address)
+        self._z80.iy.higher.bits, self._z80.iy.lower.bits = self._z80.ram.read_word(address)
 
 
 class LoadIndirectAddressNNHL(Instruction):
@@ -106,8 +102,7 @@ class LoadIndirectAddressNNHL(Instruction):
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
-        self._z80.ram.write(address + 1, self._z80.h.bits)
-        self._z80.ram.write(address, self._z80.l.bits)
+        self._z80.ram.write_word(address, self._z80.h.bits, self._z80.l.bits)
 
 
 class LoadIndirectAddressNNDD(LoadRegister16Bit):
@@ -118,8 +113,7 @@ class LoadIndirectAddressNNDD(LoadRegister16Bit):
     def _instruction_logic(self, selector, m, n):
         address = self._get_address(m, n)
         register = self._register_selector(selector)
-        self._z80.ram.write(address + 1, register.higher.bits)
-        self._z80.ram.write(address, register.lower.bits)
+        self._z80.ram.write_word(address, register.higher.bits, register.lower.bits)
 
 
 class LoadIndirectAddressNNIX(Instruction):
@@ -129,8 +123,7 @@ class LoadIndirectAddressNNIX(Instruction):
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
-        self._z80.ram.write(address + 1, self._z80.ix.higher.bits)
-        self._z80.ram.write(address, self._z80.ix.lower.bits)
+        self._z80.ram.write_word(address, self._z80.ix.higher.bits, self._z80.ix.lower.bits)
 
 
 class LoadIndirectAddressNNIY(Instruction):
@@ -140,8 +133,7 @@ class LoadIndirectAddressNNIY(Instruction):
 
     def _instruction_logic(self, m, n):
         address = self._get_address(m, n)
-        self._z80.ram.write(address + 1, self._z80.iy.higher.bits)
-        self._z80.ram.write(address, self._z80.iy.lower.bits)
+        self._z80.ram.write_word(address, self._z80.iy.higher.bits, self._z80.iy.lower.bits)
 
 
 class LoadSPHL(Instruction):
