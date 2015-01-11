@@ -116,7 +116,7 @@ class AddAIndirectAddress(Add8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(AddAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
 
 
@@ -125,7 +125,7 @@ class AdcAIndirectAddress(Add8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(AdcAIndirectAddress, self)._instruction_logic(
             [self._z80.a.bits, n, self._z80.f.carry_flag]
         )
@@ -174,7 +174,7 @@ class SubAIndirectAddress(Sub8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(SubAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
 
 
@@ -183,7 +183,7 @@ class SbcAIndirectAddress(Sub8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(SbcAIndirectAddress, self)._instruction_logic(
             [self._z80.a.bits, n, self._z80.f.carry_flag]
         )
@@ -212,7 +212,7 @@ class AndAIndirectAddress(And8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(AndAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
 
 
@@ -239,7 +239,7 @@ class OrAIndirectAddress(Or8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(OrAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
 
 
@@ -266,7 +266,7 @@ class XorAIndirectAddress(Xor8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(XorAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
 
 
@@ -292,7 +292,7 @@ class CpAIndirectAddress(Cp8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         super(CpAIndirectAddress, self)._instruction_logic([self._z80.a.bits, n])
 
 
@@ -318,7 +318,7 @@ class IncIndirectAddress(Inc8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         self._z80.a.bits = super(IncAIndirectAddress, self)._instruction_logic(
             [n, 1]
         )
@@ -346,7 +346,7 @@ class DecIndirectAddress(Dec8Bit):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
-        n = self._z80._read_ram(address)
+        n = self._z80.ram.read(address)
         self._z80.a.bits = super(DecAIndirectAddress, self)._instruction_logic(
             [n, 1]
         )
