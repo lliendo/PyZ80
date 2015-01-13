@@ -31,6 +31,7 @@ class Z80(object):
         self._fsms = Z80FSMBuilder(self).build()
         self._instruction_decoder = InstructionDecoder(self)
         self.ram = Ram()
+        self._cpu_halted = False
 
     def _build_16_bits_registers(self):
         """
@@ -80,7 +81,7 @@ class Z80(object):
 
     # TODO: Implement processor halt & resume mechanism.
     def halt(self):
-        pass
+        self._cpu_halted = True
 
     def _fetch_opcode(self):
         for fsm in self._fsms:
@@ -98,4 +99,3 @@ class Z80(object):
         while True:
             opcode = self._fetch_opcode()
             instruction, operands = self._instruction_decoder.decode(opcode)
-            self.f = instruction.execute(operands)
