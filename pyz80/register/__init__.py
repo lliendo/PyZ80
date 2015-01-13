@@ -80,6 +80,12 @@ class Z80Register(object):
     def _most_significant_bit_mask(self):
         return self._nth_bit_mask(self._size - 1)
 
+    def invert(self):
+        """
+        Performs ones compliment.
+        """
+        self._bits = (~self._bits) & (self._higher_mask | self._lower_mask)
+
     @property
     def msb(self):
         return self.nth_bit(self.size - 1)
