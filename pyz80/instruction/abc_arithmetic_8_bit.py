@@ -108,7 +108,7 @@ class Add8Bit(Arithmetic8Bit):
         self._update_half_carry_flag(operands)
         self._update_overflow_flag(operands)
         self._update_carry_flag(operands)
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class AddAIndirectAddress(Add8Bit):
@@ -136,7 +136,7 @@ class Sub8Bit(Arithmetic8Bit):
     __metaclass__ = ABCMeta
 
     def _overflow(self, operands, bits=BYTE_SIZE):
-        bitmask = _bitmask(bits=bits)
+        bitmask = self._bitmask(bits=bits)
         overflow_condition = False
         msbs = [self._msb(operand) for operand in operands]
 
@@ -166,7 +166,7 @@ class Sub8Bit(Arithmetic8Bit):
         self._update_half_carry_flag(operands)
         self._update_overflow_flag(operands)
         self._update_carry_flag(operands)
-        self._instruction_flags.set_add_substract_flag()
+        self._z80.f.set_add_substract_flag()
 
 
 class SubAIndirectAddress(Sub8Bit):
@@ -201,10 +201,10 @@ class And8Bit(Arithmetic8Bit):
     def _update_flags(self, operands, instruction_result):
         self._update_sign_flag(instruction_result)
         self._update_zero_flag(instruction_result)
-        self._instruction_flags.set_half_carry_flag()
+        self._z80.f.set_half_carry_flag()
         self._update_parity_flag(operands)
-        self._instruction_flags.reset_carry_flag()
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_carry_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class AndAIndirectAddress(And8Bit):
@@ -228,10 +228,10 @@ class Or8Bit(Arithmetic8Bit):
     def _update_flags(self, operands, instruction_result):
         self._update_sign_flag(instruction_result)
         self._update_zero_flag(instruction_result)
-        self._instruction_flags.reset_half_carry_flag()
+        self._z80.f.reset_half_carry_flag()
         self._update_parity_flag(operands)
-        self._instruction_flags.reset_carry_flag()
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_carry_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class OrAIndirectAddress(Or8Bit):
@@ -255,10 +255,10 @@ class Xor8Bit(Arithmetic8Bit):
     def _update_flags(self, operands, instruction_result):
         self._update_sign_flag(instruction_result)
         self._update_zero_flag(instruction_result)
-        self._instruction_flags.reset_half_carry_flag()
+        self._z80.f.reset_half_carry_flag()
         self._update_parity_flag(operands)
-        self._instruction_flags.reset_carry_flag()
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_carry_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class XorAIndirectAddress(Xor8Bit):
@@ -283,7 +283,7 @@ class Cp8Bit(Sub8Bit):
         self._update_zero_flag(instruction_result)
         self._update_half_carry_flag(instruction_result)
         self._update_overflow_flag(operands)
-        self._instruction_flags.set_add_substract_flag()
+        self._z80.f.set_add_substract_flag()
         self._update_carry_flag(operands)
 
 
@@ -310,7 +310,7 @@ class Inc8Bit(Add8Bit):
         self._update_zero_flag(instruction_result)
         self._update_half_carry_flag(instruction_result)
         self._update_overflow_flag(operands)
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class IncIndirectAddress(Inc8Bit):
@@ -338,7 +338,7 @@ class Dec8Bit(Sub8Bit):
         self._update_zero_flag(instruction_result)
         self._update_half_carry_flag(instruction_result)
         self._update_overflow_flag(operands)
-        self._instruction_flags.set_add_substract_flag()
+        self._z80.f.set_add_substract_flag()
 
 
 class DecIndirectAddress(Dec8Bit):
