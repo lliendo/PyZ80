@@ -38,7 +38,7 @@ class AddHLSS(Add16Bit):
     def _update_flags(self, operands, instruction_result):
         self._update_half_carry_flag(operands)
         self._update_carry_flag(operands)
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class AddIXPP(AddHLSS):
@@ -87,7 +87,7 @@ class AdcHLSS(Add16Bit):
         self._update_half_carry_flag(operands)
         self._update_carry_flag(operands)
         self._update_overflow_flag(operands)
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class SbcHLSS(Sub16Bit):
@@ -110,7 +110,7 @@ class SbcHLSS(Sub16Bit):
         self._update_half_carry_flag(operands)
         self._update_carry_flag(operands)
         self._update_overflow_flag(operands)
-        self._instruction_flags.set_add_substract_flag()
+        self._z80.f.set_add_substract_flag()
 
 
 class IncSS(Instruction):
