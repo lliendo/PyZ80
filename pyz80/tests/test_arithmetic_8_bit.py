@@ -33,8 +33,8 @@ class TestLoadInstructions(TestZ80):
         self._z80.a.bits = 127
         self._z80.b.bits = 1
         opcode = ['10000000']
-        flags = self._decode_and_execute_opcode(opcode)
-        self.assertEqual(flags.sign_flag, True)
+        self._decode_and_execute_opcode(opcode)
+        self.assertEqual(self._z80.f.sign_flag, True)
 
     def test_add_a_r_sign_flag_is_reset(self):
         """ Test ADD A, r (sign reset) """
@@ -42,8 +42,8 @@ class TestLoadInstructions(TestZ80):
         self._z80.a.bits = 126
         self._z80.b.bits = 1
         opcode = ['10000000']
-        flags = self._decode_and_execute_opcode(opcode)
-        self.assertEqual(flags.sign_flag, False)
+        self._decode_and_execute_opcode(opcode)
+        self.assertEqual(self._z80.f.sign_flag, False)
 
     def test_add_a_r_overflow_is_set(self):
         """ Test ADD A, r (overflow set) """
@@ -51,8 +51,8 @@ class TestLoadInstructions(TestZ80):
         self._z80.a.bits = 120
         self._z80.b.bits = 105
         opcode = ['10000000']
-        flags = self._decode_and_execute_opcode(opcode)
-        self.assertEqual(flags.parity_flag, True)
+        self._decode_and_execute_opcode(opcode)
+        self.assertEqual(self._z80.f.parity_flag, True)
 
     def test_add_a_r_carry_is_set(self):
         """ Test ADD A, r (carry set) """
@@ -60,8 +60,8 @@ class TestLoadInstructions(TestZ80):
         self._z80.a.bits = 255
         self._z80.b.bits = 1
         opcode = ['10000000']
-        flags = self._decode_and_execute_opcode(opcode)
-        self.assertEqual(flags.carry_flag, True)
+        self._decode_and_execute_opcode(opcode)
+        self.assertEqual(self._z80.f.carry_flag, True)
 
     def test_add_a_r_carry_is_reset(self):
         """ Test ADD A, r (carry reset) """
@@ -69,5 +69,5 @@ class TestLoadInstructions(TestZ80):
         self._z80.a.bits = 254
         self._z80.b.bits = 1
         opcode = ['10000000']
-        flags = self._decode_and_execute_opcode(opcode)
-        self.assertEqual(flags.carry_flag, False)
+        self._decode_and_execute_opcode(opcode)
+        self.assertEqual(self._z80.f.carry_flag, False)
