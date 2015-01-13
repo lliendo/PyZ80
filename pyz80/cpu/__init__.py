@@ -66,9 +66,9 @@ class Z80(object):
         self.iyl = self.iy.lower
 
     def _build_cpu_control_registers(self):
-        self._iff1 = 0x00
-        self._iff2 = 0x00
-        self._im = 0
+        self.iff1 = 0x00
+        self.iff2 = 0x00
+        self.im = 0x00
 
     def _build_registers(self):
         self._build_16_bits_registers()
@@ -77,6 +77,10 @@ class Z80(object):
 
     def inc_pc(self):
         self.pc.bits += 1
+
+    # TODO: Implement processor halt & resume mechanism.
+    def halt(self):
+        pass
 
     def _fetch_opcode(self):
         for fsm in self._fsms:
