@@ -32,7 +32,6 @@ class Instruction(object):
 
     def __init__(self, z80, log_fd=None):
         self._z80 = z80
-        self._instruction_flags = Z80FlagsRegister(bits=self._z80.f.bits)
         self._log_fd = log_fd
 
     @abstractmethod
@@ -56,7 +55,7 @@ class Instruction(object):
     def execute(self, operands):
         self._instruction_logic(*operands)
         self._log(*operands)
-        return self._instruction_flags
+        # return self._instruction_flags
 
     def _get_address(self, high_order_byte, low_order_byte):
         """
@@ -93,36 +92,36 @@ class Instruction(object):
 
     def _update_overflow_flag(self, operands):
         if self._overflow(operands):
-            self._instruction_flags.set_parity_flag()
+            self._z80.f.set_parity_flag()
         else:
-            self._instruction_flags.reset_parity_flag()
+            self._z80.f.reset_parity_flag()
 
     def _update_carry_flag(self, operands):
         if self._carry(operands):
-            self._instruction_flags.set_carry_flag()
+            self._z80.f.set_carry_flag()
         else:
-            self._instruction_flags.reset_carry_flag()
+            self._z80.f.reset_carry_flag()
 
     def _update_half_carry_flag(self, operands):
         if self._half_carry(operands):
-            self._instruction_flags.set_half_carry_flag()
+            self._z80.f.set_half_carry_flag()
         else:
-            self._instruction_flags.reset_half_carry_flag()
+            self._z80.f.reset_half_carry_flag()
 
     def _update_sign_flag(self, instruction_result):
         if self._sign(instruction_result):
-            self._instruction_flags.set_sign_flag()
+            self._z80.f.set_sign_flag()
         else:
-            self._instruction_flags.reset_sign_flag()
+            self._z80.f.reset_sign_flag()
 
     def _update_zero_flag(self, instruction_result):
         if self._zero(instruction_result):
-            self._instruction_flags.set_zero_flag()
+            self._z80.f.set_zero_flag()
         else:
-            self._instruction_flags.reset_zero_flag()
+            self._z80.f.reset_zero_flag()
 
     def _update_parity_flag(self, instruction_result):
         if self._parity(instruction_result):
-            self._instruction_flags.set_parity_flag()
+            self._z80.f.set_parity_flag()
         else:
-            self._instruction_flags.reset_parity_flag()
+            self._z80.f.reset_parity_flag()
