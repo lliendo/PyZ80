@@ -302,8 +302,8 @@ class LoadRegisterARegisterI(Instruction):
     def _update_flags(self):
         self._update_sign_flag(self._z80.a.bits)
         self._update_zero_flag(self._z80.a.bits)
-        self._instruction_flags.reset_half_carry_flag()
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_half_carry_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class LoadRegisterARegisterR(Instruction):
@@ -318,8 +318,8 @@ class LoadRegisterARegisterR(Instruction):
     def _update_flags(self):
         self._update_sign_flag(self._z80.a.bits)
         self._update_zero_flag(self._z80.a.bits)
-        self._instruction_flags.reset_half_carry_flag()
-        self._instruction_flags.reset_add_substract_flag()
+        self._z80.f.reset_half_carry_flag()
+        self._z80.f.reset_add_substract_flag()
 
 
 class LoadRegisterIRegisterA(Instruction):
