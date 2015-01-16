@@ -34,7 +34,9 @@ class CLI(object) :
         try :
             return getattr(self._options, option_name)
         except AttributeError :
-            raise CLIError('Error - Option : {0} does not exist.'.format(option_name))
+            raise CLIError(
+                'Error - Option : {0} does not exist.'.format(option_name)
+            )
 
     def _build_parser(self) :
         parser = ArgumentParser(prog='PyZ80')
@@ -43,6 +45,10 @@ class CLI(object) :
         )
         parser.add_argument(
             '-p', '--program', dest='program_path', action='store', required=True
+        )
+        parser.add_argument(
+            '-d', '--devices_dir', dest='devices_module_path', action='store',
+            default=None, required=False
         )
 
         return parser
