@@ -22,16 +22,18 @@ Copyright 2014 Lucas Liendo.
 from ..register import Z80ByteRegister, Z80WordRegister, Z80FlagsRegister
 from ..fsm import Z80FSMBuilder
 from ..ram import Ram
+from ..io import DeviceManager
 from ..instruction.decoder import InstructionDecoder
 
 
 class Z80(object):
     def __init__(self):
+        self._cpu_halted = False
         self._build_registers()
         self._fsms = Z80FSMBuilder(self).build()
         self._instruction_decoder = InstructionDecoder(self)
         self.ram = Ram()
-        self._cpu_halted = False
+        self.device_manager = DeviceManager()
 
     def _build_16_bits_registers(self):
         """
@@ -91,6 +93,10 @@ class Z80(object):
                 pass
 
         raise Z80InvalidOpcode()
+
+    def load_device(self, D):
+        device = D(self.device_manager)
+        self.device_manager.add(device)
 
     def run(self, program=[], address=0x00):
         self.ram.load(program, address=address)
