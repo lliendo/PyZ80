@@ -21,6 +21,8 @@ Copyright 2014 Lucas Liendo.
 
 from ..cli import CLI
 from ..cpu import Z80
+from ..class_loader import ClassLoader
+from ..io import Device
 
 
 class PyZ80LauncherError(Exception):
@@ -53,7 +55,21 @@ class PyZ80Launcher(object):
                 'Error - {0} is not a valid address.'.format(self._cli.address)
             )
 
+    def _check_device(self, D):
+        if not issubclass(D, Device):
+            raise PyZ80LauncherError(
+                'Error - {0} device does not inherit from \'Device\' class.'.format(invalid_devices)
+            )
+
+        return D
+
+    def _load_devices(self):
+        if self._cli.devices_module_path:
+            device_classes = ClassLoader(self._cli.devices_module_path).get_classes()
+            [self._z80.load_device(self._check_device(D)) for D in device_classes]
+
     def run(self):
+        self._load_devices()
         self._z80_cpu.run(
             program=self._read_program(), address=self._read_address()
         )
