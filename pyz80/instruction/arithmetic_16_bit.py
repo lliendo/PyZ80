@@ -19,8 +19,10 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
+from re import compile as compile_re
 from abc import ABCMeta
 from abc_arithmetic_16_bit import Add16Bit, Sub16Bit
+from . import Instruction
 
 
 class AddHLSS(Add16Bit):
