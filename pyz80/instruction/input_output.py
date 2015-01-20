@@ -20,7 +20,6 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
-from abc_input_output import InputOutput
 from . import Instruction
 
 
@@ -30,6 +29,15 @@ class InAIndirectN(Instruction):
     """ IN A, (n) """
 
     regexp = compile_re('^11011011((?:0|1){8})$')
+
+    def _instruction_logic(self, address):
+        self._z80.a.bits = self._z80.device_manager.read(address)
+
+
+class InRIndirectC(Instruction):
+    """ IN r, (C) """
+
+    regexp = compile_re('^1110110101((?:0|1){3})000$')
 
     def _select_register(self, selector):
         registers = {
@@ -43,15 +51,6 @@ class InAIndirectN(Instruction):
         }
 
         return registers[selector]
-
-    def _instruction_logic(self, address):
-        self._z80.a.bits = self._z80.device_manager.read(address)
-
-
-class InRIndirectC(InputOutput):
-    """ IN r, (C) """
-
-    regexp = compile_re('^1110110101((?:0|1){3})000$')
 
     def _update_flags(self, input_byte):
         self._update_sign_flag(input_byte)
@@ -199,7 +198,7 @@ class OutAIndirectN(Instruction):
         self._z80.device_manager.write(address, self._z80.a.bits)
 
 
-class OutRIndirectC(InAIndirectN):
+class OutRIndirectC(InRIndirectC):
     """ OUT (C), r """
 
     regexp = compile_re('^1110110101((?:0|1){3})001$')
