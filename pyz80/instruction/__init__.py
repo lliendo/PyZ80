@@ -125,3 +125,9 @@ class Instruction(object):
             self._z80.f.set_parity_flag()
         else:
             self._z80.f.reset_parity_flag()
+
+    def _update_add_substract_flag(self, instruction_result):
+        if self._add_substract(instruction_result):
+            self._z80.f.set_add_substract_flag()
+        else:
+            self._z80.f.reset_add_substract_flag()
