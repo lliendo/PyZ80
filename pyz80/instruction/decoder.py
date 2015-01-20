@@ -19,9 +19,18 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
+from ..arch import BYTE_SIZE
 from .load_8_bit import *
 from .load_16_bit import *
 from .arithmetic_8_bit import *
+from .exchange_and_transfer import *
+from .cpu_control import *
+from .arithmetic_16_bit import *
+from .rotate_and_shift import *
+from .bit_set_and_reset import *
+from .jump import *
+from .call_and_return import *
+from .input_output import *
 
 
 class InvalidInstructionError(Exception):
@@ -86,6 +95,20 @@ class InstructionDecoder(object):
             PopIY,
         ]
 
+    def _exchange_and_transfer_instructions(self):
+        return [
+            Ex,
+            ExAfAf_,
+            Exx,
+            ExIndirectSpHl,
+            ExIndirectSpIx,
+            ExIndirectSpIy,
+            Ldi,
+            Ldir,
+            Ldd,
+            Lddr,
+        ]
+
     def _8_bit_arithmetic_instructions(self):
         return [
             AddAR,
@@ -118,9 +141,154 @@ class InstructionDecoder(object):
             SbcAIndirectAddressIYRegister,
         ]
 
+    def _cpu_control_instructions(self):
+        return [
+            Daa,
+            Cpl,
+            Neg,
+            Ccf,
+            Scf,
+            Nop,
+            Halt,
+            Di,
+            Ei,
+            Im0,
+            Im1,
+            Im2,
+        ]
+
+    def _16_bit_arithmetic_instructions(self):
+        return [
+            AddHLSS,
+            AddIXPP,
+            AddIYQQ,
+            AdcHLSS,
+            SbcHLSS,
+            IncSS,
+            IncIX,
+            IncIY,
+            DecSS,
+            DecIX,
+            DecIY,
+        ]
+
+    def _rotate_and_shift_instructions(self):
+        return [
+            Rlca,
+            RlcR,
+            RlcIndirectAddressHL,
+            RlcIndirectAddressIX,
+            RlcIndirectAddressIY,
+            RlcIndirectAddressIXR,
+            RlcIndirectAddressIYR,
+            Rrca,
+            RrcR,
+            RrcIndirectAddressHL,
+            RrcIndirectAddressIX,
+            RrcIndirectAddressIY,
+            Rla,
+            RlR,
+            RlIndirectAddressHL,
+            RlIndirectAddressIX,
+            RlIndirectAddressIY,
+            Rra,
+            RrR,
+            RrIndirectAddressHL,
+            RrIndirectAddressIX,
+            RrIndirectAddressIY,
+            SlaR,
+            SlaIndirectAddressHL,
+            SlaIndirectAddressIX,
+            SlaIndirectAddressIY,
+            SllR,
+            SllIndirectAddressHL,
+            SllIndirectAddressIX,
+            SllIndirectAddressIY,
+            SraR,
+            SraIndirectAddressHL,
+            SraIndirectAddressIX,
+            SraIndirectAddressIY,
+            SrlR,
+            SrlIndirectAddressHL,
+            SrlIndirectAddressIX,
+            SrlIndirectAddressIY,
+            Rld,
+            Rrd
+        ]
+
+    def _bit_set_and_reset_instructions(self):
+        return [
+            BitTest,
+            BitTestIndirectAddressHL,
+            BitTestIndirectAddressIX,
+            BitTestIndirectAddressIY,
+            BitSet,
+            BitSetIndirectAddressHL,
+            BitSetIndirectAddressIX,
+            BitSetIndirectAddressIYRegister,
+            BitSetIndirectAddressIXRegister,
+            BitSetIndirectAddressIYRegister,
+            BitReset,
+            BitResetIndirectAddressHL,
+            BitResetIndirectAddressIX,
+            BitResetIndirectAddressIYRegister,
+            BitResetIndirectAddressIXRegister,
+            BitResetIndirectAddressIYRegister
+        ]
+
+    def _jump_instructions(self):
+        return [
+            JpNN,
+            JpCCNN,
+            JrE,
+            JrSSE,
+            JpIndirectAddressHL,
+            JpIndirectAddressIX,
+            JpIndirectAddressIY,
+            DjnzE
+        ]
+
+    def _call_and_return_instructions(self):
+        return [
+            CallNN,
+            CallCCNN,
+            Ret,
+            RetCC,
+            Reti,
+            Retn,
+            Rst
+        ]
+
+    def _input_output_instructions(self):
+        return [
+            InAIndirectN,
+            InRIndirectC,
+            InFIndirectN,
+            Ini,
+            Inir,
+            Ind,
+            Indr,
+            OutAIndirectN,
+            OutRIndirectC,
+            OutFIndirectN,
+            Outi,
+            Otir,
+            Outd,
+            Otdr
+        ]
+
     def _z80_instructions(self):
         return self._8_bit_load_instructions() + \
-            self._16_bit_load_instructions() + self._8_bit_arithmetic_instructions()
+            self._16_bit_load_instructions() + \
+            self._8_bit_arithmetic_instructions() + \
+            self._exchange_and_transfer_instructions() + \
+            self._cpu_control_instructions() + \
+            self._16_bit_arithmetic_instructions() + \
+            self._rotate_and_shift_instructions() + \
+            self._bit_set_and_reset_instructions() + \
+            self._jump_instructions() + \
+            self._call_and_return_instructions() + \
+            self._input_output_instructions()
 
     def _bytes_to_int(self, bytes):
         """
@@ -143,9 +311,8 @@ class InstructionDecoder(object):
             10101010101110111100110011011101
         """
 
-        bits_per_byte = 8
         n = self._bytes_to_int(bytes)
-        return bin(n).lstrip('0b').zfill(len(bytes) * bits_per_byte)
+        return bin(n).lstrip('0b').zfill(len(bytes) * BYTE_SIZE)
 
     def _get_instruction(self, bytes):
         return filter(lambda I: I.regexp.match(self._translate(bytes)), self._instructions).pop()
