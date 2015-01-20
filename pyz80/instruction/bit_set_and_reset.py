@@ -19,6 +19,7 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
+from re import compile as compile_re
 from abc_bit_set_and_reset import Bit
 
 
