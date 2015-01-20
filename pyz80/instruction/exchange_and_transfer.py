@@ -79,3 +79,77 @@ class ExIndirectSpIy(Exchange):
 
     def _instruction_logic(self):
         self._swap_register_with_ram_word(self._z80.sp.bits, self._z80.iy)
+
+
+class Ldi(Instruction):
+    """ LDI """
+
+    regexp = compile_re('^1110110110100000$')
+
+    def _parity(self, instruction_result):
+        return instruction_result != 0x00
+
+    def _update_flags(self):
+        self._z80.f.reset_half_carry_flag()
+        self._update_parity_flag(self._z80.bc)
+        self._z80.f.reset_add_substract_flag()
+
+    def _move_byte(self):
+        self._z80.ram.write(self._z80.de, self._z80.ram.read(self._z80.hl))
+        self._z80.de.bits += 1
+        self._z80.hl.bits += 1
+        self._z80.bc.bits -= 1
+
+    def _instruction_logic(self):
+        self._move_byte()
+        self._update_flags()
+
+
+class Ldir(Ldi):
+    """ LDIR """
+
+    regexp = compile_re('^1110110110110000$')
+
+    def _update_flags(self):
+        self._z80.f.reset_half_carry_flag()
+        self._z80.f.reset_parity_flag()
+        self._z80.f.reset_add_substract_flag()
+
+    def _instruction_logic(self):
+        while self._z80.bc.bits > 0x00:
+            self._move_byte()
+
+        self._update_flags()
+
+
+class Ldd(Ldi):
+    """ LDD """
+
+    regexp = compile_re('^1110110110101000$')
+
+    def _move_byte(self):
+        self._z80.ram.write(self._z80.de, self._z80.ram.read(self._z80.hl))
+        self._z80.de.bits -= 1
+        self._z80.hl.bits -= 1
+        self._z80.bc.bits -= 1
+
+    def _instruction_logic(self):
+        self._move_byte()
+        self._update_flags()
+
+
+class Lddr(Ldd):
+    """ LDDR """
+
+    regexp = compile_re('^1110110110111000$')
+
+    def _update_flags(self):
+        self._z80.f.reset_half_carry_flag()
+        self._z80.f.reset_parity_flag()
+        self._z80.f.reset_add_substract_flag()
+
+    def _instruction_logic(self):
+        while self._z80.bc.bits > 0x00:
+            self._move_byte()
+
+        self._update_flags()
