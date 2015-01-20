@@ -99,6 +99,7 @@ class Z80(object):
         self.device_manager.add(device)
 
     def run(self, program=[], address=0x00):
+        self.device_manager.run_devices()
         self.ram.load(program, address=address)
         self.pc.bits = address
 
