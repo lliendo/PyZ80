@@ -85,3 +85,16 @@ class DeviceManager(object):
     def run(self):
         [d.start() for d in self._devices]
         [d.join() for d in self._devices]
+
+
+class InterruptManager(object):
+    def __init__(self, z80):
+        self._z80
+
+    def nmi(self):
+        # No state at all is held for non maskable interrupts.
+        pass
+
+    def int(self, address, data):
+        # Maskable interrupts hold a line state.
+        pass
