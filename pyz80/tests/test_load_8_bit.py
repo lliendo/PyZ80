@@ -188,11 +188,6 @@ class TestLoadInstructions(TestZ80):
             self._decode_and_execute_opcode(opcode)
             self.assertEqual(registers[destination].bits, n)
 
-
-    # TODO: Implement.
-    def test_load_register_indirect_ix_raises_invalid_ram_address(self):
-        pass
-
     def test_load_register_indirect_iy(self):
         """ Test LD r, (IY + d) """
 
@@ -217,10 +212,6 @@ class TestLoadInstructions(TestZ80):
             self._decode_and_execute_opcode(opcode)
             self.assertEqual(registers[destination].bits, n)
 
-
-    # TODO: Implement.
-    def test_load_register_indirect_iy_raises_invalid_ram_address(self):
-        pass
 
     def test_load_indirect_address_hl_register(self):
         """ Test LD (HL), r """
@@ -269,10 +260,6 @@ class TestLoadInstructions(TestZ80):
                 self._z80.ram.read(address + offset)
             )
 
-    # TODO: Implement.
-    def test_load_register_indirect_address_ix_raises_invalid_ram_address(self):
-        pass
-
     def test_load_indirect_address_iy_register(self):
         """ Test LD (IY + d), r """
 
@@ -299,10 +286,6 @@ class TestLoadInstructions(TestZ80):
                 self._z80.ram.read(address + offset)
             )
 
-    # TODO: Implement.
-    def test_load_indirect_address_iy_register_raises_invalid_ram_address(self):
-        pass
-
     def test_load_indirect_address_hl_number(self):
         """ Test LD (HL), n """
 
@@ -325,10 +308,6 @@ class TestLoadInstructions(TestZ80):
         self._decode_and_execute_opcode(opcode)
         self.assertEqual(self._z80.ram.read(address + offset), n)
 
-    # TODO: Implement.
-    def test_load_indirect_address_ix_number_raises_invalid_ram_address(self):
-        pass
-
     def test_load_indirect_address_iy_number(self):
         """ Test LD (IY + d), n """
 
@@ -340,10 +319,6 @@ class TestLoadInstructions(TestZ80):
             self._int_to_bin(offset), self._int_to_bin(n)]
         self._decode_and_execute_opcode(opcode)
         self.assertEqual(self._z80.ram.read(address + offset), n)
-
-    # TODO: Implement.
-    def test_load_indirect_address_iy_number_raises_invalid_ram_address(self):
-        pass
 
     def test_load_a_indirect_address_bc(self):
         """ Test LD A, (BC) """
