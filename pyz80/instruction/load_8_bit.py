@@ -27,7 +27,7 @@ from abc_load_8_bit import *
 # table 'selectors' found in The Undocumented Z80 Documented
 # by Sean Young. See page 26.
 
-class LoadRegisterRegisterRR(LoadRegisterRegister):
+class LoadRR(LoadRegisterRegister):
     """ LD r, r' """
 
     regexp = compile_re('^01((?:0|1){3})((?:0|1){3})$')
@@ -46,7 +46,7 @@ class LoadRegisterRegisterRR(LoadRegisterRegister):
         return registers[selector]
 
 
-class LoadRegisterRegisterPP(LoadRegisterRegister):
+class LoadPP(LoadRegisterRegister):
     """ LD p, p' """
     
     regexp = compile_re('^1101110101((?:0|1){3})((?:0|1){3})$')
@@ -65,7 +65,7 @@ class LoadRegisterRegisterPP(LoadRegisterRegister):
         return registers[selector]
 
 
-class LoadRegisterRegisterQQ(LoadRegisterRegister):
+class LoadQQ(LoadRegisterRegister):
     """ LD q, q' """
 
     regexp = compile_re('^1111110101((?:0|1){3})((?:0|1){3})$')
@@ -84,7 +84,7 @@ class LoadRegisterRegisterQQ(LoadRegisterRegister):
         return registers[selector]
 
 
-class LoadRegisterRNumber(LoadRegisterNumber):
+class LoadRN(LoadRegisterNumber):
     """ LD r, n """
 
     regexp = compile_re('^00((?:0|1){3})110((?:0|1){8})$')
@@ -103,7 +103,7 @@ class LoadRegisterRNumber(LoadRegisterNumber):
         return registers[selector]
 
 
-class LoadRegisterPNumber(LoadRegisterNumber):
+class LoadPN(LoadRegisterNumber):
     """ LD p, n """
 
     regexp = compile_re('^1101110100((?:0|1){3})110((?:0|1){8})$')
@@ -122,7 +122,7 @@ class LoadRegisterPNumber(LoadRegisterNumber):
         return registers[selector]
 
 
-class LoadRegisterQNumber(LoadRegisterNumber):
+class LoadQN(LoadRegisterNumber):
     """ LD q, n """
 
     regexp = compile_re('^1111110100((?:0|1){3})110((?:0|1){8})$')
@@ -141,7 +141,7 @@ class LoadRegisterQNumber(LoadRegisterNumber):
         return registers[selector]
 
 
-class LoadRegisterIndirectHL(LoadRegisterIndirectAddress):
+class LoadRIndirectHL(LoadRegisterIndirectAddress):
     """ LD r, (HL) """
 
     regexp = compile_re('^01((?:0|1){3})110$')
@@ -151,7 +151,7 @@ class LoadRegisterIndirectHL(LoadRegisterIndirectAddress):
         self._load_register_from_ram(selector, address)
 
 
-class LoadRegisterIndirectIX(LoadRegisterIndirectAddress):
+class LoadRIndirectIX(LoadRegisterIndirectAddress):
     """ LD r, (IX + d) """
 
     regexp = compile_re('^1101110101((?:0|1){3})110((?:0|1){8})$')
@@ -161,7 +161,7 @@ class LoadRegisterIndirectIX(LoadRegisterIndirectAddress):
         self._load_register_from_ram(selector, address)
 
 
-class LoadRegisterIndirectIY(LoadRegisterIndirectAddress):
+class LoadRIndirectIY(LoadRegisterIndirectAddress):
     """ LD r, (IY + d) """
 
     regexp = compile_re('^1111110101((?:0|1){3})110((?:0|1){8})$')
@@ -171,7 +171,7 @@ class LoadRegisterIndirectIY(LoadRegisterIndirectAddress):
         self._load_register_from_ram(selector, address)
 
 
-class LoadIndirectAddressHLRegister(LoadIndirectAddressRegister):
+class LoadIndirectHLR(LoadIndirectAddressRegister):
     """ LD (HL), r """
 
     regexp = compile_re('^01110((?:0|1){3})$')
@@ -181,7 +181,7 @@ class LoadIndirectAddressHLRegister(LoadIndirectAddressRegister):
         self._load_ram_from_register(source_selector, address)
 
 
-class LoadIndirectAddressIXRegister(LoadIndirectAddressRegister):
+class LoadIndirectIXR(LoadIndirectAddressRegister):
     """ LD (IX + d), r """
 
     regexp = compile_re('^1101110101110((?:0|1){3})((?:0|1){8})$')
@@ -191,7 +191,7 @@ class LoadIndirectAddressIXRegister(LoadIndirectAddressRegister):
         self._load_ram_from_register(source_selector, address)
 
 
-class LoadIndirectAddressIYRegister(LoadIndirectAddressRegister):
+class LoadIndirectIYR(LoadIndirectAddressRegister):
     """ LD (IY + d), r """
 
     regexp = compile_re('^1111110101110((?:0|1){3})((?:0|1){8})$')
@@ -204,7 +204,7 @@ class LoadIndirectAddressIYRegister(LoadIndirectAddressRegister):
         self._load_ram_from_register(source_selector, address)
 
 
-class LoadIndirectAddressHLNumber(Instruction):
+class LoadIndirectHLN(Instruction):
     """ LD (HL), n """
 
     regexp = compile_re('^00110110((?:0|1){8})$')
@@ -213,7 +213,7 @@ class LoadIndirectAddressHLNumber(Instruction):
         self._z80.ram.write(self._z80.hl.bits, n)
 
 
-class LoadIndirectAddressIXNumber(Instruction):
+class LoadIndirectIXN(Instruction):
     """ LD (IX + d), n """
 
     regexp = compile_re('^1101110100110110((?:0|1){8})((?:0|1){8})$')
@@ -223,7 +223,7 @@ class LoadIndirectAddressIXNumber(Instruction):
         self._z80.ram.write(address, n)
 
 
-class LoadIndirectAddressIYNumber(Instruction):
+class LoadIndirectIYN(Instruction):
     """ LD (IY + d), n """
 
     regexp = compile_re('^1111110100110110((?:0|1){8})((?:0|1){8})$')
@@ -233,7 +233,7 @@ class LoadIndirectAddressIYNumber(Instruction):
         self._z80.ram.write(address, n)
 
 
-class LoadAIndirectAddressBC(Instruction):
+class LoadAIndirectBC(Instruction):
     """ LD A, (BC) """
     
     regexp = compile_re('^00001010$')
@@ -242,7 +242,7 @@ class LoadAIndirectAddressBC(Instruction):
         self._z80.a.bits = self._z80.ram.read(self._z80.bc.bits)
 
 
-class LoadAIndirectAddressDE(Instruction):
+class LoadAIndirectDE(Instruction):
     """ LD A, (DE) """
 
     regexp = compile_re('^00011010$')
@@ -251,7 +251,7 @@ class LoadAIndirectAddressDE(Instruction):
         self._z80.a.bits = self._z80.ram.read(self._z80.de.bits)
 
 
-class LoadAIndirectAddressNN(Instruction):
+class LoadAIndirectNN(Instruction):
     """ LD A, (nn) """
 
     regexp = compile_re('^00111010((?:0|1){8})((?:0|1){8})$')
@@ -261,7 +261,7 @@ class LoadAIndirectAddressNN(Instruction):
         self._z80.a.bits = self._z80.ram.read(address)
 
 
-class LoadIndirectBCRegisterA(Instruction):
+class LoadIndirectBCA(Instruction):
     """ LD (BC), A """
 
     regexp = compile_re('^00000010$')
@@ -270,7 +270,7 @@ class LoadIndirectBCRegisterA(Instruction):
         self._z80.ram.write(self._z80.bc.bits, self._z80.a.bits)
 
 
-class LoadIndirectDERegisterA(Instruction):
+class LoadIndirectDEA(Instruction):
     """ LD (DE), A """
 
     regexp = compile_re('^00010010$')
@@ -279,7 +279,7 @@ class LoadIndirectDERegisterA(Instruction):
         self._z80.ram.write(self._z80.de.bits, self._z80.a.bits)
 
 
-class LoadIndirectNNRegisterA(Instruction):
+class LoadIndirectNNA(Instruction):
     """ LD (nn), A """
 
     regexp = compile_re('^00110010((?:0|1){8})((?:0|1){8})$')
@@ -289,7 +289,7 @@ class LoadIndirectNNRegisterA(Instruction):
         self._z80.ram.write(address, self._z80.a.bits)
 
 
-class LoadRegisterARegisterI(Instruction):
+class LoadAI(Instruction):
     """ LD A, I """
 
     regexp = compile_re('^1110110101010111$')
@@ -306,7 +306,7 @@ class LoadRegisterARegisterI(Instruction):
         self._z80.f.reset_add_substract_flag()
 
 
-class LoadRegisterARegisterR(Instruction):
+class LoadAR(Instruction):
     """ LD A, R """
 
     regexp = compile_re('^1110110101011111$')
@@ -322,7 +322,7 @@ class LoadRegisterARegisterR(Instruction):
         self._z80.f.reset_add_substract_flag()
 
 
-class LoadRegisterIRegisterA(Instruction):
+class LoadIA(Instruction):
     """ LD I, A """
 
     regexp = compile_re('^1110110101000111$')
@@ -331,7 +331,7 @@ class LoadRegisterIRegisterA(Instruction):
         self._z80.i.bits = self._z80.a.bits
 
 
-class LoadRegisterRRegisterA(Instruction):
+class LoadRA(Instruction):
     """ LD R, A """
 
     regexp = compile_re('^1110110101001111$')

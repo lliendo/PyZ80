@@ -54,7 +54,7 @@ class LoadIYNN(Instruction):
         self._z80.iy.lower.bits = n
 
 
-class LoadHLIndirectAddressNN(Instruction):
+class LoadHLIndirectNN(Instruction):
     """ LD HL, (nn) """
 
     regexp = compile_re('^00101010((?:0|1){8})((?:0|1){8})$')
@@ -64,7 +64,7 @@ class LoadHLIndirectAddressNN(Instruction):
         self._z80.hl.higher.bits, self._z80.hl.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadDDIndirectAddressNN(LoadRegister16Bit):
+class LoadDDIndirectNN(LoadRegister16Bit):
     """ LD dd, (nn) """
 
     regexp = compile_re('^1110110101((?:0|1){2})1011((?:0|1){8})((?:0|1){8})$')
@@ -75,7 +75,7 @@ class LoadDDIndirectAddressNN(LoadRegister16Bit):
         register.higher.bits, register.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadIXIndirectAddressNN(Instruction):
+class LoadIXIndirectNN(Instruction):
     """ LD IX, (nn) """
 
     regexp = compile_re('^1101110100101010((?:0|1){8})((?:0|1){8})$')
@@ -85,7 +85,7 @@ class LoadIXIndirectAddressNN(Instruction):
         self._z80.ix.higher.bits, self._z80.ix.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadIYIndirectAddressNN(Instruction):
+class LoadIYIndirectNN(Instruction):
     """ LD IY, (nn) """
 
     regexp = compile_re('^1111110100101010((?:0|1){8})((?:0|1){8})$')
@@ -95,7 +95,7 @@ class LoadIYIndirectAddressNN(Instruction):
         self._z80.iy.higher.bits, self._z80.iy.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadIndirectAddressNNHL(Instruction):
+class LoadIndirectNNHL(Instruction):
     """ LD (nn), HL """
 
     regexp = compile_re('^00100010((?:0|1){8})((?:0|1){8})$')
@@ -105,7 +105,7 @@ class LoadIndirectAddressNNHL(Instruction):
         self._z80.ram.write_word(address, self._z80.h.bits, self._z80.l.bits)
 
 
-class LoadIndirectAddressNNDD(LoadRegister16Bit):
+class LoadIndirectNNDD(LoadRegister16Bit):
     """ LD (nn), dd """
 
     regexp = compile_re('^1110110101((?:0|1){2})0011((?:0|1){8})((?:0|1){8})$')
@@ -116,7 +116,7 @@ class LoadIndirectAddressNNDD(LoadRegister16Bit):
         self._z80.ram.write_word(address, register.higher.bits, register.lower.bits)
 
 
-class LoadIndirectAddressNNIX(Instruction):
+class LoadIndirectNNIX(Instruction):
     """ LD (nn), IX """
 
     regexp = compile_re('^1101110100100010((?:0|1){8})((?:0|1){8})$')
@@ -126,7 +126,7 @@ class LoadIndirectAddressNNIX(Instruction):
         self._z80.ram.write_word(address, self._z80.ix.higher.bits, self._z80.ix.lower.bits)
 
 
-class LoadIndirectAddressNNIY(Instruction):
+class LoadIndirectNNIY(Instruction):
     """ LD (nn), IY """
 
     regexp = compile_re('^1111110100100010((?:0|1){8})((?:0|1){8})$')

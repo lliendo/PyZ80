@@ -33,7 +33,7 @@ class Ex(Exchange):
         self._swap_registers(self._z80.de, self._z80.hl)
 
 
-class ExAfAf_(Exchange):
+class ExAFAF_(Exchange):
     """ EX AF, AF' """
 
     regexp = compile_re('^00001000$')
@@ -54,7 +54,7 @@ class Exx(Exchange):
         self._swap_registers(self._z80.hl, self._z80.hl_)
 
 
-class ExIndirectSpHl(Exchange):
+class ExIndirectSPHL(Exchange):
     """ EX (SP), HL """
 
     regexp = compile_re('^11100011$')
@@ -63,7 +63,7 @@ class ExIndirectSpHl(Exchange):
         self._swap_register_with_ram_word(self._z80.sp.bits, self._z80.hl)
 
 
-class ExIndirectSpIx(Exchange):
+class ExIndirectSPIX(Exchange):
     """ EX (SP), IX """
 
     regexp = compile_re('^1101110111100011$')
@@ -72,7 +72,7 @@ class ExIndirectSpIx(Exchange):
         self._swap_register_with_ram_word(self._z80.sp.bits, self._z80.ix)
 
 
-class ExIndirectSpIy(Exchange):
+class ExIndirectSPIY(Exchange):
     """ EX (SP), IY """
 
     regexp = compile_re('^1111110111100011$')

@@ -62,31 +62,31 @@ class JrSSE(Jp):
             self._z80.pc.bits += self._get_signed_offset(offset)
 
 
-class JpIndirectAddressHL(JpIndirectAddress):
+class JpIndirectHL(JpIndirectAddress):
     """ JP (HL) """
 
     regexp = compile_re('^11101001$')
 
     def _instruction_logic(self):
-        super(self, JpIndirectAddress)._instruction_logic(self._z80.hl.bits)
+        super(self, JpIndirectHL)._instruction_logic(self._z80.hl.bits)
 
 
-class JpIndirectAddressIX(JpIndirectAddress):
+class JpIndirectIX(JpIndirectAddress):
     """ JP (IX) """
 
     regexp = compile_re('^1101110111101001$')
 
     def _instruction_logic(self):
-        super(self, JpIndirectAddress)._instruction_logic(self._z80.ix.bits)
+        super(self, JpIndirectIX)._instruction_logic(self._z80.ix.bits)
 
 
-class JpIndirectAddressIY(JpIndirectAddress):
+class JpIndirectIY(JpIndirectAddress):
     """ JP (IY) """
 
     regexp = compile_re('^1111110111101001$')
 
     def _instruction_logic(self):
-        super(self, JpIndirectAddress)._instruction_logic(self._z80.iy.bits)
+        super(self, JpIndirectIY)._instruction_logic(self._z80.iy.bits)
 
 
 class DjnzE(Jp):

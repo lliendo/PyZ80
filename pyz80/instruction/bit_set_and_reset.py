@@ -45,7 +45,7 @@ class BitTest(Bit):
         self._reset_add_substract_flag()
 
 
-class BitTestIndirectAddressHL(BitTest):
+class BitTestIndirectHL(BitTest):
     """ BIT b, (HL) """
 
     regexp = compile_re('^1100101101((?:0|1){3})110$')
@@ -55,7 +55,7 @@ class BitTestIndirectAddressHL(BitTest):
         self._update_flags(n, bits)
 
 
-class BitTestIndirectAddressIX(BitTest):
+class BitTestIndirectIX(BitTest):
     """ BIT b, (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})01((?:0|1){3})110$')
@@ -65,7 +65,7 @@ class BitTestIndirectAddressIX(BitTest):
         self._update_flags(n, bits)
 
 
-class BitTestIndirectAddressIY(BitTest):
+class BitTestIndirectIY(BitTest):
     """ BIT b, (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})01((?:0|1){3})110$')
@@ -87,7 +87,7 @@ class BitSet(Bit):
         register.set_nth_bit(bit)
 
 
-class BitSetIndirectAddressHL(Bit):
+class BitSetIndirectHL(Bit):
     """ SET b, (HL) """
 
     regexp = compile_re('^1100101111((?:0|1){3})110$')
@@ -100,7 +100,7 @@ class BitSetIndirectAddressHL(Bit):
         self._z80.ram.write(address, self.set_nth_bit(bits, n))
 
 
-class BitSetIndirectAddressIX(BitSetIndirectAddressHL):
+class BitSetIndirectIX(BitSetIndirectHL):
     """ SET b, (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})11((?:0|1){3})110$')
@@ -111,7 +111,7 @@ class BitSetIndirectAddressIX(BitSetIndirectAddressHL):
         self._z80.ram.write(address, self.set_nth_bit(bits, n))
 
 
-class BitSetIndirectAddressIYRegister(BitSetIndirectAddressHL):
+class BitSetIndirectIYR(BitSetIndirectHL):
     """ SET b, (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})11((?:0|1){3})110$')
@@ -122,7 +122,7 @@ class BitSetIndirectAddressIYRegister(BitSetIndirectAddressHL):
         self._z80.ram.write(address, self.set_nth_bit(bits, n))
 
 
-class BitSetIndirectAddressIXRegister(Bit):
+class BitSetIndirectIXR(Bit):
     """ SET b, (IX + d), r """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
@@ -135,7 +135,7 @@ class BitSetIndirectAddressIXRegister(Bit):
         self._z80.ram.write(address, register.bits)
 
 
-class BitSetIndirectAddressIYRegister(Bit):
+class BitSetIndirectIYR(Bit):
     """ SET b, (IY + d), r """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
@@ -160,7 +160,7 @@ class BitReset(Bit):
         register.reset_nth_bit(bit)
 
 
-class BitResetIndirectAddressHL(Bit):
+class BitResetIndirectHL(Bit):
     """ RESET b, (HL) """
 
     regexp = compile_re('^1000101111((?:0|1){3})110$')
@@ -176,7 +176,7 @@ class BitResetIndirectAddressHL(Bit):
         self._z80.ram.write(address, self.reset_nth_bit(bits, n))
 
 
-class BitResetIndirectAddressIX(BitResetIndirectAddressHL):
+class BitResetIndirectIX(BitResetIndirectHL):
     """ RESET b, (IX + d) """
 
     regexp = compile_re('^1001110111001011((?:0|1){8})11((?:0|1){3})110$')
@@ -187,7 +187,7 @@ class BitResetIndirectAddressIX(BitResetIndirectAddressHL):
         self._z80.ram.write(address, self.reset_nth_bit(bits, n))
 
 
-class BitResetIndirectAddressIYRegister(BitResetIndirectAddressHL):
+class BitResetIndirectIYR(BitResetIndirectHL):
     """ RESET b, (IY + d) """
 
     regexp = compile_re('^1011110111001011((?:0|1){8})11((?:0|1){3})110$')
@@ -198,7 +198,7 @@ class BitResetIndirectAddressIYRegister(BitResetIndirectAddressHL):
         self._z80.ram.write(address, self.reset_nth_bit(bits, n))
 
 
-class BitResetIndirectAddressIXRegister(Bit):
+class BitResetIndirectIXR(Bit):
     """ RESET b, (IX + d), r """
 
     regexp = compile_re('^1001110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
@@ -211,7 +211,7 @@ class BitResetIndirectAddressIXRegister(Bit):
         self._z80.ram.write(address, register.bits)
 
 
-class BitResetIndirectAddressIYRegister(Bit):
+class BitResetIndirectIYR(Bit):
     """ RESET b, (IY + d), r """
 
     regexp = compile_re('^1011110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')

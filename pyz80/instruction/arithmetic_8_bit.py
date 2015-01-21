@@ -73,7 +73,7 @@ class AddAN(Add8Bit):
         super(AddAN, self)._instruction_logic([self._z80.a.bits, n])
 
 
-class AddAIndirectAddressHLRegister(AddAIndirectAddress):
+class AddAIndirectHLR(AddAIndirectAddress):
     """ ADD A, (HL) """
 
     regexp = compile_re('^10000110$')
@@ -83,7 +83,7 @@ class AddAIndirectAddressHLRegister(AddAIndirectAddress):
         super(AddAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class AddAIndirectAddressIXRegister(AddAIndirectAddress):
+class AddAIndirectIXR(AddAIndirectAddress):
     """ ADD A, (IX + d) """
 
     regexp = compile_re('^1101110110000110((?:0|1){8})$')
@@ -93,7 +93,7 @@ class AddAIndirectAddressIXRegister(AddAIndirectAddress):
         super(AddAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class AddAIndirectAddressIYRegister(AddAIndirectAddress):
+class AddAIndirectIYR(AddAIndirectAddress):
     """ ADD A, (IY + d) """
 
     regexp = compile_re('^1111110110000110((?:0|1){8})$')
@@ -161,7 +161,7 @@ class AdcAN(Add8Bit):
         )
 
 
-class AdcAIndirectAddressHLRegister(AdcAIndirectAddress):
+class AdcAIndirectHLR(AdcAIndirectAddress):
     """ ADC A, (HL) """
 
     regexp = compile_re('^10001110$')
@@ -171,7 +171,7 @@ class AdcAIndirectAddressHLRegister(AdcAIndirectAddress):
         super(AdcAIndirectAdcressHLRegister, self)._instruction_logic(address)
 
 
-class AdcAIndirectAddressIXRegister(AdcAIndirectAddress):
+class AdcAIndirectIXR(AdcAIndirectAddress):
     """ ADC A, (IX + d) """
 
     regexp = compile_re('^1101110110001110((?:0|1){8})$')
@@ -181,7 +181,7 @@ class AdcAIndirectAddressIXRegister(AdcAIndirectAddress):
         super(AdcAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class AdcAIndirectAddressIYRegister(AdcAIndirectAddress):
+class AdcAIndirectIYR(AdcAIndirectAddress):
     """ ADC A, (IY + d) """
 
     regexp = compile_re('^1111110110001110((?:0|1){8})$')
@@ -241,7 +241,7 @@ class SubAN(Sub8Bit):
         super(SubAN, self)._instruction_logic([self._z80.a.bits, n])
 
 
-class SubAIndirectAddressHLRegister(SubAIndirectAddress):
+class SubAIndirectHLR(SubAIndirectAddress):
     """ SUB A, (HL) """
 
     regexp = compile_re('^10010110$')
@@ -251,7 +251,7 @@ class SubAIndirectAddressHLRegister(SubAIndirectAddress):
         super(SubAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class SubAIndirectAddressIXRegister(SubAIndirectAddress):
+class SubAIndirectIXR(SubAIndirectAddress):
     """ SUB A, (IX + d) """
 
     regexp = compile_re('^1101110110010110((?:0|1){8})$')
@@ -261,7 +261,7 @@ class SubAIndirectAddressIXRegister(SubAIndirectAddress):
         super(SubAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class SubAIndirectAddressIYRegister(SubAIndirectAddress):
+class SubAIndirectIYR(SubAIndirectAddress):
     """ SUB A, (IY + d) """
 
     regexp = compile_re('^1111110110010110((?:0|1){8})$')
@@ -321,7 +321,7 @@ class SbcAN(Sub8Bit):
         super(SbcAN, self)._instruction_logic([self._z80.a.bits, n])
 
 
-class SbcAIndirectAddressHLRegister(SbcAIndirectAddress):
+class SbcAIndirectHLR(SbcAIndirectAddress):
     """ SBC A, (HL) """
 
     regexp = compile_re('^10011110$')
@@ -331,7 +331,7 @@ class SbcAIndirectAddressHLRegister(SbcAIndirectAddress):
         super(SbcAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class SbcAIndirectAddressIXRegister(SbcAIndirectAddress):
+class SbcAIndirectIXR(SbcAIndirectAddress):
     """ SBC A, (IX + d) """
 
     regexp = compile_re('^1101110110011110((?:0|1){8})$')
@@ -341,7 +341,7 @@ class SbcAIndirectAddressIXRegister(SbcAIndirectAddress):
         super(SbcAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class SbcAIndirectAddressIYRegister(SbcAIndirectAddress):
+class SbcAIndirectIYR(SbcAIndirectAddress):
     """ SBC A, (IY + d) """
 
     regexp = compile_re('^1111110110011110((?:0|1){8})$')
@@ -401,7 +401,7 @@ class AndAN(And8Bit):
         super(AndAN, self)._instruction_logic([self._z80.a.bits, n])
 
 
-class AndAIndirectAddressHLRegister(AndAIndirectAddress):
+class AndAIndirectHLR(AndAIndirectAddress):
     """ AND A, (HL) """
 
     regexp = compile_re('^10100110$')
@@ -411,7 +411,7 @@ class AndAIndirectAddressHLRegister(AndAIndirectAddress):
         super(AndAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class AndAIndirectAddressIXRegister(AndAIndirectAddress):
+class AndAIndirectIXR(AndAIndirectAddress):
     """ AND A, (IX + d) """
 
     regexp = compile_re('^1101110110100110((?:0|1){8})$')
@@ -421,7 +421,7 @@ class AndAIndirectAddressIXRegister(AndAIndirectAddress):
         super(AndAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class AndAIndirectAddressIYRegister(AndAIndirectAddress):
+class AndAIndirectIYR(AndAIndirectAddress):
     """ AND A, (IY + d) """
 
     regexp = compile_re('^1111110110100110((?:0|1){8})$')
@@ -481,7 +481,7 @@ class OrAN(Or8Bit):
         super(OrAN, self)._instruction_logic([self._z80.a.bits, n])
 
 
-class OrAIndirectAddressHLRegister(OrAIndirectAddress):
+class OrAIndirectHLR(OrAIndirectAddress):
     """ OR A, (HL) """
 
     regexp = compile_re('^10110110$')
@@ -491,7 +491,7 @@ class OrAIndirectAddressHLRegister(OrAIndirectAddress):
         super(OrAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class OrAIndirectAddressIXRegister(OrAIndirectAddress):
+class OrAIndirectIXR(OrAIndirectAddress):
     """ OR A, (IX + d) """
 
     regexp = compile_re('^1101110110110110((?:0|1){8})$')
@@ -501,7 +501,7 @@ class OrAIndirectAddressIXRegister(OrAIndirectAddress):
         super(OrAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class OrAIndirectAddressIYRegister(OrAIndirectAddress):
+class OrAIndirectIYR(OrAIndirectAddress):
     """ OR A, (IY + d) """
 
     regexp = compile_re('^1111110110110110((?:0|1){8})$')
@@ -561,7 +561,7 @@ class XorAN(Xor8Bit):
         super(XorAN, self)._instruction_logic([self._z80.a.bits, n])
 
 
-class XorAIndirectAddressHLRegister(XorAIndirectAddress):
+class XorAIndirectHLR(XorAIndirectAddress):
     """ XOR A, (HL) """
 
     regexp = compile_re('^10101110$')
@@ -571,7 +571,7 @@ class XorAIndirectAddressHLRegister(XorAIndirectAddress):
         super(XorAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class XorAIndirectAddressIXRegister(XorAIndirectAddress):
+class XorAIndirectIXR(XorAIndirectAddress):
     """ XOR A, (IX + d) """
 
     regexp = compile_re('^1101110110101110((?:0|1){8})$')
@@ -581,7 +581,7 @@ class XorAIndirectAddressIXRegister(XorAIndirectAddress):
         super(XorAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class XorAIndirectAddressIYRegister(XorAIndirectAddress):
+class XorAIndirectIYR(XorAIndirectAddress):
     """ XOR A, (IY + d) """
 
     regexp = compile_re('^1111110110101110((?:0|1){8})$')
@@ -641,7 +641,7 @@ class CpAN(Cp8Bit):
         super(CpAN, self)._instruction_logic([self._z80.a.bits, n])
 
 
-class CpAIndirectAddressHLRegister(CpAIndirectAddress):
+class CpAIndirectHLR(CpAIndirectAddress):
     """ CP A, (HL) """
 
     regexp = compile_re('^10111110$')
@@ -651,7 +651,7 @@ class CpAIndirectAddressHLRegister(CpAIndirectAddress):
         super(CpAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class CpAIndirectAddressIXRegister(CpAIndirectAddress):
+class CpAIndirectIXR(CpAIndirectAddress):
     """ CP A, (IX + d) """
 
     regexp = compile_re('^1101110110111110((?:0|1){8})$')
@@ -661,7 +661,7 @@ class CpAIndirectAddressIXRegister(CpAIndirectAddress):
         super(CpAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class CpAIndirectAddressIYRegister(CpAIndirectAddress):
+class CpAIndirectIYR(CpAIndirectAddress):
     """ CP A, (IY + d) """
 
     regexp = compile_re('^1111110110111110((?:0|1){8})$')
@@ -712,7 +712,7 @@ class IncAQ(Inc8Bit):
         super(IncAQ, self)._instruction_logic([self._z80.a.bits, 1])
 
 
-class IncIndirectAddressHLRegister(IncIndirectAddress):
+class IncIndirectHLR(IncIndirectAddress):
     """ INC (HL) """
 
     regexp = compile_re('^00110100$')
@@ -722,7 +722,7 @@ class IncIndirectAddressHLRegister(IncIndirectAddress):
         super(IncAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class IncIndirectAddressIXRegister(IncIndirectAddress):
+class IncIndirectIXR(IncIndirectAddress):
     """ INC (IX + d) """
 
     regexp = compile_re('^1101110100110100((?:0|1){8})$')
@@ -732,7 +732,7 @@ class IncIndirectAddressIXRegister(IncIndirectAddress):
         super(IncAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class IncIndirectAddressIYRegister(IncIndirectAddress):
+class IncIndirectIYR(IncIndirectAddress):
     """ INC (IY + d) """
 
     regexp = compile_re('^1111110100110100((?:0|1){8})$')
@@ -783,7 +783,7 @@ class DecAQ(Dec8Bit):
         super(DecAQ, self)._instruction_logic([self._z80.a.bits, 1])
 
 
-class DecIndirectAddressHLRegister(DecIndirectAddress):
+class DecIndirectHLR(DecIndirectAddress):
     """ DEC (HL) """
 
     regexp = compile_re('^00110101$')
@@ -793,7 +793,7 @@ class DecIndirectAddressHLRegister(DecIndirectAddress):
         super(DecAIndirectAddressHLRegister, self)._instruction_logic(address)
 
 
-class DecIndirectAddressIXRegister(DecIndirectAddress):
+class DecIndirectIXR(DecIndirectAddress):
     """ DEC (IX + d) """
 
     regexp = compile_re('^1101110100110101((?:0|1){8})$')
@@ -803,7 +803,7 @@ class DecIndirectAddressIXRegister(DecIndirectAddress):
         super(DecAIndirectAddressIXRegister, self)._instruction_logic(address)
 
 
-class DecIndirectAddressIYRegister(DecIndirectAddress):
+class DecIndirectIYR(DecIndirectAddress):
     """ DEC (IY + d) """
 
     regexp = compile_re('^1111110100110101((?:0|1){8})$')

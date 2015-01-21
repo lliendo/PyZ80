@@ -53,37 +53,37 @@ class RlcR(RotateLeftWithCarry):
         super(RlcR, self)._instruction_logic(register)
 
 
-class RlcIndirectAddressHL(RlcIndirectAddress):
+class RlcIndirectHL(RlcIndirectAddress):
     """ RLC (HL) """
 
     regexp = compile_re('^1100101100000110$')
 
     def _instruction_logic(self):
         address = self._z80.hl.bits
-        super(RlcIndirectAddressHL, self)._instruction_logic(address)
+        super(RlcIndirectHL, self)._instruction_logic(address)
 
 
-class RlcIndirectAddressIX(RlcIndirectAddress):
+class RlcIndirectIX(RlcIndirectAddress):
     """ RLC (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00000110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(RlcIndirectAddressIX, self)._instruction_logic(address)
+        super(RlcIndirectIX, self)._instruction_logic(address)
 
 
-class RlcIndirectAddressIY(RlcIndirectAddress):
+class RlcIndirectIY(RlcIndirectAddress):
     """ RLC (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00000110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(RlcIndirectAddressIY, self)._instruction_logic(address)
+        super(RlcIndirectIY, self)._instruction_logic(address)
 
 
-class RlcIndirectAddressIXR(RlcIndirectAddress):
+class RlcIndirectIXR(RlcIndirectAddress):
     """ RLC (IX + d), r """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00000((?:0|1){3})$')
@@ -91,10 +91,10 @@ class RlcIndirectAddressIXR(RlcIndirectAddress):
     def _instruction_logic(self, offset, selector):
         address = self._z80.ix.bits + offset
         register = self._select_register(selector)
-        register.bits = super(RlcIndirectAddressIXR, self)._instruction_logic(address).bits
+        register.bits = super(RlcIndirectIXR, self)._instruction_logic(address).bits
 
 
-class RlcIndirectAddressIYR(RlcIndirectAddress):
+class RlcIndirectIYR(RlcIndirectAddress):
     """ RLC (IY + d), r """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00000((?:0|1){3})$')
@@ -102,7 +102,7 @@ class RlcIndirectAddressIYR(RlcIndirectAddress):
     def _instruction_logic(self, offset, selector):
         address = self._z80.iy.bits + offset
         register = self._select_register(selector)
-        register.bits = super(RlcIndirectAddressIYR, self)._instruction_logic(address).bits
+        register.bits = super(RlcIndirectIYR, self)._instruction_logic(address).bits
 
 
 """ RRC instructions. """
@@ -135,34 +135,34 @@ class RrcR(RotateRightWithCarry):
         super(RrcR, self)._instruction_logic(register)
 
 
-class RrcIndirectAddressHL(RrcIndirectAddress):
+class RrcIndirectHL(RrcIndirectAddress):
     """ RRC (HL) """
 
     regexp = compile_re('^1100101100001110$')
 
     def _instruction_logic(self):
         address = self._z80.hl.bits
-        super(RrcIndirectAddressHL, self)._instruction_logic(address)
+        super(RrcIndirectHL, self)._instruction_logic(address)
 
 
-class RrcIndirectAddressIX(RrcIndirectAddress):
+class RrcIndirectIX(RrcIndirectAddress):
     """ RRC (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00001110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(RrcIndirectAddressIX, self)._instruction_logic(address)
+        super(RrcIndirectIX, self)._instruction_logic(address)
 
 
-class RrcIndirectAddressIY(RrcIndirectAddress):
+class RrcIndirectIY(RrcIndirectAddress):
     """ RRC (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00001110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(RrcIndirectAddressIY, self)._instruction_logic(address)
+        super(RrcIndirectIY, self)._instruction_logic(address)
 
 
 """ RL instructions. """
@@ -195,34 +195,34 @@ class RlR(RotateLeftThroughCarry):
         super(RlR, self)._instruction_logic(register)
 
 
-class RlIndirectAddressHL(RlIndirectAddress):
+class RlIndirectHL(RlIndirectAddress):
     """ RL (HL) """
 
     regexp = compile_re('^1100101100010110$')
 
     def _instruction_logic(self):
         address = self._z80.hl.bits
-        super(RlIndirectAddressHL, self)._instruction_logic(address)
+        super(RlIndirectHL, self)._instruction_logic(address)
 
 
-class RlIndirectAddressIX(RlIndirectAddress):
+class RlIndirectIX(RlIndirectAddress):
     """ RL (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00010110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(RlIndirectAddressIX, self)._instruction_logic(address)
+        super(RlIndirectIX, self)._instruction_logic(address)
 
 
-class RlIndirectAddressIY(RlIndirectAddress):
+class RlIndirectIY(RlIndirectAddress):
     """ RL (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00010110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(RlIndirectAddressIY, self)._instruction_logic(address)
+        super(RlIndirectIY, self)._instruction_logic(address)
 
 
 """ RR instructions. """
@@ -255,34 +255,34 @@ class RrR(RotateRightThroughCarry):
         super(RrR, self)._instruction_logic(register)
 
 
-class RrIndirectAddressHL(RrIndirectAddress):
+class RrIndirectHL(RrIndirectAddress):
     """ RR (HL) """
 
     regexp = compile_re('^1100101100011110$')
 
     def _instruction_logic(self):
         address = self._z80.hl.bits
-        super(RrIndirectAddressHL, self)._instruction_logic(address)
+        super(RrIndirectHL, self)._instruction_logic(address)
 
 
-class RrIndirectAddressIX(RrIndirectAddress):
+class RrIndirectIX(RrIndirectAddress):
     """ RR (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00011110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(RrIndirectAddressIX, self)._instruction_logic(address)
+        super(RrIndirectIX, self)._instruction_logic(address)
 
 
-class RrIndirectAddressIY(RrIndirectAddress):
+class RrIndirectIY(RrIndirectAddress):
     """ RR (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00011110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(RrIndirectAddressIY, self)._instruction_logic(address)
+        super(RrIndirectIY, self)._instruction_logic(address)
 
 
 """ SLA instructions. """
@@ -297,33 +297,33 @@ class SlaR(ShiftLeftArithmetic):
         super(SlaR, self)._instruction_logic(register)
 
 
-class SlaIndirectAddressHL(SlaIndirectAddress):
+class SlaIndirectHL(SlaIndirectAddress):
     """ SLA (HL) """
 
     regexp = compile_re('^1100101100100110$')
 
     def _instruction_logic(self):
-        super(SlaIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+        super(SlaIndirectHL, self)._instruction_logic(self._z80.hl.bits)
 
 
-class SlaIndirectAddressIX(SlaIndirectAddress):
+class SlaIndirectIX(SlaIndirectAddress):
     """ SLA (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00100110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(SlaIndirectAddressIX, self)._instruction_logic(address)
+        super(SlaIndirectIX, self)._instruction_logic(address)
 
 
-class SlaIndirectAddressIY(SlaIndirectAddress):
+class SlaIndirectIY(SlaIndirectAddress):
     """ SLA (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00100110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(SlaIndirectAddressIY, self)._instruction_logic(address)
+        super(SlaIndirectIY, self)._instruction_logic(address)
 
 
 """ SLL instructions. """
@@ -338,33 +338,33 @@ class SllR(ShiftLeftLogical):
         super(SllR, self)._instruction_logic(register)
 
 
-class SllIndirectAddressHL(SllIndirectAddress):
+class SllIndirectHL(SllIndirectAddress):
     """ SLL (HL) """
 
     regexp = compile_re('^1100101100110110$')
 
     def _instruction_logic(self):
-        super(SllIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+        super(SllIndirectHL, self)._instruction_logic(self._z80.hl.bits)
 
 
-class SllIndirectAddressIX(SllIndirectAddress):
+class SllIndirectIX(SllIndirectAddress):
     """ SLL (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00110110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(SllIndirectAddressIX, self)._instruction_logic(address)
+        super(SllIndirectIX, self)._instruction_logic(address)
 
 
-class SllIndirectAddressIY(SllIndirectAddress):
+class SllIndirectIY(SllIndirectAddress):
     """ SLL (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00110110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(SllIndirectAddressIY, self)._instruction_logic(address)
+        super(SllIndirectIY, self)._instruction_logic(address)
 
 
 """ SRA instructions. """
@@ -379,33 +379,33 @@ class SraR(ShiftRightArithmetic):
         super(SraR, self)._instruction_logic(register)
 
 
-class SraIndirectAddressHL(SraIndirectAddress):
+class SraIndirectHL(SraIndirectAddress):
     """ SRA (HL) """
 
     regexp = compile_re('^1100101100101110$')
 
     def _instruction_logic(self):
-        super(SraIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+        super(SraIndirectHL, self)._instruction_logic(self._z80.hl.bits)
 
 
-class SraIndirectAddressIX(SraIndirectAddress):
+class SraIndirectIX(SraIndirectAddress):
     """ SRA (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00101110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(SraIndirectAddressIX, self)._instruction_logic(address)
+        super(SraIndirectIX, self)._instruction_logic(address)
 
 
-class SraIndirectAddressIY(SraIndirectAddress):
+class SraIndirectIY(SraIndirectAddress):
     """ SRA (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00101110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(SraIndirectAddressIY, self)._instruction_logic(address)
+        super(SraIndirectIY, self)._instruction_logic(address)
 
 
 """ SRL instructions. """
@@ -420,33 +420,33 @@ class SrlR(ShiftRightLogical):
         super(SrlR, self)._instruction_logic(register)
 
 
-class SrlIndirectAddressHL(SrlIndirectAddress):
+class SrlIndirectHL(SrlIndirectAddress):
     """ SRL (HL) """
 
     regexp = compile_re('^1100101100111110$')
 
     def _instruction_logic(self):
-        super(SrlIndirectAddressHL, self)._instruction_logic(self._z80.hl.bits)
+        super(SrlIndirectHL, self)._instruction_logic(self._z80.hl.bits)
 
 
-class SrlIndirectAddressIX(SrlIndirectAddress):
+class SrlIndirectIX(SrlIndirectAddress):
     """ SRL (IX + d) """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})00111110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.ix.bits + offset
-        super(SrlIndirectAddressIX, self)._instruction_logic(address)
+        super(SrlIndirectIX, self)._instruction_logic(address)
 
 
-class SrlIndirectAddressIY(SrlIndirectAddress):
+class SrlIndirectIY(SrlIndirectAddress):
     """ SRL (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})00111110$')
 
     def _instruction_logic(self, offset):
         address = self._z80.iy.bits + offset
-        super(SrlIndirectAddressIY, self)._instruction_logic(address)
+        super(SrlIndirectIY, self)._instruction_logic(address)
 
 
 """ RLD & RRD instructions. """
