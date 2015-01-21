@@ -27,7 +27,7 @@ from ..arch import NIBBLE_SIZE, BYTE_SIZE
 class Instruction(object):
     
     __metaclass__ = ABCMeta
-    instruction_regexp = None
+    regexp = None
     log_message = ''
 
     def __init__(self, z80, log_fd=None):
