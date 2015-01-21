@@ -111,7 +111,7 @@ class BitSetIndirectIX(BitSetIndirectHL):
         self._z80.ram.write(address, self.set_nth_bit(bits, n))
 
 
-class BitSetIndirectIYR(BitSetIndirectHL):
+class BitSetIndirectIY(BitSetIndirectHL):
     """ SET b, (IY + d) """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})11((?:0|1){3})110$')
@@ -187,7 +187,7 @@ class BitResetIndirectIX(BitResetIndirectHL):
         self._z80.ram.write(address, self.reset_nth_bit(bits, n))
 
 
-class BitResetIndirectIYR(BitResetIndirectHL):
+class BitResetIndirectIY(BitResetIndirectHL):
     """ RESET b, (IY + d) """
 
     regexp = compile_re('^1011110111001011((?:0|1){8})11((?:0|1){3})110$')
