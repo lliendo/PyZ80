@@ -79,37 +79,37 @@ class TestZ80ByteRegister(TestCase):
         opcodes = [i for i in product([0xED], ed_four_bytes, [self._get_ignore_byte()], [self._get_ignore_byte()])]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
-    def test_dd_two_fsm(self):
+    def test_dd_two_bytes_fsm(self):
         fsm = self._z80_fsm_builder._build_dd_fsm()
         dd_two_bytes, _, _= self._z80_fsm_builder._dd_fsm_bytes()
         opcodes = [i for i in product([0xDD], dd_two_bytes)]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
-    def test_dd_three_fsm(self):
+    def test_dd_three_bytes_fsm(self):
         fsm = self._z80_fsm_builder._build_dd_fsm()
         _, dd_three_bytes, _= self._z80_fsm_builder._dd_fsm_bytes()
         opcodes = [i for i in product([0xDD], dd_three_bytes, [self._get_ignore_byte()])]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
-    def test_dd_four_fsm(self):
+    def test_dd_four_bytes_fsm(self):
         fsm = self._z80_fsm_builder._build_dd_fsm()
         _, _, dd_four_bytes= self._z80_fsm_builder._dd_fsm_bytes()
         opcodes = [i for i in product([0xDD], dd_four_bytes, [self._get_ignore_byte()], [self._get_ignore_byte()])]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
-    def test_fd_two_fsm(self):
+    def test_fd_two_bytes_fsm(self):
         fsm = self._z80_fsm_builder._build_fd_fsm()
         fd_two_bytes, _, _= self._z80_fsm_builder._fd_fsm_bytes()
         opcodes = [i for i in product([0xFD], fd_two_bytes)]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
-    def test_fd_three_fsm(self):
+    def test_fd_three_bytes_fsm(self):
         fsm = self._z80_fsm_builder._build_fd_fsm()
         _, fd_three_bytes, _= self._z80_fsm_builder._fd_fsm_bytes()
         opcodes = [i for i in product([0xFD], fd_three_bytes, [self._get_ignore_byte()])]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
-    def test_fd_four_fsm(self):
+    def test_fd_four_bytes_fsm(self):
         fsm = self._z80_fsm_builder._build_fd_fsm()
         _, _, fd_four_bytes= self._z80_fsm_builder._fd_fsm_bytes()
         opcodes = [i for i in product([0xFD], fd_four_bytes, [self._get_ignore_byte()], [self._get_ignore_byte()])]
