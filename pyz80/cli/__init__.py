@@ -30,12 +30,12 @@ class CLI(object) :
     def __init__(self) :
         self._options = self._build_parser().parse_args()
 
-    def __getattr__(self, option_name) :
+    def __getattr__(self, option) :
         try :
-            return getattr(self._options, option_name)
+            return getattr(self._options, option)
         except AttributeError :
             raise CLIError(
-                'Error - Option : {0} does not exist.'.format(option_name)
+                'Error - Option : {0} does not exist.'.format(option)
             )
 
     def _build_parser(self) :
