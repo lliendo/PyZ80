@@ -365,8 +365,9 @@ class InstructionDecoder(object):
         try:
             Instruction = self._get_instruction(bytes)
         except IndexError:
+            invalid_instruction = ' '.join('{:02X}'.format(b) for b in bytes)
             raise InvalidInstructionError(
-                'Error - Not recognized instruction: {0}'.format(bytes)
+                'Error - Invalid instruction: {0}.'.format(invalid_instruction)
             )
 
         return Instruction(self._z80), self._get_operands(Instruction, bytes)
