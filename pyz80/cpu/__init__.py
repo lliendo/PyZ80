@@ -19,11 +19,16 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
+from simplefsm.exceptions import FSMRejectedInput
 from ..register import Z80ByteRegister, Z80WordRegister, Z80FlagsRegister
 from ..fsm import Z80FSMBuilder
 from ..ram import Ram
 from ..io import DeviceManager
 from ..instruction.decoder import InstructionDecoder
+
+
+class InvalidOpcodeError(Exception):
+    pass
 
 
 class Z80(object):
@@ -89,17 +94,19 @@ class Z80(object):
         for fsm in self._fsms:
             try :
                 return fsm.run()
-            except FSMRejectedInput:
-                pass
+            except FSMRejectedInput, e:
+                invalid_opcode = ' '.join('{:02X}'.format(s) for s in e._symbol)
 
-        raise Z80InvalidOpcode()
+        raise InvalidOpcodeError(
+            'Error - Invalid opcode : {0}.'.format(invalid_opcode) 
+        )
 
     def load_device(self, D):
         device = D(self.device_manager)
         self.device_manager.add(device)
 
     def run(self, program=[], address=0x00):
-        self.device_manager.run_devices()
+        self.device_manager.run()
         self.ram.load(program, address=address)
         self.pc.bits = address
 
