@@ -95,7 +95,7 @@ class Z80(object):
             try :
                 return fsm.run()
             except FSMRejectedInput, e:
-                invalid_opcode = ' '.join('{:02X}'.format(s) for s in e._symbol)
+                invalid_opcode = ' '.join('{:02X}'.format(s) for s in e.rejected_input)
 
         raise InvalidOpcodeError(
             'Error - Invalid opcode : {0}.'.format(invalid_opcode) 
