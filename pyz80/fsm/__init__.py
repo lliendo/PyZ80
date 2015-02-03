@@ -29,10 +29,10 @@ class Z80FSM(SimpleFSM):
         self._z80 = z80
 
     def read_symbol(self):
-        try:
-            return self._z80.ram.read(self._z80.pc.bits)
-        except IndexError:
+        if self.current_state.final_state == True:
             raise FSMEndOfInput
+
+        return self._z80.ram.read(self._z80.pc.bits)
 
     def post_transit(self):
         self._z80.inc_pc()
