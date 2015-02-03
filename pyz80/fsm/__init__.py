@@ -50,8 +50,6 @@ class Z80FSMBuilder(object):
             self._build_ed_fsm(),
             self._build_dd_fsm(),
             self._build_fd_fsm(),
-            self._build_ddcb_fsm(),
-            self._build_fdcb_fsm(),
         ]
 
         return fsms
@@ -67,7 +65,7 @@ class Z80FSMBuilder(object):
         non_prefix_three_bytes = set(
             [0x01, 0x11, 0x21, 0x22, 0x2A, 0x31, 0x32, 0x3A, 0xC2,
             0xC3, 0xC4, 0xCA, 0xCC, 0xCD, 0xD2, 0xD4, 0xDA, 0xDC, 0xE2,
-            0xE4, 0xE6, 0xEA, 0xEC, 0xF2, 0xF4, 0xFA, 0xFC]
+            0xE4, 0xEA, 0xEC, 0xF2, 0xF4, 0xFA, 0xFC]
         )
 
         non_prefix_two_bytes = set(
@@ -77,7 +75,8 @@ class Z80FSMBuilder(object):
         )
 
         non_prefix_one_byte = set(range(0x00, 0xFF + 1)) - \
-            non_prefix_three_bytes - non_prefix_two_bytes
+            non_prefix_three_bytes - non_prefix_two_bytes - \
+            set([0xCB, 0xDD, 0xED, 0xFD])
 
         return non_prefix_one_byte, non_prefix_two_bytes, non_prefix_three_bytes
 
@@ -103,12 +102,7 @@ class Z80FSMBuilder(object):
 
         return self._build_fsm(states, transitions)
 
-    def _cb_fsm_bytes(self):
-        return set(range(0x00, 0xFF + 1))
-
     def _build_cb_fsm(self):
-        cb = self._cb_fsm_bytes()
-
         i_state = State('I', start_state=True)
         f_state = State('F', final_state=True)
         b_state = State('B')
@@ -116,7 +110,7 @@ class Z80FSMBuilder(object):
         states = [i_state, f_state, b_state]
         transitions = [
             Transition(i_state, b_state, lambda b: b == 0xCB),
-            Transition(b_state, f_state, lambda b: b in cb)
+            Transition(b_state, f_state, self._ignore_byte)
         ]
 
         return self._build_fsm(states, transitions)
@@ -148,7 +142,7 @@ class Z80FSMBuilder(object):
         return self._build_fsm(states, transitions)
 
     def _dd_fsm_bytes(self):
-        dd_four_bytes = set([0x21, 0x22, 0x2A, 0x36])
+        dd_four_bytes = set([0x21, 0x22, 0x2A, 0x36, 0xCB])
         
         dd_three_bytes = set([0x26, 0x2E, 0x34, 0x35, 0x46, 0x4E, 0x56, 0x5E, 0x66, 0x6E])
         dd_three_bytes = dd_three_bytes.union(range(0x70, 0x75 + 1)).union([0x77])
@@ -184,7 +178,7 @@ class Z80FSMBuilder(object):
         return self._build_fsm(states, transitions)
 
     def _fd_fsm_bytes(self):
-        fd_four_bytes = set([0x21, 0x22, 0x2A, 0x36])
+        fd_four_bytes = set([0x21, 0x22, 0x2A, 0x36, 0xCB])
 
         fd_three_bytes = set([0x26, 0x2E, 0x34, 0x35, 0x46, 0x4E, 0x56, 0x5E, 0x66, 0x6E])
         fd_three_bytes = fd_three_bytes.union(range(0x70, 0x75 + 1)).union([0x77])
@@ -215,52 +209,6 @@ class Z80FSMBuilder(object):
             Transition(b_state, d_state, lambda b: b in fd_four_bytes),
             Transition(d_state, e_state, self._ignore_byte),
             Transition(e_state, f_state, self._ignore_byte)
-        ]
-
-        return self._build_fsm(states, transitions)
-
-    def _ddcb_fsm_bytes(self):
-        return set(range(0x00, 0xFF + 1))
-
-    def _build_ddcb_fsm(self):
-        ddcb = self._ddcb_fsm_bytes()
-
-        i_state = State('I', start_state=True)
-        f_state = State('F', final_state=True)
-        b_state = State('B')
-        c_state = State('C')
-        d_state = State('D')
-        e_state = State('E')
-
-        states = [i_state, f_state, b_state, c_state, d_state, e_state]
-        transitions = [
-            Transition(i_state, b_state, lambda b: b == 0xDD),
-            Transition(b_state, c_state, lambda b: b == 0xCB),
-            Transition(c_state, d_state, self._ignore_byte),
-            Transition(d_state, f_state, lambda b: b in ddcb)
-        ]
-
-        return self._build_fsm(states, transitions)
-
-    def _fdcb_fsm_bytes(self):
-        return set(range(0x00, 0xFF + 1))
-
-    def _build_fdcb_fsm(self):
-        fdcb = self._fdcb_fsm_bytes()
-
-        i_state = State('I', start_state=True)
-        f_state = State('F', final_state=True)
-        b_state = State('B')
-        c_state = State('C')
-        d_state = State('D')
-        e_state = State('E')
-
-        states = [i_state, f_state, b_state, c_state, d_state, e_state]
-        transitions = [
-            Transition(i_state, b_state, lambda b: b == 0xFD),
-            Transition(b_state, c_state, lambda b: b == 0xCB),
-            Transition(c_state, d_state, self._ignore_byte),
-            Transition(d_state, f_state, lambda b: b in fdcb)
         ]
 
         return self._build_fsm(states, transitions)
