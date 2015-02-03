@@ -116,9 +116,9 @@ class InstructionDecoder(object):
             AddAP,
             AddAQ,
             AddAN,
-            AddAIndirectHLR,
-            AddAIndirectIXR,
-            AddAIndirectIYR,
+            AddAIndirectHL,
+            AddAIndirectIX,
+            AddAIndirectIY,
             AdcAR, 
             AdcAP,
             AdcAQ,
@@ -365,6 +365,8 @@ class InstructionDecoder(object):
         try:
             Instruction = self._get_instruction(bytes)
         except IndexError:
-            raise InvalidInstruction('Not recognized instruction: {0}'.format(bytes))
+            raise InvalidInstructionError(
+                'Error - Not recognized instruction: {0}'.format(bytes)
+            )
 
         return Instruction(self._z80), self._get_operands(Instruction, bytes)
