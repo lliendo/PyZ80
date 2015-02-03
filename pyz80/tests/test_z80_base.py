@@ -27,6 +27,7 @@ from ..instruction.decoder import InstructionDecoder
 
 class TestZ80(TestCase):
     def setUp(self):
+        self.longmessage = True
         self._z80 = Z80()
 
     def _get_random_byte(self, upper_limit=0xFF):
