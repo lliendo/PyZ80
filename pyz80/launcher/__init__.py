@@ -37,7 +37,7 @@ class PyZ80Launcher(object):
     def _read_program(self):
         try:
             fd = open(self._cli.program_path, 'rb')
-            return [int(opcode) for opcode in fd.read()]
+            return [ord(opcode) for opcode in fd.read()]
         except IOError:
             raise PyZ80LauncherError(
                 'Error - File: {0} does not exist.'.format(self._cli.program_path)
@@ -49,7 +49,7 @@ class PyZ80Launcher(object):
 
     def _read_address(self):
         try:
-            return int(self._cli.address)
+            return int(self._cli.address, base=16)
         except ValueError:
             raise PyZ80LauncherError(
                 'Error - {0} is not a valid address.'.format(self._cli.address)
@@ -58,7 +58,7 @@ class PyZ80Launcher(object):
     def _check_device(self, D):
         if not issubclass(D, Device):
             raise PyZ80LauncherError(
-                'Error - {0} device does not inherit from \'Device\' class.'.format(invalid_devices)
+                'Error - {0} device does not inherit from \'Device\' class.'.format(D.__name__)
             )
 
         return D
