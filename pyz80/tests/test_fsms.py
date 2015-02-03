@@ -63,7 +63,7 @@ class TestZ80ByteRegister(TestCase):
 
     def test_cb_fsm(self):
         fsm = self._z80_fsm_builder._build_cb_fsm()
-        cb_fsm_bytes = self._z80_fsm_builder._cb_fsm_bytes()
+        cb_fsm_bytes = [o for o in range(0x00, 0xFF + 1)]
         opcodes = [i for i in product([0xCB], cb_fsm_bytes)]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
@@ -113,16 +113,4 @@ class TestZ80ByteRegister(TestCase):
         fsm = self._z80_fsm_builder._build_fd_fsm()
         _, _, fd_four_bytes= self._z80_fsm_builder._fd_fsm_bytes()
         opcodes = [i for i in product([0xFD], fd_four_bytes, [self._get_ignore_byte()], [self._get_ignore_byte()])]
-        self._test_fsm_accepts_opcodes(fsm, opcodes)
-
-    def test_ddcb_fsm(self):
-        fsm = self._z80_fsm_builder._build_ddcb_fsm()
-        ddcb = self._z80_fsm_builder._ddcb_fsm_bytes()
-        opcodes = [i for i in product([0xDD], [0xCB], [self._get_ignore_byte()], ddcb)]
-        self._test_fsm_accepts_opcodes(fsm, opcodes)
-
-    def test_fdcb_fsm(self):
-        fsm = self._z80_fsm_builder._build_fdcb_fsm()
-        fdcb = self._z80_fsm_builder._fdcb_fsm_bytes()
-        opcodes = [i for i in product([0xFD], [0xCB], [self._get_ignore_byte()], fdcb)]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
