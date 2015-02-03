@@ -29,7 +29,7 @@ class RotateAndShift(Instruction):
 
     def __init__(self, *args, **kwargs):
         super(RotateAndShift, self).__init__(*args, **kwargs)
-        self._carry_flag = self._z80.f.carry_flag()
+        self._carry_flag = self._z80.f.set_carry_flag()
 
     def _select_register(self, selector):
         registers = {
