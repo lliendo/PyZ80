@@ -148,10 +148,10 @@ class BitSetIndirectIYR(Bit):
         self._z80.ram.write(address, register.bits)
 
 
-""" RESET instructions. """
+""" RES instructions. """
 
 class BitReset(Bit):
-    """ RESET b, r """
+    """ RES b, r """
 
     regexp = compile_re('^1000101111((?:0|1){3})((?:0|1){3})$')
 
@@ -161,7 +161,7 @@ class BitReset(Bit):
 
 
 class BitResetIndirectHL(Bit):
-    """ RESET b, (HL) """
+    """ RES b, (HL) """
 
     regexp = compile_re('^1000101111((?:0|1){3})110$')
 
@@ -177,7 +177,7 @@ class BitResetIndirectHL(Bit):
 
 
 class BitResetIndirectIX(BitResetIndirectHL):
-    """ RESET b, (IX + d) """
+    """ RES b, (IX + d) """
 
     regexp = compile_re('^1001110111001011((?:0|1){8})11((?:0|1){3})110$')
 
@@ -188,7 +188,7 @@ class BitResetIndirectIX(BitResetIndirectHL):
 
 
 class BitResetIndirectIY(BitResetIndirectHL):
-    """ RESET b, (IY + d) """
+    """ RES b, (IY + d) """
 
     regexp = compile_re('^1011110111001011((?:0|1){8})11((?:0|1){3})110$')
 
@@ -199,7 +199,7 @@ class BitResetIndirectIY(BitResetIndirectHL):
 
 
 class BitResetIndirectIXR(Bit):
-    """ RESET b, (IX + d), r """
+    """ RES b, (IX + d), r """
 
     regexp = compile_re('^1001110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
 
@@ -212,7 +212,7 @@ class BitResetIndirectIXR(Bit):
 
 
 class BitResetIndirectIYR(Bit):
-    """ RESET b, (IY + d), r """
+    """ RES b, (IY + d), r """
 
     regexp = compile_re('^1011110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
 
