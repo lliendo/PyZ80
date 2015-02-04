@@ -153,7 +153,7 @@ class BitSetIndirectIYR(Bit):
 class BitReset(Bit):
     """ RES b, r """
 
-    regexp = compile_re('^1000101111((?:0|1){3})((?:0|1){3})$')
+    regexp = compile_re('^1100101110((?:0|1){3})((?:0|1){3})$')
 
     def _instruction_logic(self, bit, selector):
         register = self._select_register(selector)
@@ -163,7 +163,7 @@ class BitReset(Bit):
 class BitResetIndirectHL(Bit):
     """ RES b, (HL) """
 
-    regexp = compile_re('^1000101111((?:0|1){3})110$')
+    regexp = compile_re('^1100101110((?:0|1){3})110$')
 
     def reset_nth_bit(self, n):
         if self.nth_bit(bits, n) is 0x01:
@@ -179,7 +179,7 @@ class BitResetIndirectHL(Bit):
 class BitResetIndirectIX(BitResetIndirectHL):
     """ RES b, (IX + d) """
 
-    regexp = compile_re('^1001110111001011((?:0|1){8})11((?:0|1){3})110$')
+    regexp = compile_re('^1101110111001011((?:0|1){8})10((?:0|1){3})110$')
 
     def _instruction_logic(self, offset, n):
         address = self._z80.ix.bits + offset
@@ -190,35 +190,9 @@ class BitResetIndirectIX(BitResetIndirectHL):
 class BitResetIndirectIY(BitResetIndirectHL):
     """ RES b, (IY + d) """
 
-    regexp = compile_re('^1011110111001011((?:0|1){8})11((?:0|1){3})110$')
+    regexp = compile_re('^1111110111001011((?:0|1){8})10((?:0|1){3})110$')
 
     def _instruction_logic(self, offset, n):
         address = self._z80.iy.bits + offset
         bits = self._z80.ram.read(address)
         self._z80.ram.write(address, self.reset_nth_bit(bits, n))
-
-
-class BitResetIndirectIXR(Bit):
-    """ RES b, (IX + d), r """
-
-    regexp = compile_re('^1001110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
-
-    def _instruction_logic(self, n, offset, selector):
-        register = self._select_register(selector)
-        address = self._z80.ix.bits + offset
-        register.bits = self._z80.ram.read(address)
-        register.reset_nth_bit(n)
-        self._z80.ram.write(address, register.bits)
-
-
-class BitResetIndirectIYR(Bit):
-    """ RES b, (IY + d), r """
-
-    regexp = compile_re('^1011110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
-
-    def _instruction_logic(self, n, offset, selector):
-        register = self._select_register(selector)
-        address = self._z80.iy.bits + offset
-        register.bits = self._z80.ram.read(address)
-        register.reset_nth_bit(n)
-        self._z80.ram.write(address, register.bits)
