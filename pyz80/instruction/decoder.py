@@ -273,8 +273,6 @@ class InstructionDecoder(object):
             BitResetIndirectHL,
             BitResetIndirectIX,
             BitResetIndirectIY,
-            BitResetIndirectIXR,
-            BitResetIndirectIYR,
         ]
 
     def _jump_instructions(self):
