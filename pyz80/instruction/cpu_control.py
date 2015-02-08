@@ -20,7 +20,7 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
-from . import Instruction
+from . import Instruction, NotImplemented
 
 
 # TODO: Implement !
@@ -33,7 +33,7 @@ class Daa(Instruction):
         pass
 
     def _instruction_logic(self):
-        pass
+        raise NotImplemented
 
 
 class Cpl(Instruction):
@@ -44,7 +44,7 @@ class Cpl(Instruction):
     def _update_flags(self):
         self._z80.f.set_half_carry_flag()
         self._z80.f.set_add_substract_flag()
-        
+
     def _instruction_logic(self):
         self._z80.a.invert()
         self._update_flags()
@@ -74,7 +74,7 @@ class Neg(Instruction):
 
     def _carry(self, bits):
         return bits is not 0x00
-       
+
     def _instruction_logic(self):
         neg_result = 0x00 - self._z80.a.bits
         self._update_flags(neg_result)
@@ -95,7 +95,7 @@ class Ccf(Instruction):
             self._z80.f.set_carry_flag()
 
         self._z80.f.reset_add_substract_flag()
-        
+
     def _instruction_logic(self):
         self._update_flags()
 
@@ -109,7 +109,7 @@ class Scf(Instruction):
         self._z80.f.reset_half_carry_flag()
         self._z80.f.reset_add_substract_flag()
         self._z80.f.set_carry_flag()
-        
+
     def _instruction_logic(self):
         self._update_flags()
 
