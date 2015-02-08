@@ -1,8 +1,10 @@
 build
 *.egg-info*
+*.egg
 dist
 *.pyc
 *.swp
 *.old.py
+*.ropeproject
 pyz80-env
 run-tests.sh
