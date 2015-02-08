@@ -31,12 +31,13 @@ class Z80Register(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, bits=0x00, size=BYTE_SIZE):
+    def __init__(self, bits=0x00, size=BYTE_SIZE, label=''):
         self._size = size
         self._lsb_mask = 0x01
         self._msb_mask = self._most_significant_bit_mask()
         self._higher_mask, self._lower_mask = self._build_masks()
         self._bits = self._apply_bit_mask(bits)
+        self.label = label
 
     def _build_masks(self):
         lower_mask = self._lsb_mask
@@ -75,7 +76,7 @@ class Z80Register(object):
 
     def reset_nth_bit(self, nth_bit):
         if self.nth_bit(nth_bit) is 0x01:
-           self._bits ^= self._nth_bit_mask(nth_bit)
+            self._bits ^= self._nth_bit_mask(nth_bit)
 
     def _most_significant_bit_mask(self):
         return self._nth_bit_mask(self._size - 1)
@@ -238,10 +239,10 @@ class Z80WordRegister(Z80Register):
 class Z80FlagsRegister(Z80ByteRegister):
     SIGN_BIT = 7
     ZERO_BIT = 6
-    HALF_CARRY_BIT = 4 
+    HALF_CARRY_BIT = 4
     PARITY_BIT = 2
     ADD_BIT = 1
-    CARRY_BIT = 0 
+    CARRY_BIT = 0
 
     @property
     def sign_flag(self):
