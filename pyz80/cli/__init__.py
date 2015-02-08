@@ -22,23 +22,23 @@ Copyright 2014 Lucas Liendo.
 from argparse import ArgumentParser
 
 
-class CLIError(Exception) :
+class CLIError(Exception):
     pass
 
 
-class CLI(object) :
-    def __init__(self) :
+class CLI(object):
+    def __init__(self):
         self._options = self._build_parser().parse_args()
 
-    def __getattr__(self, option) :
-        try :
+    def __getattr__(self, option):
+        try:
             return getattr(self._options, option)
-        except AttributeError :
+        except AttributeError:
             raise CLIError(
-                'Error - Option : {0} does not exist.'.format(option)
+                'Error - Option: {0} does not exist.'.format(option)
             )
 
-    def _build_parser(self) :
+    def _build_parser(self):
         parser = ArgumentParser(prog='PyZ80')
         parser.add_argument(
             '-a', '--address', dest='address', action='store', required=False
@@ -48,6 +48,10 @@ class CLI(object) :
         )
         parser.add_argument(
             '-d', '--devices_dir', dest='devices_module_path', action='store',
+            default=None, required=False
+        )
+        parser.add_argument(
+            '-l', '--log_file', dest='log_file', action='store',
             default=None, required=False
         )
 
