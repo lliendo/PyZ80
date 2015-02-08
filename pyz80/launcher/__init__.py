@@ -32,12 +32,26 @@ class PyZ80LauncherError(Exception):
 class PyZ80Launcher(object):
     def __init__(self):
         self._cli = CLI()
-        self._z80_cpu = Z80()
+        self._z80_cpu = Z80(log_fd=self._open_log())
+
+    def _open_log(self):
+        log_fd = None
+
+        try:
+            log_fd = open(self._cli.log_file, 'a')
+        except IOError, e:
+            raise PyZ80LauncherError(
+                'Error - Could\'t open log file: {0}. Reason: {1}.'.format(self._cli.log_file, e.strerror)
+            )
+        except TypeError:
+            pass
+
+        return log_fd
 
     def _read_program(self):
         try:
-            fd = open(self._cli.program_path, 'rb')
-            return [ord(opcode) for opcode in fd.read()]
+            with open(self._cli.program_path, 'rb') as fd:
+                program = [ord(opcode) for opcode in fd.read()]
         except IOError:
             raise PyZ80LauncherError(
                 'Error - File: {0} does not exist.'.format(self._cli.program_path)
@@ -47,18 +61,20 @@ class PyZ80Launcher(object):
                 'Error - Invalid program opcode in: {0}.'.format(self._cli.program_path)
             )
 
+        return program
+
     def _read_address(self):
         try:
             return int(self._cli.address, base=16)
         except ValueError:
             raise PyZ80LauncherError(
-                'Error - {0} is not a valid address.'.format(self._cli.address)
+                'Error - {0} is not a valid hex address.'.format(self._cli.address)
             )
 
     def _check_device(self, D):
         if not issubclass(D, Device):
             raise PyZ80LauncherError(
-                'Error - {0} device does not inherit from \'Device\' class.'.format(D.__name__)
+                'Error - {0} device must inherit from \'Device\' class.'.format(D.__name__)
             )
 
         return D
