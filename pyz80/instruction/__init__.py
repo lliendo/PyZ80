@@ -20,42 +20,37 @@ Copyright 2014 Lucas Liendo.
 """
 
 from abc import ABCMeta, abstractmethod
-from ..register import Z80FlagsRegister
 from ..arch import NIBBLE_SIZE, BYTE_SIZE
 
 
+class NotImplemented(Exception):
+    pass
+
+
 class Instruction(object):
-    
+
     __metaclass__ = ABCMeta
     regexp = None
-    log_message = ''
 
-    def __init__(self, z80, log_fd=None):
+    def __init__(self, z80):
         self._z80 = z80
-        self._log_fd = log_fd
 
     @abstractmethod
     def _instruction_logic(self, *operands):
         pass
 
-    def _translate_logging_args(self, *args):
-        """
-        Each instruction should implement this method in order
-        to be able to logged properly.
-        """
-        return args
+    def _message_log(self, *args):
+        return None
 
     def _log(self, *args):
         try:
-            logging_args = self._translate_logging_args(*args)
-            self._log_fd.write(self.log_message.format(*logging_args) + '\n')
-        except AttributeError:
+            self._z80.log_fd.write(self._message_log(*args) + '\n')
+        except (AttributeError, TypeError):
             pass
 
     def execute(self, operands):
         self._instruction_logic(*operands)
         self._log(*operands)
-        # return self._instruction_flags
 
     def _get_address(self, high_order_byte, low_order_byte):
         """
