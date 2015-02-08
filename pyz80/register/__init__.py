@@ -200,8 +200,8 @@ class Z80ByteRegister(Z80Register):
 
 
 class Z80WordRegister(Z80Register):
-    def __init__(self, bits=0x00, size=WORD_SIZE):
-        super(Z80WordRegister, self).__init__(bits=bits, size=size)
+    def __init__(self, bits=0x00, size=WORD_SIZE, label=''):
+        super(Z80WordRegister, self).__init__(bits=bits, size=size, label=label)
         self._lower = Z80ByteRegister()
         self._higher = Z80ByteRegister()
         self.bits = bits
