@@ -32,12 +32,13 @@ class InvalidOpcodeError(Exception):
 
 
 class Z80(object):
-    def __init__(self):
+    def __init__(self, log_fd=None):
         self._cpu_halted = False
         self._build_registers()
         self._fsms = Z80FSMBuilder(self).build()
         self._instruction_decoder = InstructionDecoder(self)
         self.ram = Ram()
+        self.log_fd = log_fd
         self.device_manager = DeviceManager()
 
     def _build_16_bits_registers(self):
@@ -46,9 +47,9 @@ class Z80(object):
         bc, de, hl, sp, pc, ix, iy, bc_, de_, hl_
         """
 
-        registers = ['bc', 'de', 'hl']    
-        [setattr(self, r, Z80WordRegister()) for r in registers + ['sp', 'pc', 'ix', 'iy']]
-        [setattr(self, r + '_', Z80WordRegister()) for r in registers]
+        registers = ['bc', 'de', 'hl']
+        [setattr(self, r, Z80WordRegister(label=r.upper())) for r in registers + ['sp', 'pc', 'ix', 'iy']]
+        [setattr(self, r + '_', Z80WordRegister(label=r.upper() + '\'')) for r in registers]
 
     def _build_8_bits_registers(self):
         """
@@ -58,8 +59,8 @@ class Z80(object):
 
         self.i = Z80ByteRegister()
         self.r = Z80ByteRegister()
-        self.a_ = Z80ByteRegister()
-        self.f_ = Z80FlagsRegister()
+        self.a_ = Z80ByteRegister(label='A\'')
+        self.f_ = Z80FlagsRegister(label='F\'')
         self.a = Z80ByteRegister()
         self.f = Z80FlagsRegister()
         self.b = self.bc.higher
@@ -72,6 +73,15 @@ class Z80(object):
         self.ixl = self.ix.lower
         self.iyh = self.iy.higher
         self.iyl = self.iy.lower
+
+        registers = [
+            'i', 'r', 'a', 'b', 'c',
+            'd', 'e', 'h', 'l',
+            'ixh', 'ixl', 'iyh', 'iyl'
+        ]
+
+        for r in registers:
+            getattr(self, r).label = r.upper()
 
     def _build_cpu_control_registers(self):
         self.iff1 = 0x00
@@ -98,7 +108,7 @@ class Z80(object):
                 invalid_opcode = ' '.join('{:02X}'.format(s) for s in e.rejected_input)
 
         raise InvalidOpcodeError(
-            'Error - Invalid opcode : {0}.'.format(invalid_opcode) 
+            'Error - Invalid opcode : {0}.'.format(invalid_opcode)
         )
 
     def load_device(self, D):
