@@ -42,8 +42,11 @@ class ClassLoader(object):
 
     def _get_class_names(self, file):
         # TODO: Check that file is readable & ast does raise an exception.
-        parsed_source = ast_parse(open(file).read())
-        return [node.name for node in ast_walk(parsed_source) if isinstance(node, ClassDef)]
+        with open(file) as fd:
+            parsed_source = ast_parse(fd.read())
+            class_names = [node.name for node in ast_walk(parsed_source) if isinstance(node, ClassDef)]
+
+        return class_names
 
     def get_classes(self):
         classes = []
