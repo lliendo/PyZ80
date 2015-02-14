@@ -48,7 +48,7 @@ class Instruction(object):
         except (AttributeError, TypeError):
             pass
 
-    def execute(self, operands):
+    def execute(self, operands=[]):
         self._instruction_logic(*operands)
         self._log(*operands)
 
