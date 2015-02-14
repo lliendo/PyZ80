@@ -25,9 +25,6 @@ from .test_z80_base import TestZ80
 
 
 class TestLoadInstructions(TestZ80):
-    def __init__(self, *args, **kwargs):
-        super(TestLoadInstructions, self).__init__(*args, **kwargs)
-
     def test_load_register_register_rr(self):
         """ Test LD r, r' """
 
