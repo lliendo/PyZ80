@@ -27,7 +27,7 @@ from abc_arithmetic_8_bit import *
 
 class AddAR(Add8Bit):
     """ ADD A, r """
-    
+
     regexp = compile_re('^10000((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -107,7 +107,7 @@ class AddAIndirectIY(AddAIndirectAddress):
 
 class AdcAR(Add8Bit):
     """ ADC A, r """
-    
+
     regexp = compile_re('^10001((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -195,7 +195,7 @@ class AdcAIndirectIY(AdcAIndirectAddress):
 
 class SubAR(Sub8Bit):
     """ SUB A, r """
-    
+
     regexp = compile_re('^10010((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -275,7 +275,7 @@ class SubAIndirectIY(SubAIndirectAddress):
 
 class SbcAR(Sub8Bit):
     """ SBC A, r """
-    
+
     regexp = compile_re('^10011((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -355,7 +355,7 @@ class SbcAIndirectIY(SbcAIndirectAddress):
 
 class AndAR(And8Bit):
     """ AND A, r """
-    
+
     regexp = compile_re('^10100((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -435,7 +435,7 @@ class AndAIndirectIY(AndAIndirectAddress):
 
 class OrAR(Or8Bit):
     """ OR A, r """
-    
+
     regexp = compile_re('^10110((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -515,7 +515,7 @@ class OrAIndirectIY(OrAIndirectAddress):
 
 class XorAR(Xor8Bit):
     """ XOR A, r """
-    
+
     regexp = compile_re('^10101((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -595,7 +595,7 @@ class XorAIndirectIY(XorAIndirectAddress):
 
 class CpAR(Cp8Bit):
     """ CP A, r """
-    
+
     regexp = compile_re('^10111((?:0|1){3})$')
 
     def _instruction_selector(self, selector):
@@ -675,7 +675,7 @@ class CpAIndirectIY(CpAIndirectAddress):
 
 class IncAR(Inc8Bit):
     """ INC A, r """
-    
+
     regexp = compile_re('^00((?:0|1){3})100$')
 
     def _instruction_selector(self, selector):
@@ -746,7 +746,7 @@ class IncIndirectIY(IncIndirectAddress):
 
 class DecAR(Dec8Bit):
     """ DEC A, r """
-    
+
     regexp = compile_re('^00((?:0|1){3})101$')
 
     def _instruction_selector(self, selector):
