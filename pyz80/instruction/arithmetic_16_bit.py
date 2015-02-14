@@ -30,6 +30,10 @@ class AddHLSS(Add16Bit):
 
     regexp = compile_re('^00((?:0|1){2})1001$')
 
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'ADD HL, {0}'.format(register.label)
+
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
 
@@ -67,8 +71,8 @@ class AddIYQQ(AddHLSS):
     def _instruction_logic(self, selector):
         register = self._select_register(selector)
         super(AddIYQQ, self)._instruction_logic([self._z80.iy.bits, register.bits])
-        
- 
+
+
 class AdcHLSS(Add16Bit):
     """ ADC HL, ss """
 
