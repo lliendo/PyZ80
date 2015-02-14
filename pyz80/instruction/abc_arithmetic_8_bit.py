@@ -36,7 +36,7 @@ class Arithmetic8Bit(Instruction):
             0b011: self._z80.e,
             0b111: self._z80.a,
         }
- 
+
         return registers[selector]
 
     def _r_selector(self, selector):
@@ -44,7 +44,7 @@ class Arithmetic8Bit(Instruction):
             0b100: self._z80.h,
             0b101: self._z80.l,
         }
- 
+
         return registers[selector]
 
     def _p_selector(self, selector):
@@ -60,7 +60,7 @@ class Arithmetic8Bit(Instruction):
             0b100: self._z80.iyh,
             0b101: self._z80.iyl,
         }
- 
+
         return registers[selector]
 
     def _select_register(self, selector):
@@ -73,9 +73,9 @@ class Arithmetic8Bit(Instruction):
 
 
 class Add8Bit(Arithmetic8Bit):
-    
+
     __metaclass__ = ABCMeta
-    
+
     def _overflow(self, operands, bits=BYTE_SIZE):
         bitmask = self._bitmask(bits=bits)
         overflow_condition = False
@@ -217,7 +217,7 @@ class AndAIndirectAddress(And8Bit):
 
 
 class Or8Bit(Arithmetic8Bit):
- 
+
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, operands):
@@ -244,7 +244,7 @@ class OrAIndirectAddress(Or8Bit):
 
 
 class Xor8Bit(Arithmetic8Bit):
- 
+
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, operands):
@@ -271,7 +271,7 @@ class XorAIndirectAddress(Xor8Bit):
 
 
 class Cp8Bit(Sub8Bit):
- 
+
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, operands):
@@ -297,7 +297,7 @@ class CpAIndirectAddress(Cp8Bit):
 
 
 class Inc8Bit(Add8Bit):
- 
+
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, operands):
@@ -325,7 +325,7 @@ class IncIndirectAddress(Inc8Bit):
 
 
 class Dec8Bit(Sub8Bit):
- 
+
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, operands):
