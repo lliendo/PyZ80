@@ -8,17 +8,15 @@ proper object oriented abstractions.
 This project relies on the SimpleFSM module which is not
 available on PyPI and can be found `here <https://github.com/lliendo/SimpleFSM>`_
 
-Currently only a few tests are green and the code itself is not able
-to execute any full program. Few remaining instructions and unit tests
-are under development.
-
+At the moment only a few tests are green and the code itself is not able
+to execute any full program. A few remaining instructions and a battery of
+unit tests are under development.
 
 Installation
 ------------
 
-It is strongly recommended to use a `virtualenv <https://virtualenv.pypa.io/en/latest/>`_
-Clone and install SimpleFSM mentioned above and if you're using
-a fresh virtualenv, activate it.
+It is strongly recommended to use a fresh `virtualenv <https://virtualenv.pypa.io/en/latest/>`_.
+Clone and install SimpleFSM mentioned above and if you're using a virtualenv, activate it.
 
 .. code-block:: bash
     
