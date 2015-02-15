@@ -28,6 +28,10 @@ from pkgutil import iter_modules
 from sys import path as module_search_path
 
 
+class ClassLoaderError(Exception):
+    pass
+
+
 class ClassLoader(object):
     """
     This class offers a simple mechanism to get all user-defined
@@ -36,15 +40,18 @@ class ClassLoader(object):
     """
 
     def __init__(self, module_path):
-        # TODO: Check that directory exists and is readable.
         self._module_path = module_path
         module_search_path.append(module_path)
 
     def _get_class_names(self, file):
-        # TODO: Check that file is readable & ast does raise an exception.
-        with open(file) as fd:
-            parsed_source = ast_parse(fd.read())
-            class_names = [node.name for node in ast_walk(parsed_source) if isinstance(node, ClassDef)]
+        try:
+            with open(file) as fd:
+                parsed_source = ast_parse(fd.read())
+                class_names = [node.name for node in ast_walk(parsed_source) if isinstance(node, ClassDef)]
+        except IOError, e:
+            raise ClassLoaderError(
+                'Error - Couldn\'t open : \'{0}\'. Reason : {1}'.format(file, e.strerror)
+            )
 
         return class_names
 
