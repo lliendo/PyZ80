@@ -39,20 +39,31 @@ class Z80FSM(SimpleFSM):
 
 
 class Z80FSMBuilder(object):
+
+    """
+    This builder is responsible for creating all FSMs.
+    FSMs are splitted among instruction 'categories', each
+    FSM interpreting a fixed set of instructions.
+
+    E.g. The _build_cb_fsm() method returns an FSM that is only
+    able to recognize all CB instructions.
+
+    As all FSMs are mutually exclusive is possible to try each FSM
+    sequentially in order to detect an opcode.
+    """
+
     def __init__(self, z80):
         self._z80 = z80
         self._ignore_byte = lambda _: True
 
     def build(self):
-        fsms = [
-            self._build_non_prefix_fsm(),
+        return [
+            self._build_unprefixed_fsm(),
             self._build_cb_fsm(),
             self._build_ed_fsm(),
             self._build_dd_fsm(),
             self._build_fd_fsm(),
         ]
-
-        return fsms
 
     def _build_fsm(self, states, transitions):
         fsm = Z80FSM(self._z80)
@@ -61,28 +72,33 @@ class Z80FSMBuilder(object):
 
         return fsm
 
-    def _non_prefix_fsm_bytes(self):
-        non_prefix_three_bytes = set(
+    def _unprefixed_fsm_bytes(self):
+        unprefixed_three_bytes = set(
             [0x01, 0x11, 0x21, 0x22, 0x2A, 0x31, 0x32, 0x3A, 0xC2,
             0xC3, 0xC4, 0xCA, 0xCC, 0xCD, 0xD2, 0xD4, 0xDA, 0xDC, 0xE2,
             0xE4, 0xEA, 0xEC, 0xF2, 0xF4, 0xFA, 0xFC]
         )
 
-        non_prefix_two_bytes = set(
+        unprefixed_two_bytes = set(
             [0x06, 0x0E, 0x10, 0x16, 0x18, 0x1E, 0x20, 0x26, 0x28,
             0x2E, 0x30, 0x36, 0x38, 0x3E, 0xC6, 0xCE, 0xD3, 0xD6, 0xDB,
             0xDE, 0xE6, 0xEE, 0xF6, 0xFE]
         )
 
-        non_prefix_one_byte = set(range(0x00, 0xFF + 1)) - \
-            non_prefix_three_bytes - non_prefix_two_bytes - \
+        unprefixed_one_byte = set(range(0x00, 0xFF + 1)) - \
+            unprefixed_three_bytes - unprefixed_two_bytes - \
             set([0xCB, 0xDD, 0xED, 0xFD])
 
-        return non_prefix_one_byte, non_prefix_two_bytes, non_prefix_three_bytes
+        return unprefixed_one_byte, unprefixed_two_bytes, unprefixed_three_bytes
 
-    def _build_non_prefix_fsm(self):
-        non_prefix_one_byte, non_prefix_two_bytes, \
-            non_prefix_three_bytes = self._non_prefix_fsm_bytes()
+    """
+    The unprefixed FSM.
+    This FSM detects all opcodes that don't fall under any other category.
+    """
+
+    def _build_unprefixed_fsm(self):
+        unprefixed_one_byte, unprefixed_two_bytes, \
+            unprefixed_three_bytes = self._unprefixed_fsm_bytes()
 
         i_state = State('I', start_state=True)
         f_state = State('F', final_state=True)
@@ -92,15 +108,17 @@ class Z80FSMBuilder(object):
 
         states = [i_state, f_state, b_state, c_state, d_state]
         transitions = [
-            Transition(i_state, f_state, lambda b: b in non_prefix_one_byte),
-            Transition(i_state, b_state, lambda b: b in non_prefix_two_bytes),
+            Transition(i_state, f_state, lambda b: b in unprefixed_one_byte),
+            Transition(i_state, b_state, lambda b: b in unprefixed_two_bytes),
             Transition(b_state, f_state, self._ignore_byte),
-            Transition(i_state, c_state, lambda b: b in non_prefix_three_bytes),
+            Transition(i_state, c_state, lambda b: b in unprefixed_three_bytes),
             Transition(c_state, d_state, self._ignore_byte),
             Transition(d_state, f_state, self._ignore_byte),
         ]
 
         return self._build_fsm(states, transitions)
+
+    """ The CB instruction FSM. """
 
     def _build_cb_fsm(self):
         i_state = State('I', start_state=True)
@@ -120,6 +138,8 @@ class Z80FSMBuilder(object):
         ed_two_bytes = set(range(0x00, 0xBB)) - ed_four_bytes
 
         return ed_two_bytes, ed_four_bytes
+
+    """ The ED instruction FSM. """
 
     def _build_ed_fsm(self):
         ed_two_bytes, ed_four_bytes = self._ed_fsm_bytes()
@@ -143,16 +163,18 @@ class Z80FSMBuilder(object):
 
     def _dd_fsm_bytes(self):
         dd_four_bytes = set([0x21, 0x22, 0x2A, 0x36, 0xCB])
-        
+
         dd_three_bytes = set([0x26, 0x2E, 0x34, 0x35, 0x46, 0x4E, 0x56, 0x5E, 0x66, 0x6E])
         dd_three_bytes = dd_three_bytes.union(range(0x70, 0x75 + 1)).union([0x77])
-        dd_three_bytes.union(range(0x7E, 0xBE + 8, 8)) 
+        dd_three_bytes.union(range(0x7E, 0xBE + 8, 8))
 
-        dd_two_bytes = set(range(0x09, 0xBE + 1)) 
+        dd_two_bytes = set(range(0x09, 0xBE + 1))
         dd_two_bytes = dd_two_bytes.union([0xE1, 0xE3, 0xE5, 0xE9, 0xF9])
         dd_two_bytes -= dd_three_bytes - dd_four_bytes
 
         return dd_two_bytes, dd_three_bytes, dd_four_bytes
+
+    """ The DD/DDCB instrucion FSM. """
 
     def _build_dd_fsm(self):
         dd_two_bytes, dd_three_bytes, dd_four_bytes = self._dd_fsm_bytes()
@@ -182,13 +204,15 @@ class Z80FSMBuilder(object):
 
         fd_three_bytes = set([0x26, 0x2E, 0x34, 0x35, 0x46, 0x4E, 0x56, 0x5E, 0x66, 0x6E])
         fd_three_bytes = fd_three_bytes.union(range(0x70, 0x75 + 1)).union([0x77])
-        fd_three_bytes.union(range(0x7E, 0xBE + 8, 8)) 
+        fd_three_bytes.union(range(0x7E, 0xBE + 8, 8))
 
-        fd_two_bytes = set(range(0x09, 0xBE + 1)) 
+        fd_two_bytes = set(range(0x09, 0xBE + 1))
         fd_two_bytes = fd_two_bytes.union([0xE1, 0xE3, 0xE5, 0xE9, 0xF9])
         fd_two_bytes -= fd_three_bytes - fd_four_bytes
 
         return fd_two_bytes, fd_three_bytes, fd_four_bytes
+
+    """ The FD/FDCB instrucion FSM. """
 
     def _build_fd_fsm(self):
         fd_two_bytes, fd_three_bytes, fd_four_bytes = self._fd_fsm_bytes()

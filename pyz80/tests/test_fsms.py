@@ -44,21 +44,21 @@ class TestZ80ByteRegister(TestCase):
     def _test_fsm_accepts_opcodes(self, fsm, opcodes):
         [self._test_fsm_accepts_opcode(fsm, list(opcode)) for opcode in opcodes]
 
-    def test_non_prefix_one_byte_fsm(self):
-        fsm = self._z80_fsm_builder._build_non_prefix_fsm()
-        opcodes, _, _ = self._z80_fsm_builder._non_prefix_fsm_bytes()
+    def test_unprefixed_one_byte_fsm(self):
+        fsm = self._z80_fsm_builder._build_unprefixed_fsm()
+        opcodes, _, _ = self._z80_fsm_builder._unprefixed_fsm_bytes()
         [self._test_fsm_accepts_opcode(fsm, [opcode]) for opcode in opcodes]
 
-    def test_non_prefix_two_bytes_fsm(self):
-        fsm = self._z80_fsm_builder._build_non_prefix_fsm()
-        _, non_prefix_two_bytes, _ = self._z80_fsm_builder._non_prefix_fsm_bytes()
-        opcodes = [i for i in product(non_prefix_two_bytes, [self._get_ignore_byte()])]
+    def test_unprefixed_two_bytes_fsm(self):
+        fsm = self._z80_fsm_builder._build_unprefixed_fsm()
+        _, unprefixed_two_bytes, _ = self._z80_fsm_builder._unprefixed_fsm_bytes()
+        opcodes = [i for i in product(unprefixed_two_bytes, [self._get_ignore_byte()])]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
-    def test_non_prefix_three_bytes_fsm(self):
-        fsm = self._z80_fsm_builder._build_non_prefix_fsm()
-        _, _, non_prefix_three_bytes = self._z80_fsm_builder._non_prefix_fsm_bytes()
-        opcodes = [i for i in product(non_prefix_three_bytes, [self._get_ignore_byte()], [self._get_ignore_byte()])]
+    def test_unprefixed_three_bytes_fsm(self):
+        fsm = self._z80_fsm_builder._build_unprefixed_fsm()
+        _, _, unprefixed_three_bytes = self._z80_fsm_builder._unprefixed_fsm_bytes()
+        opcodes = [i for i in product(unprefixed_three_bytes, [self._get_ignore_byte()], [self._get_ignore_byte()])]
         self._test_fsm_accepts_opcodes(fsm, opcodes)
 
     def test_cb_fsm(self):
