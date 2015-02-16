@@ -23,12 +23,17 @@ from unittest import TestCase
 from random import randint
 from ..cpu import Z80
 from ..instruction.decoder import InstructionDecoder
-
+from ..io import DeviceManager
+from ..ram import Ram
+from ..arch import BYTE_SIZE, WORD_SIZE
 
 class TestZ80(TestCase):
     def setUp(self):
         self.longmessage = True
-        self._z80 = Z80()
+        self._z80 = Z80(
+            ram=Ram(), device_manager=DeviceManager(),
+            trace_fd=None
+        )
 
     def _get_random_byte(self, upper_limit=0xFF):
         return randint(0x00, upper_limit)
@@ -46,12 +51,12 @@ class TestZ80(TestCase):
     def _opcode_to_int(self, opcode):
         return map(lambda o: self._bin_to_int(o), opcode)
 
-    def _int_to_bin(self, n, padding=8):
+    def _int_to_bin(self, n, padding=BYTE_SIZE):
         return '{0}'.format(bin(n).lstrip('0b').zfill(padding))
 
     def _word_to_bin(self, n):
-        word = self._int_to_bin(n, padding=16)
-        return word[:8], word[8:]
+        word = self._int_to_bin(n, padding=WORD_SIZE)
+        return word[:WORD_SIZE / 2], word[WORD_SIZE / 2:]
 
     def _load_ram_with_word(self, address, value):
         n, m = self._word_to_bin(value)
