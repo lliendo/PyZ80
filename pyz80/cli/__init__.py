@@ -51,7 +51,7 @@ class CLI(object):
             default=None, required=False
         )
         parser.add_argument(
-            '-t', '--trace', dest='trace', action='store',
+            '-t', '--trace', dest='trace', action='store_true',
             default=False, required=False
         )
 
