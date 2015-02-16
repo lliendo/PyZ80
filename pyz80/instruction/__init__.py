@@ -39,12 +39,13 @@ class Instruction(object):
     def _instruction_logic(self, *operands):
         pass
 
-    def _message_log(self, *args):
+    def _message_log(self, *operands):
         return None
 
-    def _log(self, *args):
+    # TODO: Display all register status when logging.
+    def _log(self, *operands):
         try:
-            self._z80.log_fd.write(self._message_log(*args) + '\n')
+            self._z80.trace_fd.write(self._message_log(*operands) + '\n')
         except (AttributeError, TypeError):
             pass
 
