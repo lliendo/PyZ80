@@ -19,6 +19,7 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
+from sys import stdout
 from ..cli import CLI
 from ..cpu import Z80
 from ..class_loader import ClassLoader
@@ -32,21 +33,15 @@ class PyZ80LauncherError(Exception):
 class PyZ80Launcher(object):
     def __init__(self):
         self._cli = CLI()
-        self._z80_cpu = Z80(log_fd=self._open_log())
+        self._z80_cpu = Z80(trace_fd=self._open_trace())
 
-    def _open_log(self):
-        log_fd = None
+    def _open_trace(self):
+        trace_fd = None
 
-        try:
-            log_fd = open(self._cli.log_file, 'a')
-        except IOError, e:
-            raise PyZ80LauncherError(
-                'Error - Could\'t open log file: {0}. Reason: {1}.'.format(self._cli.log_file, e.strerror)
-            )
-        except TypeError:
-            pass
+        if self._cli.trace == True:
+            trace_fd = stdout
 
-        return log_fd
+        return trace_fd
 
     def _read_program(self):
         try:
