@@ -121,5 +121,5 @@ class Z80(object):
         while True:
             opcode = self._fetch_opcode()
             instruction, operands = self._instruction_decoder.decode(opcode)
-            instruction.execute(*operands)
+            instruction.execute(operands)
             # TODO: Process interruptions.
