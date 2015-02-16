@@ -22,9 +22,9 @@ Copyright 2014 Lucas Liendo.
 from simplefsm.exceptions import FSMRejectedInput
 from ..register import Z80ByteRegister, Z80WordRegister, Z80FlagsRegister
 from ..fsm import Z80FSMBuilder
-from ..ram import Ram
-from ..io import DeviceManager
 from ..instruction.decoder import InstructionDecoder
+from ..io import DeviceManager
+from ..ram import Ram
 
 
 class InvalidOpcodeError(Exception):
@@ -32,14 +32,14 @@ class InvalidOpcodeError(Exception):
 
 
 class Z80(object):
-    def __init__(self, log_fd=None):
+    def __init__(self, ram=Ram(), device_manager=DeviceManager(), trace_fd=None):
         self._cpu_halted = False
         self._build_registers()
         self._fsms = Z80FSMBuilder(self).build()
         self._instruction_decoder = InstructionDecoder(self)
-        self.ram = Ram()
-        self.log_fd = log_fd
-        self.device_manager = DeviceManager()
+        self.ram = ram
+        self.device_manager = device_manager
+        self.trace_fd = trace_fd
 
     def _build_16_bits_registers(self):
         """
@@ -84,9 +84,7 @@ class Z80(object):
             getattr(self, r).label = r.upper()
 
     def _build_cpu_control_registers(self):
-        self.iff1 = 0x00
-        self.iff2 = 0x00
-        self.im = 0x00
+        self.iff1, self.iff2, self.im = (0x00, 0x00, 0x00)
 
     def _build_registers(self):
         self._build_16_bits_registers()
@@ -102,7 +100,7 @@ class Z80(object):
 
     def _fetch_opcode(self):
         for fsm in self._fsms:
-            try :
+            try:
                 return fsm.run()
             except FSMRejectedInput, e:
                 invalid_opcode = ' '.join('{:02X}'.format(s) for s in e.rejected_input)
@@ -123,3 +121,5 @@ class Z80(object):
         while True:
             opcode = self._fetch_opcode()
             instruction, operands = self._instruction_decoder.decode(opcode)
+            instruction.execute(*operands)
+            # TODO: Process interruptions.
