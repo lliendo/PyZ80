@@ -28,7 +28,7 @@ class LoadRegister16Bit(Instruction):
 
     __metaclass__ = ABCMeta
 
-    def _register_selector(self, selector):
+    def _select_register(self, selector):
         registers = {
             0b00: self._z80.bc,
             0b01: self._z80.de,
@@ -40,10 +40,10 @@ class LoadRegister16Bit(Instruction):
 
 
 class Push(Instruction):
-    
+
     __metaclass__ = ABCMeta
 
-    def _register_selector(self, selector):
+    def _select_register(self, selector):
         registers = {
             0b00: self._z80.bc,
             0b01: self._z80.de,
@@ -64,16 +64,16 @@ class Push(Instruction):
 
 
 class Pop(Instruction):
-    
+
     __metaclass__ = ABCMeta
 
-    def _register_selector(self, selector):
+    def _select_register(self, selector):
         registers = {
             0b00: self._z80.bc,
             0b01: self._z80.de,
             0b10: self._z80.hl,
         }
-        
+
         if selector == 0b11:
             higher_register = self._z80.a
             lower_register = self._z80.f

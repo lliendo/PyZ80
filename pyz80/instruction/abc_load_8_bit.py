@@ -28,17 +28,17 @@ class LoadRegisterRegister(Instruction):
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, destination_selector, source_selector):
-        destination_register = self._register_selector(destination_selector)
-        source_register = self._register_selector(source_selector)
+        destination_register = self._select_register(destination_selector)
+        source_register = self._select_register(source_selector)
         destination_register.bits = source_register.bits
 
 
 class LoadRegisterNumber(Instruction):
-    
+
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, destination_selector, bits):
-        destination_register = self._register_selector(destination_selector)
+        destination_register = self._select_register(destination_selector)
         destination_register.bits = bits
 
 
@@ -46,7 +46,7 @@ class LoadRegisterIndirectAddress(Instruction):
 
     __metaclass__ = ABCMeta
 
-    def _register_selector(self, selector):
+    def _select_register(self, selector):
         registers = {
             0b000: self._z80.b,
             0b001: self._z80.c,
@@ -60,7 +60,7 @@ class LoadRegisterIndirectAddress(Instruction):
         return registers[selector]
 
     def _load_register_from_ram(self, selector, address):
-        destination_register = self._register_selector(selector)
+        destination_register = self._select_register(selector)
         destination_register.bits = self._z80.ram.read(address)
 
 
@@ -68,7 +68,7 @@ class LoadIndirectAddressRegister(Instruction):
 
     __metaclass__ = ABCMeta
 
-    def _register_selector(self, selector):
+    def _select_register(self, selector):
         registers = {
             0b000: self._z80.b,
             0b001: self._z80.c,
@@ -82,5 +82,5 @@ class LoadIndirectAddressRegister(Instruction):
         return registers[selector]
 
     def _load_ram_from_register(self, selector, address):
-        source_register = self._register_selector(selector)
+        source_register = self._select_register(selector)
         self._z80.ram.write(address, source_register.bits)
