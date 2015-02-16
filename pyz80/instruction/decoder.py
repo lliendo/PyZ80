@@ -37,6 +37,7 @@ class InvalidInstructionError(Exception):
     pass
 
 
+# TODO: Load all classes using the ClassLoader ?
 class InstructionDecoder(object):
     def __init__(self, z80):
         self._z80 = z80
@@ -70,7 +71,6 @@ class InstructionDecoder(object):
             LoadIA,
             LoadRA,
         ]
-
 
     def _16_bit_load_instructions(self):
         return [
@@ -119,14 +119,14 @@ class InstructionDecoder(object):
             AddAIndirectHL,
             AddAIndirectIX,
             AddAIndirectIY,
-            AdcAR, 
+            AdcAR,
             AdcAP,
             AdcAQ,
             AdcAN,
             AdcAIndirectHL,
             AdcAIndirectIX,
             AdcAIndirectIY,
-            SubAR, 
+            SubAR,
             SubAP,
             SubAQ,
             SubAN,
@@ -353,19 +353,19 @@ class InstructionDecoder(object):
         n = self._bytes_to_int(bytes)
         return bin(n).lstrip('0b').zfill(len(bytes) * BYTE_SIZE)
 
-    def _get_instruction(self, bytes):
-        return filter(lambda I: I.regexp.match(self._translate(bytes)), self._instructions).pop()
+    def _get_instruction(self, opcode):
+        return filter(lambda I: I.regexp.match(self._translate(opcode)), self._instructions).pop()
 
-    def _get_operands(self, Instruction, bytes):
-        return map(lambda s: int(s, base=2), Instruction.regexp.match(self._translate(bytes)).groups())
+    def _get_operands(self, Instruction, opcode):
+        return map(lambda s: int(s, base=2), Instruction.regexp.match(self._translate(opcode)).groups())
 
-    def decode(self, bytes):
+    def decode(self, opcode):
         try:
-            Instruction = self._get_instruction(bytes)
+            Instruction = self._get_instruction(opcode)
         except IndexError:
-            invalid_instruction = ' '.join('{:02X}'.format(b) for b in bytes)
+            invalid_instruction = ' '.join('{:02X}'.format(byte) for byte in opcode)
             raise InvalidInstructionError(
                 'Error - Invalid instruction: {0}.'.format(invalid_instruction)
             )
 
-        return Instruction(self._z80), self._get_operands(Instruction, bytes)
+        return Instruction(self._z80), self._get_operands(Instruction, opcode)
