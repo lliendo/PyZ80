@@ -20,7 +20,6 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
-from abc import ABCMeta
 from abc_arithmetic_16_bit import Add16Bit, Sub16Bit
 from . import Instruction
 
@@ -32,7 +31,7 @@ class AddHLSS(Add16Bit):
 
     def _message_log(self, selector):
         register = self._select_register(selector)
-        return 'ADD HL, {0}'.format(register.label)
+        return 'ADD HL, {:}'.format(register.label)
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -52,8 +51,12 @@ class AddIXPP(AddHLSS):
 
     regexp = compile_re('^1101111000((?:0|1){2})1001$')
 
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'ADD IX, {:}'.format(register.label)
+
     def _instruction_selector(self, selector):
-        return self.__selector(selector)
+        return self._pp_selector(selector)
 
     def _instruction_logic(self, selector):
         register = self._select_register(selector)
@@ -65,8 +68,12 @@ class AddIYQQ(AddHLSS):
 
     regexp = compile_re('^1111111000((?:0|1){2})1001$')
 
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'ADD IY, {:}'.format(register.label)
+
     def _instruction_selector(self, selector):
-        return self._pp_selector(selector)
+        return self._qq_selector(selector)
 
     def _instruction_logic(self, selector):
         register = self._select_register(selector)
@@ -77,6 +84,10 @@ class AdcHLSS(Add16Bit):
     """ ADC HL, ss """
 
     regexp = compile_re('^1110110101((?:0|1){2})1010$')
+
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'ADC HL, {:}'.format(register.label)
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -101,6 +112,10 @@ class SbcHLSS(Sub16Bit):
 
     regexp = compile_re('^1110110101((?:0|1){2})0010$')
 
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'SUB HL, {:}'.format(register.label)
+
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
 
@@ -124,6 +139,10 @@ class IncSS(Instruction):
 
     regexp = compile_re('^00((?:0|1){2})0011$')
 
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'INC {:}'.format(register.label)
+
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
 
@@ -137,6 +156,9 @@ class IncIX(Instruction):
 
     regexp = compile_re('^1101110100100011$')
 
+    def _message_log(self):
+        return 'INC IX'
+
     def _instruction_logic(self, selector):
         self._z80.ix.bits += 1
 
@@ -146,6 +168,9 @@ class IncIY(Instruction):
 
     regexp = compile_re('^1111110100100011$')
 
+    def _message_log(self):
+        return 'INC IY'
+
     def _instruction_logic(self, selector):
         self._z80.iy.bits += 1
 
@@ -154,6 +179,10 @@ class DecSS(Instruction):
     """ DEC ss """
 
     regexp = compile_re('^00((?:0|1){2})1011$')
+
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'DEC {:}'.format(register.label)
 
     def _instruction_selector(self, selector):
         return self._ss_selector(selector)
@@ -168,6 +197,9 @@ class DecIX(Instruction):
 
     regexp = compile_re('^1101110100101011$')
 
+    def _message_log(self):
+        return 'DEC IX'
+
     def _instruction_logic(self, selector):
         self._z80.ix.bits += 1
 
@@ -176,6 +208,9 @@ class DecIY(Instruction):
     """ DEC IY """
 
     regexp = compile_re('^1111110100101011$')
+
+    def _message_log(self):
+        return 'DEC IY'
 
     def _instruction_logic(self, selector):
         self._z80.iy.bits += 1
