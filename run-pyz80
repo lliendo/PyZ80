@@ -21,8 +21,8 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-
 from pyz80.launcher import PyZ80Launcher
 
 
-PyZ80Launcher().run()
+if __name__ == '__main__':
+    PyZ80Launcher().run()
