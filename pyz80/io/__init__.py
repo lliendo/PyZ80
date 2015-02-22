@@ -60,7 +60,7 @@ class DeviceManager(object):
             device = [d for d in self._devices if d.address == address].pop()
         except IndexError:
             raise DeviceManagerError(
-                'Error - No device at address : {0}'.format(address)
+                'Error - No device at address : {:02X}'.format(address)
             )
 
         return device
@@ -73,7 +73,7 @@ class DeviceManager(object):
 
         if registered_device:
             raise DeviceManagerError(
-                'Error - A device is already registered at address : {0}'.format(device.address)
+                'Error - A device is already registered at address : {:02X}'.format(device.address)
             )
 
     def read(self, address, block=False, timeout=0):
