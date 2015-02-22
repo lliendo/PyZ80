@@ -19,7 +19,7 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from . import Instruction
 
 
@@ -70,6 +70,12 @@ class LoadRegisterRegister(Instruction):
 
         return register
 
+    def _message_log(self, destination_selector, source_selector):
+        return 'LD {:} {:}'.format(
+            self._select_register(destination_selector).bits,
+            self._select_register(source_selector).bits
+        )
+
     def _instruction_logic(self, destination_selector, source_selector):
         destination_register = self._select_register(destination_selector)
         source_register = self._select_register(source_selector)
@@ -80,9 +86,15 @@ class LoadRegisterNumber(LoadRegisterRegister):
 
     __metaclass__ = ABCMeta
 
-    def _instruction_logic(self, destination_selector, bits):
+    def _message_log(self, destination_selector, n):
+        return 'LD {:} {:02X}'.format(
+            self._select_register(destination_selector),
+            n
+        )
+
+    def _instruction_logic(self, destination_selector, n):
         destination_register = self._select_register(destination_selector)
-        destination_register.bits = bits
+        destination_register.bits = n
 
 
 class LoadRegisterIndirectAddress(LoadRegisterRegister):
@@ -100,9 +112,6 @@ class LoadRegisterIndirectAddress(LoadRegisterRegister):
 class LoadIndirectAddressRegister(LoadRegisterRegister):
 
     __metaclass__ = ABCMeta
-
-    def _instruction_selector(self, selector):
-        return self._r_selector(selector)
 
     def _instruction_selector(self, selector):
         return self._r_selector(selector)
