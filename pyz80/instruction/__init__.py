@@ -70,7 +70,7 @@ class Instruction(object):
 
     def _parity(self, n):
         parity_even = True
-        ones_count = len(filter(lambda s: s is '1', bin(n).lstrip('0b')))
+        ones_count = len([1 for bit in bin(n).lstrip('0b') if bit == '1'])
 
         if ones_count & 0x01:
             parity_even = False
