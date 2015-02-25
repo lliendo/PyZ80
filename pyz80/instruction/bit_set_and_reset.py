@@ -20,27 +20,49 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
-from abc_bit_set_and_reset import Bit
+from ..instruction import Instruction
+from ..register import Z80ByteRegister
 
 
 """ BIT instructions. """
 
-class BitTest(Bit):
+class BitTest(Instruction):
     """ BIT b, r """
 
     regexp = compile_re('^1100101101((?:0|1){3})((?:0|1){3})$')
 
-    def _instruction_logic(self, n, selector):
+    def _instruction_selector(self, selector):
+        registers = {
+            0b000: self._z80.b,
+            0b001: self._z80.c,
+            0b010: self._z80.d,
+            0b011: self._z80.e,
+            0b100: self._z80.h,
+            0b101: self._z80.l,
+            0b111: self._z80.a,
+        }
+
+        return registers[selector]
+
+    def _message_log(self, nth_bit, selector):
         register = self._select_register(selector)
-        self._update_flags(n, register.bits)
+        return 'BIT {:}, {:}'.format(nth_bit, register.label)
 
-    def _update_flags(self, n, bits):
-        if (self.nth_bit(bits) is 0x01) and (n is 7):
-            self._set_sign_flag()
+    def _instruction_logic(self, nth_bit, selector):
+        register = self._select_register(selector)
+        self._update_flags(nth_bit, register.bits)
+
+    def _update_flags(self, nth_bit, register):
+        self._update_sign_flag(register.bits)
+
+        if register.nth_bit(nth_bit) == 0x00:
+            self._set_zero_flag()
+            self._set_parity_flag()
         else:
-            self._reset_sign_flag()
+            self._reset_zero_flag()
+            self._reset_parity_flag()
 
-        self._update_zero_flag(self.nth_bit(bits))
+        self._update_zero_flag(register.bits)
         self._set_half_carry_flag()
         self._reset_add_substract_flag()
 
@@ -50,9 +72,12 @@ class BitTestIndirectHL(BitTest):
 
     regexp = compile_re('^1100101101((?:0|1){3})110$')
 
-    def _instruction_logic(self, n, selector):
-        bits = self._z80.ram.read(self._z80.hl.bits)
-        self._update_flags(n, bits)
+    def _message_log(self, nth_bit):
+        return 'BIT {:}, (HL)'.format(nth_bit)
+
+    def _instruction_logic(self, nth_bit):
+        register = Z80ByteRegister(bits=self._z80.ram.read(self._z80.hl.bits))
+        self._update_flags(nth_bit, register)
 
 
 class BitTestIndirectIX(BitTest):
@@ -60,9 +85,13 @@ class BitTestIndirectIX(BitTest):
 
     regexp = compile_re('^1101110111001011((?:0|1){8})01((?:0|1){3})110$')
 
-    def _instruction_logic(self, offset, n):
-        bits = self._z80.ram.read(self._z80.ix.bits + offset)
-        self._update_flags(n, bits)
+    def _message_log(self, offset, n):
+        return 'BIT {:}, (IX + {:})'.format(n, offset)
+
+    def _instruction_logic(self, offset, nth_bit):
+        address = self._z80.ix.bits + offset
+        register = Z80ByteRegister(bits=self._z80.ram.read(address))
+        self._update_flags(nth_bit, register)
 
 
 class BitTestIndirectIY(BitTest):
@@ -70,34 +99,43 @@ class BitTestIndirectIY(BitTest):
 
     regexp = compile_re('^1111110111001011((?:0|1){8})01((?:0|1){3})110$')
 
-    def _instruction_logic(self, offset, n):
-        bits = self._z80.ram.read(self._z80.iy.bits + offset)
-        self._update_flags(n, bits)
+    def _message_log(self, offset, nth_bit):
+        return 'BIT {:}, (IY + {:})'.format(nth_bit, offset)
+
+    def _instruction_logic(self, offset, nth_bit):
+        address = self._z80.iy.bits + offset
+        register = Z80ByteRegister(bits=self._z80.ram.read(address))
+        self._update_flags(nth_bit, register)
 
 
 """ SET instructions. """
 
-class BitSet(Bit):
+class BitSet(BitTest):
     """ SET b, r """
 
     regexp = compile_re('^1100101111((?:0|1){3})((?:0|1){3})$')
 
-    def _instruction_logic(self, bit, selector):
+    def _message_log(self, nth_bit, selector):
         register = self._select_register(selector)
-        register.set_nth_bit(bit)
+        return 'SET {:}, {:}'.format(nth_bit, register.label)
+
+    def _instruction_logic(self, nth_bit, selector):
+        register = self._select_register(selector)
+        register.set_nth_bit(nth_bit)
 
 
-class BitSetIndirectHL(Bit):
+class BitSetIndirectHL(BitTest):
     """ SET b, (HL) """
 
     regexp = compile_re('^1100101111((?:0|1){3})110$')
 
-    def set_nth_bit(self, bits, n):
-        return bits | self._nth_bit_mask(n)
+    def _message_log(self, nth_bit):
+        return 'SET {:}, (HL)'.format(nth_bit)
 
-    def _instruction_logic(self, n):
-        bits = self._z80.ram.read(self._z80.hl.bits)
-        self._z80.ram.write(address, self.set_nth_bit(bits, n))
+    def _instruction_logic(self, nth_bit):
+        register = Z80ByteRegister(bits=self._z80.ram.read(self._z80.hl.bits))
+        register.set_nth_bit(nth_bit)
+        self._z80.ram.write(self._z80.hl.bits, register.bits)
 
 
 class BitSetIndirectIX(BitSetIndirectHL):
@@ -105,10 +143,14 @@ class BitSetIndirectIX(BitSetIndirectHL):
 
     regexp = compile_re('^1101110111001011((?:0|1){8})11((?:0|1){3})110$')
 
-    def _instruction_logic(self, offset, n):
+    def _message_log(self, offset, nth_bit):
+        return 'SET {:}, (IX + {:02X})'.format(nth_bit, offset)
+
+    def _instruction_logic(self, offset, nth_bit):
         address = self._z80.ix.bits + offset
-        bits = self._z80.ram.read(address)
-        self._z80.ram.write(address, self.set_nth_bit(bits, n))
+        register = Z80ByteRegister(bits=self._z80.ram.read(address))
+        register.set_nth_bit(nth_bit)
+        self._z80.ram.write(address, register.bits)
 
 
 class BitSetIndirectIY(BitSetIndirectHL):
@@ -116,64 +158,78 @@ class BitSetIndirectIY(BitSetIndirectHL):
 
     regexp = compile_re('^1111110111001011((?:0|1){8})11((?:0|1){3})110$')
 
-    def _instruction_logic(self, offset, n):
+    def _message_log(self, offset, nth_bit):
+        return 'SET {:}, (IY + {:02X})'.format(nth_bit, offset)
+
+    def _instruction_logic(self, offset, nth_bit):
         address = self._z80.iy.bits + offset
-        bits = self._z80.ram.read(address)
-        self._z80.ram.write(address, self.set_nth_bit(bits, n))
+        register = Z80ByteRegister(bits=self._z80.ram.read(address))
+        register.set_nth_bit(nth_bit)
+        self._z80.ram.write(address, register.bits)
 
 
-class BitSetIndirectIXR(Bit):
+class BitSetIndirectIXR(BitTest):
     """ SET b, (IX + d), r """
 
     regexp = compile_re('^1101110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
 
-    def _instruction_logic(self, n, offset, selector):
+    def _message_log(self, offset, nth_bit, selector):
+        register = self._select_register(selector)
+        return 'SET {:}, (IX + {:02X})'.format(nth_bit, offset, register.label)
+
+    def _instruction_logic(self, offset, nth_bit, selector):
         register = self._select_register(selector)
         address = self._z80.ix.bits + offset
         register.bits = self._z80.ram.read(address)
-        register.set_nth_bit(n)
+        register.set_nth_bit(nth_bit)
         self._z80.ram.write(address, register.bits)
 
 
-class BitSetIndirectIYR(Bit):
+class BitSetIndirectIYR(BitTest):
     """ SET b, (IY + d), r """
 
     regexp = compile_re('^1111110111001011((?:0|1){8})11((?:0|1){3})((?:0|1){3})$')
 
-    def _instruction_logic(self, n, offset, selector):
+    def _message_log(self, offset, nth_bit, selector):
+        register = self._select_register(selector)
+        return 'SET {:}, (IY + {:02X})'.format(nth_bit, offset, register.label)
+
+    def _instruction_logic(self, offset, nth_bit, selector):
         register = self._select_register(selector)
         address = self._z80.iy.bits + offset
         register.bits = self._z80.ram.read(address)
-        register.set_nth_bit(n)
+        register.set_nth_bit(nth_bit)
         self._z80.ram.write(address, register.bits)
 
 
 """ RES instructions. """
 
-class BitReset(Bit):
+class BitReset(BitTest):
     """ RES b, r """
 
     regexp = compile_re('^1100101110((?:0|1){3})((?:0|1){3})$')
 
-    def _instruction_logic(self, bit, selector):
+    def _message_log(self, nth_bit, selector):
         register = self._select_register(selector)
-        register.reset_nth_bit(bit)
+        return 'RES {:}, {:}'.format(nth_bit, register.label)
+
+    def _instruction_logic(self, nth_bit, selector):
+        register = self._select_register(selector)
+        register.reset_nth_bit(nth_bit)
 
 
-class BitResetIndirectHL(Bit):
+class BitResetIndirectHL(BitTest):
     """ RES b, (HL) """
 
     regexp = compile_re('^1100101110((?:0|1){3})110$')
 
-    def reset_nth_bit(self, n):
-        if self.nth_bit(bits, n) is 0x01:
-            return n ^ self._nth_bit_mask(n)
+    def _message_log(self, nth_bit):
+        return 'RES {:}, (HL)'.format(nth_bit)
 
-        return n
-
-    def _instruction_logic(self, n):
-        bits = self._z80.ram.read(self._z80.hl.bits)
-        self._z80.ram.write(address, self.reset_nth_bit(bits, n))
+    def _instruction_logic(self, nth_bit):
+        register = Z80ByteRegister(bits=self._z80.ram.read(self._z80.hl.bits))
+        register.reset_nth_bit(nth_bit)
+        self._z80.ram.write(self._z80.hl.bits, register.bits)
 
 
 class BitResetIndirectIX(BitResetIndirectHL):
@@ -181,10 +237,14 @@ class BitResetIndirectIX(BitResetIndirectHL):
 
     regexp = compile_re('^1101110111001011((?:0|1){8})10((?:0|1){3})110$')
 
-    def _instruction_logic(self, offset, n):
+    def _message_log(self, offset, nth_bit):
+        return 'RES {:}, (IX + {:02X})'.format(nth_bit, offset)
+
+    def _instruction_logic(self, offset, nth_bit):
         address = self._z80.ix.bits + offset
-        bits = self._z80.ram.read(address)
-        self._z80.ram.write(address, self.reset_nth_bit(bits, n))
+        register = Z80ByteRegister(bits=self._z80.ram.read(address))
+        register.reset_nth_bit(nth_bit)
+        self._z80.ram.write(address, register.bits)
 
 
 class BitResetIndirectIY(BitResetIndirectHL):
@@ -192,7 +252,11 @@ class BitResetIndirectIY(BitResetIndirectHL):
 
     regexp = compile_re('^1111110111001011((?:0|1){8})10((?:0|1){3})110$')
 
-    def _instruction_logic(self, offset, n):
+    def _message_log(self, offset, nth_bit):
+        return 'RES {:}, (IY + {:02X})'.format(nth_bit, offset)
+
+    def _instruction_logic(self, offset, nth_bit):
         address = self._z80.iy.bits + offset
-        bits = self._z80.ram.read(address)
-        self._z80.ram.write(address, self.reset_nth_bit(bits, n))
+        register = Z80ByteRegister(bits=self._z80.ram.read(address))
+        register.reset_nth_bit(nth_bit)
+        self._z80.ram.write(address, register.bits)
