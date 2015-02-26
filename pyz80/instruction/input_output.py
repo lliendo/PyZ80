@@ -21,6 +21,7 @@ Copyright 2014 Lucas Liendo.
 
 from re import compile as compile_re
 from . import Instruction
+from ..register import Z80ByteRegister
 
 
 """ Input instructions. """
@@ -29,6 +30,9 @@ class InAIndirectN(Instruction):
     """ IN A, (n) """
 
     regexp = compile_re('^11011011((?:0|1){8})$')
+
+    def _message_log(self, address):
+        return 'IN A, ({:02X})'.format(address)
 
     def _instruction_logic(self, address):
         self._z80.a.bits = self._z80.device_manager.read(address)
@@ -52,6 +56,10 @@ class InRIndirectC(Instruction):
 
         return registers[selector]
 
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'IN {:}, (C)'.format(register.bits)
+
     def _update_flags(self, input_byte):
         self._update_sign_flag(input_byte)
         self._update_zero_flag(input_byte)
@@ -69,6 +77,9 @@ class InFIndirectN(Instruction):
 
     regexp = compile_re('^1110110101110000$')
 
+    def _message_log(self, address):
+        return 'IN F, ({:02X})'.format(address)
+
     def _instruction_logic(self, address):
         self._z80.f.bits = self._z80.device_manager.read(address)
 
@@ -78,11 +89,14 @@ class Ini(Instruction):
 
     regexp = compile_re('^1110110110100010$')
 
+    def _message_log(self):
+        return 'INI'
+
     def _parity(self, input_byte):
         return ((input_byte + ((self._z80.c.bits + 1) & 0xFF)) & 0x07) ^ self._z80.b.bits
 
     def _add_substract(self, input_byte):
-        return Z80register(bits=input_byte).msb
+        return Z80ByteRegister(bits=input_byte).msb
 
     def _carry(self, input_byte):
         return (input_byte + ((self._z80.c.bits + 1) & 0xFF)) > 0xFF
@@ -97,7 +111,7 @@ class Ini(Instruction):
         self._update_parity_flag(input_byte)
         self._update_carry_flag(input_byte)
         self._update_add_substract(input_byte)
-        
+
     def _read(self):
         input_byte = self._z80.device_manager.read(self._z80.c.bits)
         self._z80.ram.write(self._z80.hl.bits, input_byte)
@@ -115,6 +129,9 @@ class Inir(Ini):
     """ INIR """
 
     regexp = compile_re('^1110110110110010$')
+
+    def _message_log(self):
+        return 'INIR'
 
     def _update_flags(self, input_byte):
         self._z80.f.reset_sign_flag()
@@ -136,11 +153,14 @@ class Ind(Instruction):
 
     regexp = compile_re('^1110110110101010$')
 
+    def _message_log(self):
+        return 'IND'
+
     def _parity(self, input_byte):
         return ((input_byte + ((self._z80.c.bits - 1) & 0xFF)) & 0x07) ^ self._z80.b.bits
 
     def _add_substract(self, input_byte):
-        return Z80register(bits=input_byte).msb
+        return Z80ByteRegister(bits=input_byte).msb
 
     def _carry(self, input_byte):
         return (input_byte + ((self._z80.c.bits - 1) & 0xFF)) > 0xFF
@@ -172,6 +192,9 @@ class Indr(Ind):
 
     regexp = compile_re('^1110110110111010$')
 
+    def _message_log(self):
+        return 'INDR'
+
     def _update_flags(self, input_byte):
         self._z80.f.reset_sign_flag()
         self._z80.f.set_zero_flag()
@@ -183,7 +206,7 @@ class Indr(Ind):
     def _instruction_logic(self):
         while self._z80.b.bits > 0x00:
             input_byte = self._read()
-        
+
         self._update_flags(input_byte)
 
 
@@ -194,6 +217,9 @@ class OutAIndirectN(Instruction):
 
     regexp = compile_re('^11010011((?:0|1){8})$')
 
+    def _message_log(self, address):
+        return 'OUT ({:02X}), A'.format(address)
+
     def _instruction_logic(self, address):
         self._z80.device_manager.write(address, self._z80.a.bits)
 
@@ -202,6 +228,10 @@ class OutRIndirectC(InRIndirectC):
     """ OUT (C), r """
 
     regexp = compile_re('^1110110101((?:0|1){3})001$')
+
+    def _message_log(self, selector):
+        register = self._select_register(selector)
+        return 'OUT (C), {:}'.format(register.label)
 
     def _instruction_logic(self, selector):
         register = self._select_register(selector)
@@ -213,6 +243,9 @@ class OutFIndirectN(Instruction):
 
     regexp = compile_re('^1110110101110001$')
 
+    def _message_log(self):
+        return 'OUT (C), 0'
+
     def _instruction_logic(self, address):
         self._z80.device_manager.write(self._z80.c.bits, 0x00)
 
@@ -222,11 +255,14 @@ class Outi(Instruction):
 
     regexp = compile_re('^1110110110100011$')
 
+    def _message_log(self):
+        return 'OUTI'
+
     def _parity(self, output_byte):
         return ((output_byte + self._z80.l.bits) & 0x07) ^ self._z80.b.bits
 
     def _add_substract(self, output_byte):
-        return Z80Register(bits=output_byte).msb
+        return Z80ByteRegister(bits=output_byte).msb
 
     def _carry(self, output_byte):
         return (output_byte + self._z80.l.bits) > 0xFF
@@ -260,6 +296,9 @@ class Otir(Outi):
 
     regexp = compile_re('^1110110110110011$')
 
+    def _message_log(self):
+        return 'OTIR'
+
     def _update_flags(self, output_byte):
         self._z80.f.reset_sign_flag()
         self._z80.f.set_zero_flag()
@@ -280,6 +319,9 @@ class Outd(Outi):
 
     regexp = compile_re('^1110110110101011$')
 
+    def _message_log(self):
+        return 'OUTD'
+
     def _write(self):
         output_byte = self._z80.ram.read(self._z80.hl.bits)
         self._z80.device_manager.write(self._z80.c.bits, output_byte)
@@ -298,8 +340,11 @@ class Otdr(Outd):
 
     regexp = compile_re('^1110110110111011$')
 
+    def _message_log(self):
+        return 'OTDR'
+
     def _instruction_logic(self):
         while self._z80.b.bits > 0x00:
             output_byte = self._write()
-        
+
         self._update_flags(output_byte)
