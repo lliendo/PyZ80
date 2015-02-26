@@ -29,6 +29,9 @@ class Daa(Instruction):
 
     regexp = compile_re('^00100111$')
 
+    def _message_log(self):
+        return 'DAA'
+
     def _update_flags(self):
         pass
 
@@ -40,6 +43,9 @@ class Cpl(Instruction):
     """ CPL """
 
     regexp = compile_re('^00101111$')
+
+    def _message_log(self):
+        return 'CPL'
 
     def _update_flags(self):
         self._z80.f.set_half_carry_flag()
@@ -54,6 +60,9 @@ class Neg(Instruction):
     """ NEG """
 
     regexp = compile_re('^1110110101000100$')
+
+    def _message_log(self):
+        return 'NEG'
 
     def _update_flags(self, instruction_result):
         self._update_sign_flag(instruction_result)
@@ -86,6 +95,9 @@ class Ccf(Instruction):
 
     regexp = compile_re('^00111111$')
 
+    def _message_log(self):
+        return 'CCF'
+
     def _update_flags(self):
         if self._z80.f.carry_flag is not 0x00:
             self._z80.f.set_half_carry_flag()
@@ -105,6 +117,9 @@ class Scf(Instruction):
 
     regexp = compile_re('^00110111$')
 
+    def _message_log(self):
+        return 'SCF'
+
     def _update_flags(self):
         self._z80.f.reset_half_carry_flag()
         self._z80.f.reset_add_substract_flag()
@@ -119,6 +134,9 @@ class Nop(Instruction):
 
     regexp = compile_re('^00000000$')
 
+    def _message_log(self):
+        return 'NOP'
+
     def _instruction_logic(self):
         pass
 
@@ -127,6 +145,9 @@ class Halt(Instruction):
     """ HALT """
 
     regexp = compile_re('^01110110$')
+
+    def _message_log(self):
+        return 'HALT'
 
     def _instruction_logic(self):
         self._z80.halt()
@@ -137,6 +158,9 @@ class Di(Instruction):
 
     regexp = compile_re('^11110011$')
 
+    def _message_log(self):
+        return 'DI'
+
     def _instruction_logic(self):
         self._z80.iff1, self._z80.iff2 = 0x00, 0x00
 
@@ -145,6 +169,9 @@ class Ei(Instruction):
     """ EI """
 
     regexp = compile_re('^11111011$')
+
+    def _message_log(self):
+        return 'EI'
 
     def _instruction_logic(self):
         self._z80.iff1, self._z80.iff2 = 0x01, 0x01
@@ -155,6 +182,9 @@ class Im0(Instruction):
 
     regexp = compile_re('^1110110101000110$')
 
+    def _message_log(self):
+        return 'IM 0'
+
     def _instruction_logic(self):
         self._z80.im = 0x00
 
@@ -164,6 +194,9 @@ class Im1(Instruction):
 
     regexp = compile_re('^1110110101010110$')
 
+    def _message_log(self):
+        return 'IM 1'
+
     def _instruction_logic(self):
         self._z80.im = 0x01
 
@@ -172,6 +205,9 @@ class Im2(Instruction):
     """ IM 2 """
 
     regexp = compile_re('^1110110101011110$')
+
+    def _message_log(self):
+        return 'IM 2'
 
     def _instruction_logic(self):
         self._z80.im = 0x02
