@@ -29,6 +29,10 @@ class CallNN(Instruction):
 
     regexp = compile_re('^11001101((?:0|1){8})((?:0|1){8})$')
 
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'CALL {:02X}'.format(address)
+
     def _instruction_logic(self, high_order_byte, low_order_byte):
         self._z80.ram.write(self._z80.sp.bits - 1, self._z80.pc.higher.bits)
         self._z80.ram.write(self._z80.sp.bits - 2, self._z80.pc.lower.bits)
@@ -41,6 +45,10 @@ class CallCCNN(CallNN, Jp):
 
     regexp = compile_re('^11((?:0|1){3})100((?:0|1){8})((?:0|1){8})$')
 
+    def _message_log(self, selector, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'CALL {:02X} {:02X}'.format(selector, address)
+
     def _instruction_logic(self, selector, high_order_byte, low_order_byte):
         if self._condition_applies(selector):
             super(self, CallCCNN)._instruction_logic(high_order_byte, low_order_byte)
@@ -50,6 +58,9 @@ class Ret(Instruction):
     """ RET """
 
     regexp = compile_re('^11001001$')
+
+    def _message_log(self):
+        return 'RET'
 
     def _instruction_logic(self):
         self._z80.pc.lower.bits = self._z80.ram.read(self._z80.sp.bits)
@@ -63,6 +74,9 @@ class RetCC(Ret, Jp):
     regexp = compile_re('^11((?:0|1){3})000$')
 
     def _instruction_logic(self, selector):
+        return 'RET {:02X}'.format(selector)
+
+    def _instruction_logic(self, selector):
         if self._condition_applies(selector):
             super(self, RetCC)._instruction_logic()
 
@@ -71,6 +85,9 @@ class Reti(Ret):
     """ RETI """
 
     regexp = compile_re('^1110110101001101$')
+
+    def _message_log(self):
+        return 'RETI'
 
     def _instruction_logic(self):
         super(self, Reti)._instruction_logic()
@@ -82,11 +99,17 @@ class Retn(Reti):
 
     regexp = compile_re('^1110110101000101$')
 
+    def _message_log(self):
+        return 'RETN'
+
 
 class Rst(Instruction):
     """ RST p """
 
     regexp = compile_re('^11((?:0|1){3})111$')
+
+    def _message_log(self, selector):
+        return 'RST {:02X}'.format(self._address_selector(selector))
 
     def _address_selector(self, selector):
         addresses = {
