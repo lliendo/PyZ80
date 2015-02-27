@@ -28,14 +28,15 @@ class LoadDDNN(LoadRegister16Bit):
 
     regexp = compile_re('^00((?:0|1){2})0001((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, selector, *unused):
+    def _message_log(self, selector, high_order_byte, low_order_byte):
         register = self._select_register(selector)
-        return 'LD {:}, {:02X}'.format(register.label, register.bits)
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'LD {:}, {:02X}'.format(register.label, address)
 
-    def _instruction_logic(self, selector, m, n):
+    def _instruction_logic(self, selector, high_order_byte, low_order_byte):
         register = self._select_register(selector)
-        register.higher.bits = m
-        register.lower.bits = n
+        register.higher.bits = high_order_byte
+        register.lower.bits = low_order_byte
 
 
 class LoadIXNN(Instruction):
@@ -43,13 +44,13 @@ class LoadIXNN(Instruction):
 
     regexp = compile_re('^1101110100100001((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, *unused):
-        register = self._select_register(selector)
-        return 'LD IX, {:02X}'.format(self._z80.ix.bits)
+    def _message_log(self, high_order_byte, low_order_byte):
+        n = self._get_address(high_order_byte, low_order_byte)
+        return 'LD IX, {:02X}'.format(n)
 
-    def _instruction_logic(self, m, n):
-        self._z80.ix.higher.bits = m
-        self._z80.ix.lower.bits = n
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        self._z80.ix.higher.bits = high_order_byte
+        self._z80.ix.lower.bits = low_order_byte
 
 
 class LoadIYNN(Instruction):
@@ -57,12 +58,13 @@ class LoadIYNN(Instruction):
 
     regexp = compile_re('^1111110100100001((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, *unused):
-        return 'LD IY, {:02X}'.format(self._z80.iy.bits)
+    def _message_log(self, high_order_byte, low_order_byte):
+        n = self._get_address(high_order_byte, low_order_byte)
+        return 'LD IY, {:02X}'.format(n)
 
-    def _instruction_logic(self, m, n):
-        self._z80.iy.higher.bits = m
-        self._z80.iy.lower.bits = n
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        self._z80.iy.higher.bits = high_order_byte
+        self._z80.iy.lower.bits = low_order_byte
 
 
 class LoadHLIndirectNN(Instruction):
@@ -70,11 +72,12 @@ class LoadHLIndirectNN(Instruction):
 
     regexp = compile_re('^00101010((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, m, n):
-        return 'LD HL, ({:02X})'.format(self._get_address(m, n))
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'LD HL, ({:02X})'.format(address)
 
-    def _instruction_logic(self, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         self._z80.hl.higher.bits, self._z80.hl.lower.bits = self._z80.ram.read_word(address)
 
 
@@ -83,12 +86,13 @@ class LoadDDIndirectNN(LoadRegister16Bit):
 
     regexp = compile_re('^1110110101((?:0|1){2})1011((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, selector, m, n):
+    def _message_log(self, selector, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         register = self._select_register(selector)
-        return 'LD {:}, ({:02X})'.format(register.label, self._get_address(m, n))
+        return 'LD {:}, ({:02X})'.format(register.label, address)
 
-    def _instruction_logic(self, selector, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, selector, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         register = self._select_register(selector)
         register.higher.bits, register.lower.bits = self._z80.ram.read_word(address)
 
@@ -98,11 +102,12 @@ class LoadIXIndirectNN(Instruction):
 
     regexp = compile_re('^1101110100101010((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, m, n):
-        return 'LD IX, ({:02X})'.format(self._get_address(m, n))
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'LD IX, ({:02X})'.format(address)
 
-    def _instruction_logic(self, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         self._z80.ix.higher.bits, self._z80.ix.lower.bits = self._z80.ram.read_word(address)
 
 
@@ -111,11 +116,12 @@ class LoadIYIndirectNN(Instruction):
 
     regexp = compile_re('^1111110100101010((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, m, n):
-        return 'LD IY, ({:02X})'.format(self._get_address(m, n))
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'LD IY, ({:02X})'.format(address)
 
-    def _instruction_logic(self, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         self._z80.iy.higher.bits, self._z80.iy.lower.bits = self._z80.ram.read_word(address)
 
 
@@ -124,11 +130,12 @@ class LoadIndirectNNHL(Instruction):
 
     regexp = compile_re('^00100010((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, m, n):
-        return 'LD ({:02X}), HL'.format(self._get_address(m, n))
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'LD ({:02X}), HL'.format(address)
 
-    def _instruction_logic(self, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         self._z80.ram.write_word(address, self._z80.h.bits, self._z80.l.bits)
 
 
@@ -137,12 +144,13 @@ class LoadIndirectNNDD(LoadRegister16Bit):
 
     regexp = compile_re('^1110110101((?:0|1){2})0011((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, selector, m, n):
+    def _message_log(self, selector, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         register = self._select_register(selector)
-        return 'LD ({:02X}), {:}'.format(self._get_address(m, n), register.label)
+        return 'LD ({:02X}), {:}'.format(address, register.label)
 
-    def _instruction_logic(self, selector, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, selector, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         register = self._select_register(selector)
         self._z80.ram.write_word(address, register.higher.bits, register.lower.bits)
 
@@ -152,11 +160,11 @@ class LoadIndirectNNIX(Instruction):
 
     regexp = compile_re('^1101110100100010((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, m, n):
-        return 'LD ({:02X}), IX'.format(self._get_address(m, n))
+    def _message_log(self, high_order_byte, low_order_byte):
+        return 'LD ({:02X}), IX'.format(self._get_address(high_order_byte, low_order_byte))
 
-    def _instruction_logic(self, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         self._z80.ram.write_word(address, self._z80.ix.higher.bits, self._z80.ix.lower.bits)
 
 
@@ -165,11 +173,12 @@ class LoadIndirectNNIY(Instruction):
 
     regexp = compile_re('^1111110100100010((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, m, n):
-        return 'LD ({:02X}), IY'.format(self._get_address(m, n))
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'LD ({:02X}), IY'.format(address)
 
-    def _instruction_logic(self, m, n):
-        address = self._get_address(m, n)
+    def _instruction_logic(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
         self._z80.ram.write_word(address, self._z80.iy.higher.bits, self._z80.iy.lower.bits)
 
 
