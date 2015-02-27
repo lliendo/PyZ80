@@ -29,6 +29,10 @@ class JpNN(Instruction):
 
     regexp = compile_re('^11000011((?:0|1){8})((?:0|1){8})$')
 
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'JP {:02X}'.format(address)
+
     def _instruction_logic(self, high_order_byte, low_order_byte):
         self._z80.pc.bits = self._get_address(high_order_byte, low_order_byte)
 
@@ -37,6 +41,10 @@ class JpCCNN(Jp):
     """ JP cc, nn """
 
     regexp = compile_re('^11((?:0|1){3})010((?:0|1){8})((?:0|1){8})$')
+
+    def _message_log(self, high_order_byte, low_order_byte):
+        address = self._get_address(high_order_byte, low_order_byte)
+        return 'JP {:02X}, {:02X}'.format(address)
 
     def _instruction_logic(self, selector, high_order_byte, low_order_byte):
         if self._condition_applies(selector):
@@ -48,6 +56,9 @@ class JrE(Jp):
 
     regexp = compile_re('^00011000((?:0|1){8})$')
 
+    def _message_log(self, offset):
+        return 'JR {:02X}'.format(offset)
+
     def _instruction_logic(self, offset):
         self._z80.pc.bits += _get_signed_offset(offset)
 
@@ -56,6 +67,9 @@ class JrSSE(Jp):
     """ JR ss, e """
 
     regexp = compile_re('^001((?:0|1){2})000((?:0|1){8})$')
+
+    def _message_log(self, selector, offset):
+        return 'JR {:02X}, {:02X}'.format(selector, offset)
 
     def _instruction_logic(self, selector, offset):
         if self._condition_applies(selector):
@@ -67,6 +81,9 @@ class JpIndirectHL(JpIndirectAddress):
 
     regexp = compile_re('^11101001$')
 
+    def _message_log(self):
+        return 'JP (HL)'
+
     def _instruction_logic(self):
         super(self, JpIndirectHL)._instruction_logic(self._z80.hl.bits)
 
@@ -75,6 +92,9 @@ class JpIndirectIX(JpIndirectAddress):
     """ JP (IX) """
 
     regexp = compile_re('^1101110111101001$')
+
+    def _message_log(self):
+        return 'JP (IX)'
 
     def _instruction_logic(self):
         super(self, JpIndirectIX)._instruction_logic(self._z80.ix.bits)
@@ -85,6 +105,9 @@ class JpIndirectIY(JpIndirectAddress):
 
     regexp = compile_re('^1111110111101001$')
 
+    def _message_log(self):
+        return 'JP (IY)'
+
     def _instruction_logic(self):
         super(self, JpIndirectIY)._instruction_logic(self._z80.iy.bits)
 
@@ -93,6 +116,9 @@ class DjnzE(Jp):
     """ DJNZ e """
 
     regexp = compile_re('^00010000((?:0|1){8})$')
+
+    def _message_log(self, offset):
+        return 'DJNZ {:02X}'.format(offset)
 
     def _instruction_logic(self, offset):
         self._z80.b -= 1
