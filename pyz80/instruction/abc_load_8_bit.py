@@ -29,12 +29,12 @@ class LoadRegisterRegister(Instruction):
 
     def _default_selector(self, selector):
         registers = {
-             0b000: self._z80.b,
-             0b001: self._z80.c,
-             0b010: self._z80.d,
-             0b011: self._z80.e,
-             0b111: self._z80.a,
-         }
+            0b000: self._z80.b,
+            0b001: self._z80.c,
+            0b010: self._z80.d,
+            0b011: self._z80.e,
+            0b111: self._z80.a,
+        }
 
         return registers[selector]
 
@@ -72,8 +72,8 @@ class LoadRegisterRegister(Instruction):
 
     def _message_log(self, destination_selector, source_selector):
         return 'LD {:} {:}'.format(
-            self._select_register(destination_selector).bits,
-            self._select_register(source_selector).bits
+            self._select_register(destination_selector).label,
+            self._select_register(source_selector).label
         )
 
     def _instruction_logic(self, destination_selector, source_selector):
@@ -88,7 +88,7 @@ class LoadRegisterNumber(LoadRegisterRegister):
 
     def _message_log(self, destination_selector, n):
         return 'LD {:} {:02X}'.format(
-            self._select_register(destination_selector),
+            self._select_register(destination_selector).label,
             n
         )
 
