@@ -32,6 +32,7 @@ class ClassLoaderError(Exception):
     pass
 
 
+# TODO: Skip all inner defined classes.
 class ClassLoader(object):
     """
     This class offers a simple mechanism to get all user-defined
