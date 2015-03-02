@@ -20,7 +20,8 @@ Copyright 2014 Lucas Liendo.
 """
 
 from re import compile as compile_re
-from abc_exchange_and_transfer import *
+from abc_arithmetic_8_bit import Cp8Bit
+from abc_exchange_and_transfer import Exchange
 from . import Instruction
 
 
@@ -112,11 +113,11 @@ class Ldi(Instruction):
 
     def _update_flags(self):
         self._z80.f.reset_half_carry_flag()
-        self._update_parity_flag(self._z80.bc)
+        self._update_parity_flag(self._z80.bc.bits - 1)
         self._z80.f.reset_add_substract_flag()
 
     def _move_byte(self):
-        self._z80.ram.write(self._z80.de, self._z80.ram.read(self._z80.hl))
+        self._z80.ram.write(self._z80.de.bits, self._z80.ram.read(self._z80.hl.bits))
         self._z80.de.bits += 1
         self._z80.hl.bits += 1
         self._z80.bc.bits -= 1
@@ -155,7 +156,7 @@ class Ldd(Ldi):
         return 'LDD'
 
     def _move_byte(self):
-        self._z80.ram.write(self._z80.de, self._z80.ram.read(self._z80.hl))
+        self._z80.ram.write(self._z80.de.bits, self._z80.ram.read(self._z80.hl.bits))
         self._z80.de.bits -= 1
         self._z80.hl.bits -= 1
         self._z80.bc.bits -= 1
@@ -183,3 +184,77 @@ class Lddr(Ldd):
             self._move_byte()
 
         self._update_flags()
+
+
+class Cpi(Cp8Bit):
+    """ CPI """
+
+    regexp = compile_re('^1110110110100001$')
+
+    def _message_log(self):
+        return 'CPI'
+
+    def _update_flags(self, operands, instruction_result):
+        self._update_sign_flag(instruction_result)
+        self._update_zero_flag(instruction_result)
+        self._update_half_carry_flag(instruction_result)
+        self._update_overflow_flag(operands)
+        self._z80.f.set_add_substract_flag()
+
+    def _compare(self, operands):
+        cp_result = reduce(lambda n, m: n - m, operands)
+        self._z80.hl.bits += 1
+        self._z80.bc.bits -= 1
+        return cp_result
+
+    def _instruction_logic(self):
+        operands = [self._z80.a.bits, self._z80.ram.read(self._z80.hl.bits)]
+        instruction_result = self._compare(operands)
+        self._update_flags(operands, instruction_result)
+
+
+class Cpir(Cpi):
+    """ CPIR """
+
+    regexp = compile_re('^1110110110110001$')
+
+    def _message_log(self):
+        return 'CPIR'
+
+    def _instruction_logic(self):
+        while self._z80.bc.bits > 0x00 and (self._z80.a.bits != self._z80.ram.read(self._z80.hl.bits)):
+            operands = [self._z80.a.bits, self._z80.ram.read(self._z80.hl.bits)]
+            instruction_result = self._compare(operands)
+
+        self._update_flags(operands, instruction_result)
+
+
+class Cpd(Cpi):
+    """ CPD """
+
+    regexp = compile_re('^1110110110101001$')
+
+    def _message_log(self):
+        return 'CPD'
+
+    def _compare(self, operands):
+        cp_result = reduce(lambda n, m: n - m, operands)
+        self._z80.hl.bits -= 1
+        self._z80.bc.bits -= 1
+        return cp_result
+
+
+class Cpdr(Cpd):
+    """ CPDR """
+
+    regexp = compile_re('^1110110110111001$')
+
+    def _message_log(self):
+        return 'CPDR'
+
+    def _instruction_logic(self):
+        while self._z80.bc.bits > 0x00 and (self._z80.a.bits != self._z80.ram.read(self._z80.hl.bits)):
+            operands = [self._z80.a.bits, self._z80.ram.read(self._z80.hl.bits)]
+            instruction_result = self._compare(operands)
+
+        self._update_flags(operands, instruction_result)
