@@ -27,13 +27,13 @@ class Exchange(Instruction):
 
     __metaclass__ = ABCMeta
 
-    def _swap_registers(self, register, other_register):
+    def _swap_registers(self, register, another_register):
         bits = register.bits
-        register.bits = other_register.bits
-        other_register.bits = bits
+        register.bits = another_register.bits
+        another_register.bits = bits
 
     def _swap_register_with_ram_word(self, address, register):
         high_order_byte, low_order_byte = self._z80.ram.read_word(address)
-        self._z80.ram.write_word(address, register.higher, register.lower)
-        register.higher = high_order_byte
-        register.lower = low_order_byte
+        self._z80.ram.write_word(address, register.higher.bits, register.lower.bits)
+        register.higher.bits = high_order_byte
+        register.lower.bits = low_order_byte
