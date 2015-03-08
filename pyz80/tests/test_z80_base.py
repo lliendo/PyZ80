@@ -58,7 +58,7 @@ class TestZ80(TestCase):
         word = self._int_to_bin(n, padding=WORD_SIZE)
         return word[:WORD_SIZE / 2], word[WORD_SIZE / 2:]
 
-    def _load_ram_with_word(self, address, value):
+    def _write_ram_word(self, address, value):
         n, m = self._word_to_bin(value)
         self._z80.ram.write(address + 1, self._bin_to_int(n))
         self._z80.ram.write(address, self._bin_to_int(m))

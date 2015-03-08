@@ -62,7 +62,7 @@ class TestLoadInstructions(TestZ80):
 
         address = self._get_random_word()
         nn = self._get_random_word()
-        self._load_ram_with_word(address, nn)
+        self._write_ram_word(address, nn)
         opcode = ['00101010'] + list(self._word_to_bin(address))
         self._decode_and_execute_opcode(opcode)
         self.assertEqual(self._z80.hl.bits, nn)
@@ -78,7 +78,7 @@ class TestLoadInstructions(TestZ80):
         for destination in registers.keys():
             address = self._get_random_word()
             nn = self._get_random_word()
-            self._load_ram_with_word(address, nn)
+            self._write_ram_word(address, nn)
             opcode = ['11101101', '01{0}1011'.format(destination)] + list(self._word_to_bin(address))
             self._decode_and_execute_opcode(opcode)
             self.assertEqual(registers[destination].bits, nn)
@@ -88,7 +88,7 @@ class TestLoadInstructions(TestZ80):
 
         address = self._get_random_word()
         nn = self._get_random_word()
-        self._load_ram_with_word(address, nn)
+        self._write_ram_word(address, nn)
         opcode = ['11011101', '00101010'] + list(self._word_to_bin(address))
         self._decode_and_execute_opcode(opcode)
         self.assertEqual(self._z80.ix.bits, nn)
@@ -98,7 +98,7 @@ class TestLoadInstructions(TestZ80):
         
         address = self._get_random_word()
         nn = self._get_random_word()
-        self._load_ram_with_word(address, nn)
+        self._write_ram_word(address, nn)
         opcode = ['11111101', '00101010'] + list(self._word_to_bin(address))
         self._decode_and_execute_opcode(opcode)
         self.assertEqual(self._z80.iy.bits, nn)
@@ -236,7 +236,7 @@ class TestLoadInstructions(TestZ80):
             address = self._get_random_word()
             self._z80.sp.bits = address
             nn = self._get_random_word()
-            self._load_ram_with_word(self._z80.sp.bits, nn)
+            self._write_ram_word(self._z80.sp.bits, nn)
             opcode = ['11{0}0001'.format(destination)]
             self._decode_and_execute_opcode(opcode)
             self.assertEqual(registers[destination].bits, nn)
@@ -248,7 +248,7 @@ class TestLoadInstructions(TestZ80):
         address = self._get_random_word()
         self._z80.sp.bits = address
         nn = self._get_random_word()
-        self._load_ram_with_word(self._z80.sp.bits, nn)
+        self._write_ram_word(self._z80.sp.bits, nn)
         opcode = ['11011101', '11100001']
         self._decode_and_execute_opcode(opcode)
         self.assertEqual(self._z80.ix.bits, nn)
@@ -260,7 +260,7 @@ class TestLoadInstructions(TestZ80):
         address = self._get_random_word()
         self._z80.sp.bits = address
         nn = self._get_random_word()
-        self._load_ram_with_word(self._z80.sp.bits, nn)
+        self._write_ram_word(self._z80.sp.bits, nn)
         opcode = ['11111101', '11100001']
         self._decode_and_execute_opcode(opcode)
         self.assertEqual(self._z80.iy.bits, nn)

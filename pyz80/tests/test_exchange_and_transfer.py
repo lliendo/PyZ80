@@ -137,7 +137,7 @@ class TestExchangeAndTransfer(TestZ80):
         sp_bits = self._get_random_word()
         hl_bits = self._get_random_word()
         word = self._get_random_word()
-        self._load_ram_with_word(sp_bits, word)
+        self._write_ram_word(sp_bits, word)
         self._z80.sp.bits = sp_bits
         self._z80.hl.bits = hl_bits
         instruction.execute()
@@ -160,7 +160,7 @@ class TestExchangeAndTransfer(TestZ80):
         sp_bits = self._get_random_word()
         ix_bits = self._get_random_word()
         word = self._get_random_word()
-        self._load_ram_with_word(sp_bits, word)
+        self._write_ram_word(sp_bits, word)
         self._z80.sp.bits = sp_bits
         self._z80.ix.bits = ix_bits
         instruction.execute()
@@ -183,7 +183,7 @@ class TestExchangeAndTransfer(TestZ80):
         sp_bits = self._get_random_word()
         iy_bits = self._get_random_word()
         word = self._get_random_word()
-        self._load_ram_with_word(sp_bits, word)
+        self._write_ram_word(sp_bits, word)
         self._z80.sp.bits = sp_bits
         self._z80.iy.bits = iy_bits
         instruction.execute()
