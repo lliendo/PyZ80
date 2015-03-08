@@ -42,9 +42,9 @@ class JpCCNN(Jp):
 
     regexp = compile_re('^11((?:0|1){3})010((?:0|1){8})((?:0|1){8})$')
 
-    def _message_log(self, high_order_byte, low_order_byte):
+    def _message_log(self, selector, high_order_byte, low_order_byte):
         address = self._get_address(high_order_byte, low_order_byte)
-        return 'JP {:02X}, {:02X}'.format(address)
+        return 'JP {:02X}, {:02X}'.format(selector, address)
 
     def _instruction_logic(self, selector, high_order_byte, low_order_byte):
         if self._condition_applies(selector):
