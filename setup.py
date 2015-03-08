@@ -19,20 +19,20 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
+
 from setuptools import setup
 
 setup(
-    name = "PyZ80",
-    description = "A Z80 cpu emulator fully implemented in Python", 
-    version = "0.0.1",
-    packages = ["pyz80"],
-    author = "Lucas Liendo",
-    author_email = "mindmaster@gmail.com",
-    keywords = "emulator z80 pyz80",
-    install_requires = [
+    name="PyZ80",
+    description="A Z80 cpu emulator fully implemented in Python",
+    version="0.0.1",
+    packages=["pyz80"],
+    author="Lucas Liendo",
+    author_email="mindmaster@gmail.com",
+    keywords="emulator z80 pyz80",
+    install_requires=[
         "nose>=1.3.2",
-        "mock>=1.0.1",
-    ], 
-    zip_safe = False,
-    test_suite = "nose.collector",
+    ],
+    zip_safe=False,
+    test_suite="nose.collector",
 )
