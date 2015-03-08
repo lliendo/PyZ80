@@ -34,6 +34,7 @@ class TestExchangeAndTransfer(TestZ80):
         self._z80.de.bits = de_bits
         self._z80.hl.bits = hl_bits
         instruction.execute()
+
         self.assertEqual(
             self._z80.de.bits,
             hl_bits,
@@ -58,6 +59,7 @@ class TestExchangeAndTransfer(TestZ80):
         self._z80.a_.bits = a__bits
         self._z80.f_.bits = f__bits
         instruction.execute()
+
         self.assertEqual(
             self._z80.a.bits,
             a__bits,
@@ -96,6 +98,7 @@ class TestExchangeAndTransfer(TestZ80):
         self._z80.de_.bits = de__bits
         self._z80.hl_.bits = hl__bits
         instruction.execute()
+
         self.assertEqual(
             self._z80.bc.bits,
             bc__bits,
@@ -111,7 +114,6 @@ class TestExchangeAndTransfer(TestZ80):
             hl__bits,
             msg='HL = {:02X}, HL\' bits = {:02X}'.format(self._z80.hl.bits, hl__bits)
         )
-
         self.assertEqual(
             self._z80.bc_.bits,
             bc_bits,
@@ -139,16 +141,16 @@ class TestExchangeAndTransfer(TestZ80):
         self._z80.sp.bits = sp_bits
         self._z80.hl.bits = hl_bits
         instruction.execute()
-        some_value = self._read_ram_word(sp_bits)
+
         self.assertEqual(
             self._read_ram_word(sp_bits),
             hl_bits,
-            msg='Ram word = {:02X}, HL bits = {:02X}'.format(self._read_ram_word(sp_bits), hl_bits)
+            msg='Test word = {:02X}, HL bits = {:02X}'.format(self._read_ram_word(sp_bits), hl_bits)
         )
         self.assertEqual(
             self._z80.hl.bits,
             word,
-            msg='HL = {:02X}, Word bits = {:02X}'.format(self._z80.hl.bits, word)
+            msg='HL = {:02X}, Test word = {:02X}'.format(self._z80.hl.bits, word)
         )
 
     def test_ex_indirect_sp_ix(self):
@@ -162,16 +164,16 @@ class TestExchangeAndTransfer(TestZ80):
         self._z80.sp.bits = sp_bits
         self._z80.ix.bits = ix_bits
         instruction.execute()
-        some_value = self._read_ram_word(sp_bits)
+
         self.assertEqual(
             self._read_ram_word(sp_bits),
             ix_bits,
-            msg='Ram word = {:02X}, IX bits = {:02X}'.format(self._read_ram_word(sp_bits), ix_bits)
+            msg='Test word = {:02X}, IX bits = {:02X}'.format(self._read_ram_word(sp_bits), ix_bits)
         )
         self.assertEqual(
             self._z80.ix.bits,
             word,
-            msg='IX = {:02X}, Word bits = {:02X}'.format(self._z80.ix.bits, word)
+            msg='IX = {:02X}, Test word = {:02X}'.format(self._z80.ix.bits, word)
         )
 
     def test_ex_indirect_sp_iy(self):
@@ -185,14 +187,158 @@ class TestExchangeAndTransfer(TestZ80):
         self._z80.sp.bits = sp_bits
         self._z80.iy.bits = iy_bits
         instruction.execute()
-        some_value = self._read_ram_word(sp_bits)
+
         self.assertEqual(
             self._read_ram_word(sp_bits),
             iy_bits,
-            msg='Ram word = {:02X}, IX bits = {:02X}'.format(self._read_ram_word(sp_bits), iy_bits)
+            msg='Test word = {:02X}, IY bits = {:02X}'.format(self._read_ram_word(sp_bits), iy_bits)
         )
         self.assertEqual(
             self._z80.iy.bits,
             word,
-            msg='IX = {:02X}, Word bits = {:02X}'.format(self._z80.iy.bits, word)
+            msg='IX = {:02X}, Test Word = {:02X}'.format(self._z80.iy.bits, word)
         )
+
+    def test_ldi(self):
+        """ Test LDI """
+
+        instruction = Ldi(self._z80)
+        de_bits = self._get_random_word()
+        hl_bits = self._get_random_word()
+        bc_bits = self._get_random_word()
+        byte = self._get_random_word()
+        self._z80.ram.write(hl_bits, byte)
+        self._z80.de.bits = de_bits
+        self._z80.hl.bits = hl_bits
+        self._z80.bc.bits = bc_bits
+        instruction.execute()
+
+        self.assertEqual(
+            self._z80.ram.read(de_bits),
+            byte,
+            msg='Test byte = {:02X}, DE bits = {:02X}'.format(self._z80.ram.read(de_bits), byte)
+        )
+        self.assertEqual(
+            self._z80.de.bits,
+            de_bits + 1,
+            msg='DE = {:02X}, DE bits = {:02X}'.format(self._z80.de.bits, de_bits + 1)
+        )
+        self.assertEqual(
+            self._z80.hl.bits,
+            hl_bits + 1,
+            msg='HL = {:02X}, HL bits = {:02X}'.format(self._z80.hl.bits, hl_bits + 1)
+        )
+        self.assertEqual(
+            self._z80.bc.bits,
+            bc_bits - 1,
+            msg='BC = {:02X}, BC bits = {:02X}'.format(self._z80.bc.bits, bc_bits - 1)
+        )
+
+    def test_ldir(self):
+        """ Test LDIR. """
+
+        instruction = Ldir(self._z80)
+        bytes = [self._get_random_byte() for i in range(0, self._get_random_byte())]
+        de_bits = self._get_random_word()
+        hl_bits = self._get_random_word()
+        bc_bits = len(bytes)
+        [self._z80.ram.write(hl_bits + i, byte) for i, byte in enumerate(bytes)]
+        self._z80.de.bits = de_bits
+        self._z80.hl.bits = hl_bits
+        self._z80.bc.bits = bc_bits
+        instruction.execute()
+
+        self.assertEqual(
+            self._z80.de.bits,
+            de_bits + bc_bits,
+            msg='DE = {:02X}, DE - BC = {:02X}'.format(self._z80.de.bits, de_bits + bc_bits)
+        )
+        self.assertEqual(
+            self._z80.hl.bits,
+            hl_bits + bc_bits,
+            msg='HL = {:02X}, HL bits - BC bits = {:02X}'.format(self._z80.hl.bits, hl_bits + bc_bits)
+        )
+        self.assertEqual(
+            self._z80.bc.bits,
+            0x00,
+            msg='BC = {:02X}'.format(self._z80.bc.bits)
+        )
+
+        for i, byte in enumerate(bytes):
+            self.assertEqual(
+                self._z80.ram.read(de_bits + i),
+                byte,
+                msg='Ram byte = {:02X}, Test byte = {:02X}'.format(self._z80.ram.read(de_bits + i), byte)
+            )
+
+    def test_ldd(self):
+        """ Test LDD """
+
+        instruction = Ldd(self._z80)
+        de_bits = self._get_random_word()
+        hl_bits = self._get_random_word()
+        bc_bits = self._get_random_word()
+        byte = self._get_random_word()
+        self._z80.ram.write(hl_bits, byte)
+        self._z80.de.bits = de_bits
+        self._z80.hl.bits = hl_bits
+        self._z80.bc.bits = bc_bits
+        instruction.execute()
+
+        self.assertEqual(
+            self._z80.ram.read(de_bits),
+            byte,
+            msg='Test byte = {:02X}, DE bits = {:02X}'.format(self._z80.ram.read(de_bits), byte)
+        )
+        self.assertEqual(
+            self._z80.de.bits,
+            de_bits - 1,
+            msg='DE = {:02X}, DE bits = {:02X}'.format(self._z80.de.bits, de_bits - 1)
+        )
+        self.assertEqual(
+            self._z80.hl.bits,
+            hl_bits - 1,
+            msg='HL = {:02X}, HL bits = {:02X}'.format(self._z80.hl.bits, hl_bits - 1)
+        )
+        self.assertEqual(
+            self._z80.bc.bits,
+            bc_bits - 1,
+            msg='BC = {:02X}, BC bits = {:02X}'.format(self._z80.bc.bits, bc_bits - 1)
+        )
+
+    def test_lddr(self):
+        """ Test LDDR. """
+
+        instruction = Lddr(self._z80)
+        bytes = [self._get_random_byte() for i in range(0, self._get_random_byte())]
+        de_bits = self._get_random_word()
+        hl_bits = self._get_random_word()
+        bc_bits = len(bytes)
+        [self._z80.ram.write(hl_bits - i, byte) for i, byte in enumerate(bytes)]
+        self._z80.de.bits = de_bits
+        self._z80.hl.bits = hl_bits
+        self._z80.bc.bits = bc_bits
+        instruction.execute()
+
+        self.assertEqual(
+            self._z80.de.bits,
+            de_bits - bc_bits,
+            msg='DE = {:02X}, DE - BC = {:02X}'.format(self._z80.de.bits, de_bits - bc_bits)
+        )
+        self.assertEqual(
+            self._z80.hl.bits,
+            hl_bits - bc_bits,
+            msg='HL = {:02X}, HL bits - BC bits = {:02X}'.format(self._z80.hl.bits, hl_bits - bc_bits)
+        )
+        self.assertEqual(
+            self._z80.bc.bits,
+            0x00,
+            msg='BC = {:02X}'.format(self._z80.bc.bits)
+        )
+
+        for i, byte in enumerate(bytes):
+            self.assertEqual(
+                self._z80.ram.read(de_bits - i),
+                byte,
+                msg='Ram byte = {:02X}, Test byte = {:02X}'.format(self._z80.ram.read(de_bits - i), byte)
+            )
