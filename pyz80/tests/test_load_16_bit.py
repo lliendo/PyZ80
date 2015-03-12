@@ -19,249 +19,333 @@ along with PyZ80. If not, see <http://www.gnu.org/licenses/>.
 Copyright 2014 Lucas Liendo.
 """
 
-from itertools import product
 from ..instruction.load_16_bit import *
 from .test_z80_base import TestZ80
 
 
 class TestLoadInstructions(TestZ80):
+
+    def _registers(self):
+        return {
+            0b00: self._z80.bc,
+            0b01: self._z80.de,
+            0b10: self._z80.hl,
+            0b11: self._z80.sp,
+        }
+
     def test_load_register_nn(self):
         """ Test LD dd, nn """
 
-        registers = {
-            '00': self._z80.bc,
-            '01': self._z80.de,
-            '10': self._z80.hl,
-            '11': self._z80.sp,
-        }
-    
-        for destination in registers.keys():
-            nn = self._get_random_word()
-            opcode = ['00{0}0001'.format(destination)] + list(self._word_to_bin(nn))
-            self._decode_and_execute_opcode(opcode)
-            self.assertEqual(registers[destination].bits, nn)
+        instruction = LoadDDNN(self._z80)
+
+        for selector, register in self._registers().iteritems():
+            word = self._get_random_word()
+            high_order_byte, low_order_byte = self._split_word(word)
+            instruction.execute([selector, high_order_byte, low_order_byte])
+            self.assertEqual(
+                register.bits,
+                word
+            )
 
     def test_load_ix_nn(self):
         """ Test LD IX, nn """
 
-        nn = self._get_random_word()
-        opcode = ['11011101', '00100001'] + list(self._word_to_bin(nn))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.ix.bits, nn)
+        instruction = LoadIXNN(self._z80)
+        word = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(word)
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.ix.bits,
+            word
+        )
 
     def test_load_iy_nn(self):
         """ Test LD IY, nn """
 
-        nn = self._get_random_word()
-        opcode = ['11111101', '00100001'] + list(self._word_to_bin(nn))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.iy.bits, nn)
+        instruction = LoadIYNN(self._z80)
+        word = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(word)
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.iy.bits,
+            word
+        )
 
     def test_load_hl_indirect_nn(self):
         """ Test LD HL, (nn) """
 
+        instruction = LoadHLIndirectNN(self._z80)
         address = self._get_random_word()
-        nn = self._get_random_word()
-        self._write_ram_word(address, nn)
-        opcode = ['00101010'] + list(self._word_to_bin(address))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.hl.bits, nn)
+        word = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(address)
+        self._write_ram_word(address, word)
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.hl.bits,
+            word
+        )
+
 
     def test_load_dd_indirect_nn(self):
-        registers = {
-            '00': self._z80.bc,
-            '01': self._z80.de,
-            '10': self._z80.hl,
-            '11': self._z80.sp,
-        }
+        """ Test LD dd, (nn) """
 
-        for destination in registers.keys():
+        instruction = LoadDDIndirectNN(self._z80)
+
+        for selector, register in self._registers().iteritems():
             address = self._get_random_word()
-            nn = self._get_random_word()
-            self._write_ram_word(address, nn)
-            opcode = ['11101101', '01{0}1011'.format(destination)] + list(self._word_to_bin(address))
-            self._decode_and_execute_opcode(opcode)
-            self.assertEqual(registers[destination].bits, nn)
+            word = self._get_random_word()
+            high_order_byte, low_order_byte = self._split_word(address)
+            self._write_ram_word(address, word)
+            instruction.execute([selector, high_order_byte, low_order_byte])
+            self.assertEqual(
+                register.bits,
+                word
+            )
 
     def test_load_ix_indirect_nn(self):
         """ Test LD IX, (nn) """
 
+        instruction = LoadIXIndirectNN(self._z80)
         address = self._get_random_word()
-        nn = self._get_random_word()
-        self._write_ram_word(address, nn)
-        opcode = ['11011101', '00101010'] + list(self._word_to_bin(address))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.ix.bits, nn)
+        word = self._get_random_word()
+        self._write_ram_word(address, word)
+        high_order_byte, low_order_byte = self._split_word(address)
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.ix.bits,
+            word
+        )
 
     def test_load_iy_indirect_nn(self):
         """ Test LD IY, (nn) """
-        
+
+        instruction = LoadIYIndirectNN(self._z80)
         address = self._get_random_word()
-        nn = self._get_random_word()
-        self._write_ram_word(address, nn)
-        opcode = ['11111101', '00101010'] + list(self._word_to_bin(address))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.iy.bits, nn)
+        word = self._get_random_word()
+        self._write_ram_word(address, word)
+        high_order_byte, low_order_byte = self._split_word(address)
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.iy.bits,
+            word
+        )
 
     def test_load_indirect_nn_hl(self):
         """ Test LD (nn), HL """
 
+        instruction = LoadIndirectNNHL(self._z80)
         address = self._get_random_word()
-        nn = self._get_random_word()
-        self._z80.hl.bits = nn
-        opcode = ['00100010'] + list(self._word_to_bin(address))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._read_ram_word(address), nn)
+        word = self._get_random_word()
+        self._z80.hl.bits = word
+        high_order_byte, low_order_byte = self._split_word(address)
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._read_ram_word(address),
+            word
+        )
 
     def test_load_indirect_nn_dd(self):
         """ Test LD (nn), dd """
 
-        registers = {
-            '00': self._z80.bc,
-            '01': self._z80.de,
-            '10': self._z80.hl,
-            '11': self._z80.sp,
-        }
+        instruction = LoadIndirectNNDD(self._z80)
 
-        for destination in registers.keys():
+        for selector, register in self._registers().iteritems():
             address = self._get_random_word()
-            nn = self._get_random_word()
-            registers[destination].bits = nn
-            opcode = ['11101101', '01{0}0011'.format(destination)] + list(self._word_to_bin(address))
-            self._decode_and_execute_opcode(opcode)
-            self.assertEqual(self._read_ram_word(address), nn)
+            word = self._get_random_word()
+            high_order_byte, low_order_byte = self._split_word(address)
+            register.bits = word
+            instruction.execute([selector, high_order_byte, low_order_byte])
+            self.assertEqual(
+                self._read_ram_word(address),
+                word
+            )
 
     def test_load_indirect_nn_ix(self):
         """ Test LD (nn), IX """
 
+        instruction = LoadIndirectNNIX(self._z80)
         address = self._get_random_word()
-        nn = self._get_random_word()
-        self._z80.ix.bits = nn
-        opcode = ['11011101', '00100010'] + list(self._word_to_bin(address))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._read_ram_word(address), nn)
+        word = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(address)
+        self._z80.ix.bits = word
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._read_ram_word(address),
+            word
+        )
 
     def test_load_indirect_nn_iy(self):
         """ Test LD (nn), IY """
 
+        instruction = LoadIndirectNNIY(self._z80)
         address = self._get_random_word()
-        nn = self._get_random_word()
-        self._z80.iy.bits = nn
-        opcode = ['11111101', '00100010'] + list(self._word_to_bin(address))
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._read_ram_word(address), nn)
+        word = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(address)
+        self._z80.iy.bits = word
+        instruction.execute([high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._read_ram_word(address),
+            word
+        )
 
     def test_load_sp_hl(self):
         """ Test LD SP, HL """
 
-        nn = self._get_random_word()
-        self._z80.hl.bits = nn
-        opcode = ['11111001']
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.sp.bits, self._z80.hl.bits)
+        instruction = LoadSPHL(self._z80)
+        word = self._get_random_word()
+        self._z80.hl.bits = word
+        instruction.execute()
+        self.assertEqual(
+            self._z80.sp.bits,
+            self._z80.hl.bits
+        )
 
     def test_load_sp_ix(self):
         """ Test LD SP, IX """
 
-        nn = self._get_random_word()
-        self._z80.ix.bits = nn
-        opcode = ['11011101', '11111001']
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.sp.bits, self._z80.ix.bits)
+        instruction = LoadSPIX(self._z80)
+        word = self._get_random_word()
+        self._z80.hl.bits = word
+        instruction.execute()
+        self.assertEqual(
+            self._z80.sp.bits,
+            self._z80.ix.bits
+        )
 
     def test_load_sp_iy(self):
         """ Test LD SP, IY """
 
-        nn = self._get_random_word()
-        self._z80.iy.bits = nn
-        opcode = ['11111101', '11111001']
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.sp.bits, self._z80.iy.bits)
+        instruction = LoadSPIY(self._z80)
+        word = self._get_random_word()
+        self._z80.hl.bits = word
+        instruction.execute()
+        self.assertEqual(
+            self._z80.sp.bits,
+            self._z80.iy.bits
+        )
 
     def test_push_qq(self):
         """ Test PUSH qq """
 
         registers = {
-            '00': self._z80.bc,
-            '01': self._z80.de,
-            '10': self._z80.hl,
-            # '11': self._z80.af,
+            0b00: self._z80.bc,
+            0b01: self._z80.de,
+            0b10: self._z80.hl,
+            # 0b11: self._z80.af,
         }
 
-        for destination in registers.keys():
+        instruction = PushQQ(self._z80)
+
+        for selector, register in registers.iteritems():
             address = self._get_random_word()
             self._z80.sp.bits = address
-            nn = self._get_random_word()
-            registers[destination].bits = nn
-            opcode = ['11{0}0101'.format(destination)]
-            self._decode_and_execute_opcode(opcode)
-            self.assertEqual(self._read_ram_word(self._z80.sp.bits), nn)
-            self.assertEqual(self._z80.sp.bits, address - 2)
+            word = self._get_random_word()
+            register.bits = word
+            instruction.execute([selector])
+            self.assertEqual(
+                self._read_ram_word(self._z80.sp.bits),
+                word
+            )
+            self.assertEqual(
+                self._z80.sp.bits,
+                address - 2
+            )
 
     def test_push_ix(self):
         """ Test PUSH IX """
 
+        instruction = PushIX(self._z80)
         address = self._get_random_word()
         self._z80.sp.bits = address
-        nn = self._get_random_word()
-        self._z80.ix.bits = nn
-        opcode = ['11011101', '11100101']
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._read_ram_word(self._z80.sp.bits), nn)
-        self.assertEqual(self._z80.sp.bits, address - 2)
+        word = self._get_random_word()
+        self._z80.ix.bits = word
+        instruction.execute([])
+        self.assertEqual(
+            self._read_ram_word(self._z80.sp.bits),
+            word
+        )
+        self.assertEqual(
+            self._z80.sp.bits,
+            address - 2
+        )
 
     def test_push_iy(self):
         """ Test PUSH IY """
 
+        instruction = PushIY(self._z80)
         address = self._get_random_word()
         self._z80.sp.bits = address
-        nn = self._get_random_word()
-        self._z80.iy.bits = nn
-        opcode = ['11111101', '11100101']
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._read_ram_word(self._z80.sp.bits), nn)
-        self.assertEqual(self._z80.sp.bits, address - 2)
+        word = self._get_random_word()
+        self._z80.iy.bits = word
+        instruction.execute([])
+        self.assertEqual(
+            self._read_ram_word(self._z80.sp.bits),
+            word
+        )
+        self.assertEqual(
+            self._z80.sp.bits,
+            address - 2
+        )
 
     def test_pop_qq(self):
         """ Test POP qq """
 
         registers = {
-            '00': self._z80.bc,
-            '01': self._z80.de,
-            '10': self._z80.hl,
-            # '11': self._z80.af,
+            0b00: self._z80.bc,
+            0b01: self._z80.de,
+            0b10: self._z80.hl,
+            # 0b11: self._z80.af,
         }
 
-        for destination in registers.keys():
+        instruction = PopQQ(self._z80)
+
+        for selector, register in registers.iteritems():
             address = self._get_random_word()
             self._z80.sp.bits = address
-            nn = self._get_random_word()
-            self._write_ram_word(self._z80.sp.bits, nn)
-            opcode = ['11{0}0001'.format(destination)]
-            self._decode_and_execute_opcode(opcode)
-            self.assertEqual(registers[destination].bits, nn)
-            self.assertEqual(self._z80.sp.bits, address + 2)
+            word = self._get_random_word()
+            self._write_ram_word(self._z80.sp.bits, word)
+            instruction.execute([selector])
+            self.assertEqual(
+                register.bits,
+                word
+            )
+            self.assertEqual(
+                self._z80.sp.bits,
+                address + 2
+            )
 
     def test_pop_ix(self):
         """ Test POP IX """
 
+        instruction = PopIX(self._z80)
         address = self._get_random_word()
         self._z80.sp.bits = address
-        nn = self._get_random_word()
-        self._write_ram_word(self._z80.sp.bits, nn)
-        opcode = ['11011101', '11100001']
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.ix.bits, nn)
-        self.assertEqual(self._z80.sp.bits, address + 2)
+        word = self._get_random_word()
+        self._write_ram_word(self._z80.sp.bits, word)
+        instruction.execute()
+        self.assertEqual(
+            self._z80.ix.bits,
+            word
+        )
+        self.assertEqual(
+            self._z80.sp.bits,
+            address + 2
+        )
 
     def test_pop_iy(self):
         """ Test POP IY """
 
+        instruction = PopIY(self._z80)
         address = self._get_random_word()
         self._z80.sp.bits = address
-        nn = self._get_random_word()
-        self._write_ram_word(self._z80.sp.bits, nn)
-        opcode = ['11111101', '11100001']
-        self._decode_and_execute_opcode(opcode)
-        self.assertEqual(self._z80.iy.bits, nn)
-        self.assertEqual(self._z80.sp.bits, address + 2)
+        word = self._get_random_word()
+        self._write_ram_word(self._z80.sp.bits, word)
+        instruction.execute()
+        self.assertEqual(
+            self._z80.iy.bits,
+            word
+        )
+        self.assertEqual(
+            self._z80.sp.bits,
+            address + 2
+        )
