@@ -27,6 +27,7 @@ from ..io import DeviceManager
 from ..ram import Ram
 from ..arch import BYTE_SIZE, WORD_SIZE
 
+
 class TestZ80(TestCase):
     def setUp(self):
         self.longmessage = True
@@ -45,28 +46,20 @@ class TestZ80(TestCase):
         for r in registers:
             r.bits = self._get_random_byte()
 
-    def _bin_to_int(self, n):
-        return int(n, base=2)
-
-    def _opcode_to_int(self, opcode):
-        return map(lambda o: self._bin_to_int(o), opcode)
-
-    def _int_to_bin(self, n, padding=BYTE_SIZE):
-        return '{0}'.format(bin(n).lstrip('0b').zfill(padding))
-
-    def _word_to_bin(self, n):
-        word = self._int_to_bin(n, padding=WORD_SIZE)
-        return word[:WORD_SIZE / 2], word[WORD_SIZE / 2:]
-
-    def _write_ram_word(self, address, value):
-        n, m = self._word_to_bin(value)
-        self._z80.ram.write(address + 1, self._bin_to_int(n))
-        self._z80.ram.write(address, self._bin_to_int(m))
+    def _write_ram_word(self, address, word):
+        high_order_byte, low_order_byte = self._split_word(word)
+        self._z80.ram.write(address + 1, high_order_byte)
+        self._z80.ram.write(address, low_order_byte)
 
     def _read_ram_word(self, address):
-        return self._z80.ram.read(address) + self._z80.ram.read(address + 1) * 256
+        high_order_byte = self._z80.ram.read(address + 1)
+        low_order_byte = self._z80.ram.read(address)
+        return self._compose_word(high_order_byte, low_order_byte)
 
-    def _decode_and_execute_opcode(self, opcode):
-        bytes = self._opcode_to_int(opcode)
-        instruction, operands = InstructionDecoder(self._z80).decode(bytes)
-        return instruction.execute(operands)
+    def _compose_word(self, high_order_byte, low_order_byte, word_size=WORD_SIZE):
+        return (high_order_byte << (WORD_SIZE / 2)) + low_order_byte
+
+    def _split_word(self, word, word_size=WORD_SIZE):
+        high_order_byte = (word & 0xFF00) >> (WORD_SIZE / 2)
+        low_order_byte = word & 0xFF
+        return high_order_byte, low_order_byte
