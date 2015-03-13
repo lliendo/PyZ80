@@ -52,8 +52,6 @@ class TestArithmetic8Bit(TestZ80):
             0b101: self._z80.iyl,
         }
 
-    """ ADD tests. """
-
     def _add_a_x(self, instruction, selector, register):
         self._z80.a.bits = self._get_random_byte()
         register.bits = self._get_random_byte()
