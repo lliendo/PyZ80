@@ -32,30 +32,31 @@ class Jp(Instruction):
 
         if (offset & 0x80) is 0x01:
             address = -(offset & 0x7F)
-            
+
         return address
-        
+
     def _condition_applies(self, condition):
         condition_holds = False
+
         jump_conditions = {
-            0b000: not self._z80.f.zero_flag(),
-            0b001: self._z80.f.zero_flag(),
-            0b010: not self._z80.f.carry_flag(),
-            0b011: self._z80.f.carry_flag(),
-            0b100: not self._z80.f.parity_flag(),
-            0b101: self._z80.f.parity_flag(),
-            0b110: not self._z80.f.sign_flag(),
-            0b111: self._z80.f.sign_flag(),
+            0b000: self._z80.f.zero_flag ^ 0x01,
+            0b001: self._z80.f.zero_flag,
+            0b010: self._z80.f.carry_flag ^ 0x01,
+            0b011: self._z80.f.carry_flag,
+            0b100: self._z80.f.parity_flag ^ 0x01,
+            0b101: self._z80.f.parity_flag,
+            0b110: self._z80.f.sign_flag ^ 0x01,
+            0b111: self._z80.f.sign_flag,
         }
-        
-        if jump_conditions[condition] is 0x01:
+
+        if jump_conditions[condition] == 0x01:
             condition_holds = True
 
         return condition_holds
 
 
 class JpIndirectAddress(Instruction):
-    
+
     __metaclass__ = ABCMeta
 
     def _instruction_logic(self, address):
