@@ -24,6 +24,8 @@ from . import Instruction
 from abc_jump import *
 
 
+# TODO: Check if _get_signed_offset is really needed. Check if offset
+# can go backwards as well.
 class JpNN(Instruction):
     """ JP nn """
 
@@ -60,7 +62,8 @@ class JrE(Jp):
         return 'JR {:02X}'.format(offset)
 
     def _instruction_logic(self, offset):
-        self._z80.pc.bits += _get_signed_offset(offset)
+        #self._z80.pc.bits += _get_signed_offset(offset)
+        self._z80.pc.bits += offset
 
 
 class JrSSE(Jp):
@@ -73,7 +76,8 @@ class JrSSE(Jp):
 
     def _instruction_logic(self, selector, offset):
         if self._condition_applies(selector):
-            self._z80.pc.bits += self._get_signed_offset(offset)
+            #self._z80.pc.bits += self._get_signed_offset(offset)
+            self._z80.pc.bits += offset
 
 
 class JpIndirectHL(JpIndirectAddress):
@@ -85,7 +89,7 @@ class JpIndirectHL(JpIndirectAddress):
         return 'JP (HL)'
 
     def _instruction_logic(self):
-        super(self, JpIndirectHL)._instruction_logic(self._z80.hl.bits)
+        super(JpIndirectHL, self)._instruction_logic(self._z80.hl.bits)
 
 
 class JpIndirectIX(JpIndirectAddress):
@@ -97,7 +101,7 @@ class JpIndirectIX(JpIndirectAddress):
         return 'JP (IX)'
 
     def _instruction_logic(self):
-        super(self, JpIndirectIX)._instruction_logic(self._z80.ix.bits)
+        super(JpIndirectIX, self)._instruction_logic(self._z80.ix.bits)
 
 
 class JpIndirectIY(JpIndirectAddress):
@@ -109,7 +113,7 @@ class JpIndirectIY(JpIndirectAddress):
         return 'JP (IY)'
 
     def _instruction_logic(self):
-        super(self, JpIndirectIY)._instruction_logic(self._z80.iy.bits)
+        super(JpIndirectIY, self)._instruction_logic(self._z80.iy.bits)
 
 
 class DjnzE(Jp):
@@ -121,7 +125,8 @@ class DjnzE(Jp):
         return 'DJNZ {:02X}'.format(offset)
 
     def _instruction_logic(self, offset):
-        self._z80.b -= 1
+        self._z80.b.bits -= 1
 
-        if self._z80.b.bits is not 0x00:
-            self._z80.pc.bits += self._get_signed_offset(offset)
+        if self._z80.b.bits != 0x00:
+            #self._z80.pc.bits += self._get_signed_offset(offset)
+            self._z80.pc.bits += offset
