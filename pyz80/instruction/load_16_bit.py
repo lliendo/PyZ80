@@ -23,7 +23,7 @@ from re import compile as compile_re
 from abc_load_16_bit import *
 
 
-class LoadDDNN(LoadRegister16Bit):
+class LdDDNN(LdRegister16Bit):
     """ LD dd, nn """
 
     regexp = compile_re('^00((?:0|1){2})0001((?:0|1){8})((?:0|1){8})$')
@@ -39,7 +39,7 @@ class LoadDDNN(LoadRegister16Bit):
         register.lower.bits = low_order_byte
 
 
-class LoadIXNN(Instruction):
+class LdIXNN(Instruction):
     """ LD IX, nn """
 
     regexp = compile_re('^1101110100100001((?:0|1){8})((?:0|1){8})$')
@@ -53,7 +53,7 @@ class LoadIXNN(Instruction):
         self._z80.ix.lower.bits = low_order_byte
 
 
-class LoadIYNN(Instruction):
+class LdIYNN(Instruction):
     """ LD IY, nn """
 
     regexp = compile_re('^1111110100100001((?:0|1){8})((?:0|1){8})$')
@@ -67,7 +67,7 @@ class LoadIYNN(Instruction):
         self._z80.iy.lower.bits = low_order_byte
 
 
-class LoadHLIndirectNN(Instruction):
+class LdHLIndirectNN(Instruction):
     """ LD HL, (nn) """
 
     regexp = compile_re('^00101010((?:0|1){8})((?:0|1){8})$')
@@ -81,7 +81,7 @@ class LoadHLIndirectNN(Instruction):
         self._z80.hl.higher.bits, self._z80.hl.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadDDIndirectNN(LoadRegister16Bit):
+class LdDDIndirectNN(LdRegister16Bit):
     """ LD dd, (nn) """
 
     regexp = compile_re('^1110110101((?:0|1){2})1011((?:0|1){8})((?:0|1){8})$')
@@ -97,7 +97,7 @@ class LoadDDIndirectNN(LoadRegister16Bit):
         register.higher.bits, register.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadIXIndirectNN(Instruction):
+class LdIXIndirectNN(Instruction):
     """ LD IX, (nn) """
 
     regexp = compile_re('^1101110100101010((?:0|1){8})((?:0|1){8})$')
@@ -111,7 +111,7 @@ class LoadIXIndirectNN(Instruction):
         self._z80.ix.higher.bits, self._z80.ix.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadIYIndirectNN(Instruction):
+class LdIYIndirectNN(Instruction):
     """ LD IY, (nn) """
 
     regexp = compile_re('^1111110100101010((?:0|1){8})((?:0|1){8})$')
@@ -125,7 +125,7 @@ class LoadIYIndirectNN(Instruction):
         self._z80.iy.higher.bits, self._z80.iy.lower.bits = self._z80.ram.read_word(address)
 
 
-class LoadIndirectNNHL(Instruction):
+class LdIndirectNNHL(Instruction):
     """ LD (nn), HL """
 
     regexp = compile_re('^00100010((?:0|1){8})((?:0|1){8})$')
@@ -139,7 +139,7 @@ class LoadIndirectNNHL(Instruction):
         self._z80.ram.write_word(address, self._z80.h.bits, self._z80.l.bits)
 
 
-class LoadIndirectNNDD(LoadRegister16Bit):
+class LdIndirectNNDD(LdRegister16Bit):
     """ LD (nn), dd """
 
     regexp = compile_re('^1110110101((?:0|1){2})0011((?:0|1){8})((?:0|1){8})$')
@@ -155,7 +155,7 @@ class LoadIndirectNNDD(LoadRegister16Bit):
         self._z80.ram.write_word(address, register.higher.bits, register.lower.bits)
 
 
-class LoadIndirectNNIX(Instruction):
+class LdIndirectNNIX(Instruction):
     """ LD (nn), IX """
 
     regexp = compile_re('^1101110100100010((?:0|1){8})((?:0|1){8})$')
@@ -168,7 +168,7 @@ class LoadIndirectNNIX(Instruction):
         self._z80.ram.write_word(address, self._z80.ix.higher.bits, self._z80.ix.lower.bits)
 
 
-class LoadIndirectNNIY(Instruction):
+class LdIndirectNNIY(Instruction):
     """ LD (nn), IY """
 
     regexp = compile_re('^1111110100100010((?:0|1){8})((?:0|1){8})$')
@@ -182,7 +182,7 @@ class LoadIndirectNNIY(Instruction):
         self._z80.ram.write_word(address, self._z80.iy.higher.bits, self._z80.iy.lower.bits)
 
 
-class LoadSPHL(Instruction):
+class LdSPHL(Instruction):
     """ LD SP, HL """
 
     regexp = compile_re('^11111001$')
@@ -194,7 +194,7 @@ class LoadSPHL(Instruction):
         self._z80.sp.bits = self._z80.hl.bits
 
 
-class LoadSPIX(Instruction):
+class LdSPIX(Instruction):
     """ LD SP, IX """
 
     regexp = compile_re('^1101110111111001$')
@@ -206,7 +206,7 @@ class LoadSPIX(Instruction):
         self._z80.sp.bits = self._z80.ix.bits
 
 
-class LoadSPIY(Instruction):
+class LdSPIY(Instruction):
     """ LD SP, IY """
 
     regexp = compile_re('^1111110111111001$')

@@ -36,7 +36,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_nn(self):
         """ Test LD dd, nn """
 
-        instruction = LoadDDNN(self._z80)
+        instruction = LdDDNN(self._z80)
 
         for selector, register in self._registers().iteritems():
             word = self._get_random_word()
@@ -50,7 +50,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_ix_nn(self):
         """ Test LD IX, nn """
 
-        instruction = LoadIXNN(self._z80)
+        instruction = LdIXNN(self._z80)
         word = self._get_random_word()
         high_order_byte, low_order_byte = self._split_word(word)
         instruction.execute([high_order_byte, low_order_byte])
@@ -62,7 +62,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_iy_nn(self):
         """ Test LD IY, nn """
 
-        instruction = LoadIYNN(self._z80)
+        instruction = LdIYNN(self._z80)
         word = self._get_random_word()
         high_order_byte, low_order_byte = self._split_word(word)
         instruction.execute([high_order_byte, low_order_byte])
@@ -74,7 +74,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_hl_indirect_nn(self):
         """ Test LD HL, (nn) """
 
-        instruction = LoadHLIndirectNN(self._z80)
+        instruction = LdHLIndirectNN(self._z80)
         address = self._get_random_word()
         word = self._get_random_word()
         high_order_byte, low_order_byte = self._split_word(address)
@@ -89,7 +89,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_dd_indirect_nn(self):
         """ Test LD dd, (nn) """
 
-        instruction = LoadDDIndirectNN(self._z80)
+        instruction = LdDDIndirectNN(self._z80)
 
         for selector, register in self._registers().iteritems():
             address = self._get_random_word()
@@ -105,7 +105,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_ix_indirect_nn(self):
         """ Test LD IX, (nn) """
 
-        instruction = LoadIXIndirectNN(self._z80)
+        instruction = LdIXIndirectNN(self._z80)
         address = self._get_random_word()
         word = self._get_random_word()
         self._write_ram_word(address, word)
@@ -119,7 +119,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_iy_indirect_nn(self):
         """ Test LD IY, (nn) """
 
-        instruction = LoadIYIndirectNN(self._z80)
+        instruction = LdIYIndirectNN(self._z80)
         address = self._get_random_word()
         word = self._get_random_word()
         self._write_ram_word(address, word)
@@ -133,7 +133,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_hl(self):
         """ Test LD (nn), HL """
 
-        instruction = LoadIndirectNNHL(self._z80)
+        instruction = LdIndirectNNHL(self._z80)
         address = self._get_random_word()
         word = self._get_random_word()
         self._z80.hl.bits = word
@@ -147,7 +147,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_dd(self):
         """ Test LD (nn), dd """
 
-        instruction = LoadIndirectNNDD(self._z80)
+        instruction = LdIndirectNNDD(self._z80)
 
         for selector, register in self._registers().iteritems():
             address = self._get_random_word()
@@ -163,7 +163,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_ix(self):
         """ Test LD (nn), IX """
 
-        instruction = LoadIndirectNNIX(self._z80)
+        instruction = LdIndirectNNIX(self._z80)
         address = self._get_random_word()
         word = self._get_random_word()
         high_order_byte, low_order_byte = self._split_word(address)
@@ -177,7 +177,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_iy(self):
         """ Test LD (nn), IY """
 
-        instruction = LoadIndirectNNIY(self._z80)
+        instruction = LdIndirectNNIY(self._z80)
         address = self._get_random_word()
         word = self._get_random_word()
         high_order_byte, low_order_byte = self._split_word(address)
@@ -191,7 +191,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_sp_hl(self):
         """ Test LD SP, HL """
 
-        instruction = LoadSPHL(self._z80)
+        instruction = LdSPHL(self._z80)
         word = self._get_random_word()
         self._z80.hl.bits = word
         instruction.execute()
@@ -203,7 +203,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_sp_ix(self):
         """ Test LD SP, IX """
 
-        instruction = LoadSPIX(self._z80)
+        instruction = LdSPIX(self._z80)
         word = self._get_random_word()
         self._z80.hl.bits = word
         instruction.execute()
@@ -215,7 +215,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_sp_iy(self):
         """ Test LD SP, IY """
 
-        instruction = LoadSPIY(self._z80)
+        instruction = LdSPIY(self._z80)
         word = self._get_random_word()
         self._z80.hl.bits = word
         instruction.execute()

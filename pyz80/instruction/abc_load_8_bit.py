@@ -23,7 +23,7 @@ from abc import ABCMeta
 from . import Instruction
 
 
-class LoadRegisterRegister(Instruction):
+class LdRegisterRegister(Instruction):
 
     __metaclass__ = ABCMeta
 
@@ -82,7 +82,7 @@ class LoadRegisterRegister(Instruction):
         destination_register.bits = source_register.bits
 
 
-class LoadRegisterNumber(LoadRegisterRegister):
+class LdRegisterNumber(LdRegisterRegister):
 
     __metaclass__ = ABCMeta
 
@@ -97,7 +97,7 @@ class LoadRegisterNumber(LoadRegisterRegister):
         destination_register.bits = n
 
 
-class LoadRegisterIndirectAddress(LoadRegisterRegister):
+class LdRegisterIndirectAddress(LdRegisterRegister):
 
     __metaclass__ = ABCMeta
 
@@ -109,7 +109,7 @@ class LoadRegisterIndirectAddress(LoadRegisterRegister):
         destination_register.bits = self._z80.ram.read(address)
 
 
-class LoadIndirectAddressRegister(LoadRegisterRegister):
+class LdIndirectAddressRegister(LdRegisterRegister):
 
     __metaclass__ = ABCMeta
 

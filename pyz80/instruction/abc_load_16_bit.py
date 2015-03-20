@@ -24,7 +24,7 @@ from . import Instruction
 
 
 # TODO: Rename this class with a more appropiate name.
-class LoadRegister16Bit(Instruction):
+class LdRegister16Bit(Instruction):
 
     __metaclass__ = ABCMeta
 

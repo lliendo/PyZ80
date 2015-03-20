@@ -24,7 +24,7 @@ from ..instruction.load_8_bit import *
 from .test_z80_base import TestZ80
 
 
-class TestLoadInstructions(TestZ80):
+class TestLdInstructions(TestZ80):
 
     def _r_registers(self):
         return {
@@ -58,7 +58,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_register_rr(self):
         """ Test LD r, r' """
 
-        instruction = LoadRR(self._z80)
+        instruction = LdRR(self._z80)
 
         for (destination_selector, source_selector) in product(self._r_registers().keys(), self._r_registers().keys()):
             self._load_z80_registers(
@@ -73,7 +73,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_register_pp(self):
         """ Test LD p, p' """
 
-        instruction = LoadPP(self._z80)
+        instruction = LdPP(self._z80)
 
         for (destination_selector, source_selector) in product(self._p_registers().keys(), self._p_registers().keys()):
             self._load_z80_registers(
@@ -88,7 +88,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_register_qq(self):
         """ Test LD q, q' """
 
-        instruction = LoadQQ(self._z80)
+        instruction = LdQQ(self._z80)
 
         for (destination_selector, source_selector) in product(self._q_registers().keys(), self._q_registers().keys()):
             self._load_z80_registers(
@@ -103,7 +103,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_r_number(self):
         """ Test LD r, n """
 
-        instruction = LoadRN(self._z80)
+        instruction = LdRN(self._z80)
 
         for selector, register in self._r_registers().iteritems():
             byte = self._get_random_byte()
@@ -116,7 +116,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_p_number(self):
         """ Test LD p, n """
 
-        instruction = LoadPN(self._z80)
+        instruction = LdPN(self._z80)
 
         for selector, register in self._p_registers().iteritems():
             byte = self._get_random_byte()
@@ -129,7 +129,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_q_number(self):
         """ Test LD q, n """
 
-        instruction = LoadQN(self._z80)
+        instruction = LdQN(self._z80)
 
         for selector, register in self._q_registers().iteritems():
             byte = self._get_random_byte()
@@ -142,7 +142,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_indirect_hl(self):
         """ Test LD r, (HL) """
 
-        instruction = LoadRIndirectHL(self._z80)
+        instruction = LdRIndirectHL(self._z80)
 
         for selector, register in self._r_registers().iteritems():
             byte = self._get_random_byte()
@@ -158,7 +158,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_indirect_ix(self):
         """ Test LD r, (IX + d) """
 
-        instruction = LoadRIndirectIX(self._z80)
+        instruction = LdRIndirectIX(self._z80)
 
         for selector, register in self._r_registers().iteritems():
             byte = self._get_random_byte()
@@ -175,7 +175,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_indirect_iy(self):
         """ Test LD r, (IY + d) """
 
-        instruction = LoadRIndirectIY(self._z80)
+        instruction = LdRIndirectIY(self._z80)
 
         for selector, register in self._r_registers().iteritems():
             byte = self._get_random_byte()
@@ -192,7 +192,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_address_hl_register(self):
         """ Test LD (HL), r """
 
-        instruction = LoadRIndirectHL(self._z80)
+        instruction = LdRIndirectHL(self._z80)
 
         for selector, register in self._r_registers().iteritems():
             address = self._get_random_word()
@@ -207,7 +207,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_address_ix_register(self):
         """ Test LD (IX + d), r """
 
-        instruction = LoadIndirectIXR(self._z80)
+        instruction = LdIndirectIXR(self._z80)
 
         for selector, register in self._r_registers().iteritems():
             address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
@@ -223,7 +223,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_address_iy_register(self):
         """ Test LD (IY + d), r """
 
-        instruction = LoadIndirectIYR(self._z80)
+        instruction = LdIndirectIYR(self._z80)
 
         for selector, register in self._r_registers().iteritems():
             address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
@@ -239,7 +239,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_address_hl_number(self):
         """ Test LD (HL), n """
 
-        instruction = LoadIndirectHLN(self._z80)
+        instruction = LdIndirectHLN(self._z80)
         byte = self._get_random_byte()
         address = self._get_random_word()
         self._z80.hl.bits = address
@@ -252,7 +252,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_address_ix_number(self):
         """ Test LD (IX + d), n """
 
-        instruction = LoadIndirectIXN(self._z80)
+        instruction = LdIndirectIXN(self._z80)
         byte = self._get_random_byte()
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
@@ -266,7 +266,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_address_iy_number(self):
         """ Test LD (IY + d), n """
 
-        instruction = LoadIndirectIYN(self._z80)
+        instruction = LdIndirectIYN(self._z80)
         byte = self._get_random_byte()
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
@@ -280,7 +280,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_a_indirect_address_bc(self):
         """ Test LD A, (BC) """
 
-        instruction = LoadAIndirectBC(self._z80)
+        instruction = LdAIndirectBC(self._z80)
         byte = self._get_random_byte()
         address = self._get_random_word()
         self._z80.ram.write(address, byte)
@@ -294,7 +294,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_a_indirect_address_de(self):
         """ Test LD A, (DE) """
 
-        instruction = LoadAIndirectDE(self._z80)
+        instruction = LdAIndirectDE(self._z80)
         byte = self._get_random_byte()
         address = self._get_random_word()
         self._z80.ram.write(address, byte)
@@ -308,7 +308,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_a_indirect_address_nn(self):
         """ Test LD A, (nn) """
 
-        instruction = LoadAIndirectNN(self._z80)
+        instruction = LdAIndirectNN(self._z80)
         address = self._get_random_word()
         high_order_byte, low_order_byte = self._split_word(address)
         instruction.execute([high_order_byte, low_order_byte])
@@ -320,7 +320,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_bc_register_a(self):
         """ Test LD (BC), A """
 
-        instruction = LoadIndirectBCA(self._z80)
+        instruction = LdIndirectBCA(self._z80)
         byte = self._get_random_byte()
         address = self._get_random_word()
         self._z80.a.bits = byte
@@ -334,7 +334,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_de_register_a(self):
         """ Test LD (DE), A """
 
-        instruction = LoadIndirectDEA(self._z80)
+        instruction = LdIndirectDEA(self._z80)
         byte = self._get_random_byte()
         address = self._get_random_word()
         self._z80.a.bits = byte
@@ -348,7 +348,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_indirect_nn_register_a(self):
         """ Test LD (nn), A """
 
-        instruction = LoadIndirectNNA(self._z80)
+        instruction = LdIndirectNNA(self._z80)
         address = self._get_random_word()
         high_order_byte, low_order_byte = self._split_word(address)
         instruction.execute([high_order_byte, low_order_byte])
@@ -360,7 +360,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_a_register_i(self):
         """ Test LD A, I """
 
-        instruction = LoadAI(self._z80)
+        instruction = LdAI(self._z80)
         byte = self._get_random_byte()
         self._z80.i.bits = byte
         instruction.execute()
@@ -372,7 +372,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_a_register_r(self):
         """ Test LD A, R """
 
-        instruction = LoadAR(self._z80)
+        instruction = LdAR(self._z80)
         byte = self._get_random_byte()
         self._z80.r.bits = byte
         instruction.execute()
@@ -384,7 +384,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_i_register_a(self):
         """ Test LD I, A """
 
-        instruction = LoadIA(self._z80)
+        instruction = LdIA(self._z80)
         byte = self._get_random_byte()
         self._z80.a.bits = byte
         instruction.execute()
@@ -396,7 +396,7 @@ class TestLoadInstructions(TestZ80):
     def test_load_register_r_register_a(self):
         """ Test LD R, A """
 
-        instruction = LoadRA(self._z80)
+        instruction = LdRA(self._z80)
         byte = self._get_random_byte()
         self._z80.a.bits = byte
         instruction.execute()
