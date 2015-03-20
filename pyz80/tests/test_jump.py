@@ -23,8 +23,26 @@ from ..instruction.jump import *
 from .test_z80_base import TestZ80
 
 
+# TODO: A lot of repeated code. Refactor me !
 class TestJump(TestZ80):
-    """ Tests for jump instructions. """
+    """ Tests all jump instructions. """
+
+    def _jp_conditions(self):
+        # PO = Parity odd (parity flag is reset).
+        # PE = Parity even (parity flag is set).
+        # P = Plus (sign flag is reset).
+        # M = Minus (sign flag is set).
+
+        return {
+            'NZ': 0b000,
+            'Z':  0b001,
+            'NC': 0b010,
+            'C':  0b011,
+            'PO': 0b100,
+            'PE': 0b101,
+            'P':  0b110,
+            'M':  0b111
+        }
 
     def test_jp_nn(self):
         """ Test JP nn """
@@ -35,7 +53,323 @@ class TestJump(TestZ80):
         instruction.execute([high_order_byte, low_order_byte])
         self.assertEqual(
             self._z80.pc.bits,
-            address
+            address,
+            msg='PC = {:02X}, address = {:02X}'.format(
+                self._z80.pc.bits,
+                address
+            )
+        )
+
+    def test_jp_nz_nn_zero_set(self):
+        """ Test JP NZ, nn (Z set) """
+
+        self._z80.f.set_zero_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['NZ'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_nz_nn_zero_reset(self):
+        """ Test JP NZ, nn (Z reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['NZ'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_z_nn_zero_set(self):
+        """ Test JP Z, nn (Z set) """
+
+        self._z80.f.set_zero_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['Z'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_z_nn_zero_reset(self):
+        """ Test JP Z, nn (Z reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['Z'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_nc_nn_carry_set(self):
+        """ Test JP NC, nn (C set) """
+
+        self._z80.f.set_carry_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['NC'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_nc_nn_carry_reset(self):
+        """ Test JP NC, nn (C reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['NC'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_c_nn_carry_set(self):
+        """ Test JP C, nn (C set) """
+
+        self._z80.f.set_carry_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['C'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_c_nn_carry_reset(self):
+        """ Test JP C, nn (C reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['C'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_po_nn_parity_set(self):
+        """ Test JP PO, nn (P set) """
+
+        self._z80.f.set_parity_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['PO'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_po_nn_parity_reset(self):
+        """ Test JP PO, nn (P reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['PO'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_pe_nn_parity_set(self):
+        """ Test JP PE, nn (P set) """
+
+        self._z80.f.set_parity_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['PE'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_pe_nn_parity_reset(self):
+        """ Test JP PE, nn (P reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['PE'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_p_nn_sign_set(self):
+        """ Test JP P, nn (S set) """
+
+        self._z80.f.set_sign_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['P'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_p_nn_sign_reset(self):
+        """ Test JP P, nn (S reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['P'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_m_nn_sign_set(self):
+        """ Test JP M, nn (S set) """
+
+        self._z80.f.set_sign_flag()
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['M'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
+        )
+
+    def test_jp_m_nn_sign_reset(self):
+        """ Test JP M, nn (S reset) """
+
+        instruction = JpCCNN(self._z80)
+        address = self._get_random_word()
+        jp_address = self._get_random_word()
+        high_order_byte, low_order_byte = self._split_word(jp_address)
+        self._z80.pc.bits = address
+        instruction.execute([self._jp_conditions()['M'], high_order_byte, low_order_byte])
+        self.assertEqual(
+            self._z80.pc.bits,
+            address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
         )
 
     def test_jp_e(self):
@@ -48,18 +382,15 @@ class TestJump(TestZ80):
         instruction.execute([offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address + offset
+            address + offset,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def _jp_ss_e_conditions(self):
-        return {
-            'C':  0b11,
-            'NC': 0b10,
-            'Z':  0b01,
-            'NZ': 0b00
-        }
-
-    def test_jp_ss_e_carry_set(self):
+    def test_jp_c_e_carry_set(self):
         """ Test JP C, e (C set) """
 
         self._z80.f.set_carry_flag()
@@ -67,13 +398,18 @@ class TestJump(TestZ80):
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['C'], offset])
+        instruction.execute([self._jp_conditions()['C'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address + offset
+            address + offset,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def test_jp_ss_e_not_carry_set(self):
+    def test_jp_nc_e_carry_set(self):
         """ Test JP NC, e (C set) """
 
         self._z80.f.set_carry_flag()
@@ -81,39 +417,54 @@ class TestJump(TestZ80):
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['NC'], offset])
+        instruction.execute([self._jp_conditions()['NC'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address
+            address,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def test_jp_ss_e_carry_reset(self):
+    def test_jp_c_e_carry_reset(self):
         """ Test JP C, e (C reset) """
 
         instruction = JrSSE(self._z80)
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['C'], offset])
+        instruction.execute([self._jp_conditions()['C'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address
+            address,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def test_jp_ss_e_not_carry_reset(self):
+    def test_jp_nc_e_carry_reset(self):
         """ Test JP NC, e (C reset) """
 
         instruction = JrSSE(self._z80)
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['NC'], offset])
+        instruction.execute([self._jp_conditions()['NC'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address + offset
+            address + offset,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def test_jp_ss_e_zero_set(self):
+    def test_jp_z_e_zero_set(self):
         """ Test JP Z, e (Z set) """
 
         self._z80.f.set_zero_flag()
@@ -121,13 +472,18 @@ class TestJump(TestZ80):
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['Z'], offset])
+        instruction.execute([self._jp_conditions()['Z'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address + offset
+            address + offset,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def test_jp_ss_e_not_zero_set(self):
+    def test_jp_nz_e_zero_set(self):
         """ Test JP NZ, e (Z set) """
 
         self._z80.f.set_zero_flag()
@@ -135,37 +491,51 @@ class TestJump(TestZ80):
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['NZ'], offset])
+        instruction.execute([self._jp_conditions()['NZ'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address
+            address,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def test_jp_ss_e_zero_reset(self):
+    def test_jp_z_e_zero_reset(self):
         """ Test JP Z, e (Z reset) """
 
         instruction = JrSSE(self._z80)
-
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['Z'], offset])
+        instruction.execute([self._jp_conditions()['Z'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address
+            address,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
-    def test_jp_ss_e_not_zero_reset(self):
+    def test_jp_nz_e_zero_reset(self):
         """ Test JP NZ, e (Z reset) """
 
         instruction = JrSSE(self._z80)
         address = self._get_random_word(upper_limit=0xFFFF - 0xFF)
         offset = self._get_random_byte()
         self._z80.pc.bits = address
-        instruction.execute([self._jp_ss_e_conditions()['NZ'], offset])
+        instruction.execute([self._jp_conditions()['NZ'], offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address + offset
+            address + offset,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset
+            )
         )
 
     def test_jp_indirect_hl(self):
@@ -179,7 +549,12 @@ class TestJump(TestZ80):
         instruction.execute()
         self.assertEqual(
             self._z80.pc.bits,
-            jp_address
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
         )
 
     def test_jp_indirect_ix(self):
@@ -193,7 +568,12 @@ class TestJump(TestZ80):
         instruction.execute()
         self.assertEqual(
             self._z80.pc.bits,
-            jp_address
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
         )
 
     def test_jp_indirect_iy(self):
@@ -207,7 +587,12 @@ class TestJump(TestZ80):
         instruction.execute()
         self.assertEqual(
             self._z80.pc.bits,
-            jp_address
+            jp_address,
+            msg='PC = {:02X}, address = {:02X}, jp_address = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                jp_address
+            )
         )
 
     def test_djnz_b_non_zero(self):
@@ -222,11 +607,25 @@ class TestJump(TestZ80):
         instruction.execute([offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address + offset
+            address + offset,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}, B = {:02X}, b_bits = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset,
+                self._z80.b.bits,
+                b_bits
+            )
         )
         self.assertEqual(
             self._z80.b.bits,
-            b_bits - 1
+            b_bits - 1,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}, B = {:02X}, b_bits = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset,
+                self._z80.b.bits,
+                b_bits
+            )
         )
 
     def test_djnz_b_zero(self):
@@ -240,9 +639,21 @@ class TestJump(TestZ80):
         instruction.execute([offset])
         self.assertEqual(
             self._z80.pc.bits,
-            address
+            address,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}, B = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset,
+                self._z80.b.bits
+            )
         )
         self.assertEqual(
             self._z80.b.bits,
-            0x00
+            0x00,
+            msg='PC = {:02X}, address = {:02X}, offset = {:02X}, B = {:02X}'.format(
+                self._z80.pc.bits,
+                address,
+                offset,
+                self._z80.b.bits
+            )
         )
