@@ -23,7 +23,8 @@ from ..instruction.jump import *
 from .test_z80_base import TestZ80
 
 
-class TestArithmetic8Bit(TestZ80):
+class TestJump(TestZ80):
+    """ Tests for jump instructions. """
 
     def test_jp_nn(self):
         """ Test JP nn """
