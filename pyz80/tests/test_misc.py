@@ -23,7 +23,7 @@ from .test_z80_base import TestZ80
 from ..instruction.decoder import InstructionDecoder
 
 
-class TestLoadInstructions(TestZ80):
+class TestMisc(TestZ80):
     def test_instruction_unique_regexps(self):
         instruction_decoder = InstructionDecoder(None)
         regexps = map(lambda i: i.regexp.pattern, instruction_decoder._z80_instructions())
